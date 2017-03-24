@@ -15,7 +15,7 @@
 # Copyright:   Copyright (c) 2016 Snowplow Analytics Ltd
 # License:     Apache License Version 2.0
 
-connection: "snowplow_demo"
+connection: "redshift"
 
 # include all views in this project
 include: "*.view"

@@ -161,7 +161,7 @@
     dimensions: page_views.browser_name
     measures: [page_views.average_request_time, page_views.average_response_time, page_views.average_onload_time, page_views.average_time_to_dom_interactive, page_views.average_time_to_dom_complete]
     filters:
-      page_views.page_view_count: '>2000'
+      page_views.page_view_count: '>100'
     sorts: page_views.browser_name
     stacking: normal
     hide_legend: true

@@ -127,8 +127,9 @@
     dimensions: sessions.geo_location
     measures: sessions.user_count
     filters:
-      sessions.geo_location: inside box from 85.0511287798066, -540 to -85.05112877980659, 180
-      sessions.session_start_time: 28 days
+ #     sessions.geo_location: inside box from 85.0511287798066, -540 to -85.05112877980659, 180
+       sessions.geo_location: inside box from 54.310114, -133 to 15.188784, -59
+       sessions.session_start_time: 28 days
     limit: 1000
     map: world
     map_scale_indicator: 'on'

@@ -16,7 +16,7 @@
 # License:     Apache License Version 2.0
 
 - dashboard: web
-  title: GDX dashboard
+  title: GDX KPIs
   layout: grid
 
   rows:

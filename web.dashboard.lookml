@@ -16,7 +16,7 @@
 # License:     Apache License Version 2.0
 
 - dashboard: web
-  title: Snowplow web dashboard (4 week period)
+  title: GDX dashboard
   layout: grid
 
   rows:

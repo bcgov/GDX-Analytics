@@ -325,7 +325,7 @@ view: page_views {
 
   dimension: time_engaged_tier {
     type: tier
-    tiers: [0, 10, 30, 60]
+    tiers: [0, 10, 30, 60, 120]
     style: integer
     sql: ${time_engaged} ;;
     group_label: "Engagement"

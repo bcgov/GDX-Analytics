@@ -3,31 +3,21 @@ view: sessions {
     sql: WITH prep AS (
 
         SELECT
-
           session_id,
-
           -- time
-
           MIN(page_view_start) AS session_start,
           MAX(page_view_end) AS session_end,
-
           MIN(page_view_start_local) AS session_start_local,
           MAX(page_view_end_local) AS session_end_local,
-
           -- engagement
-
           COUNT(*) AS page_views,
-
           -- SUM(CASE WHEN user_bounced THEN 1 ELSE 0 END) AS bounced_page_views,
           -- SUM(CASE WHEN user_engaged THEN 1 ELSE 0 END) AS engaged_page_views,
-
           SUM(time_engaged_in_s) AS time_engaged_in_s
 
         FROM ${page_views.SQL_TABLE_NAME}
-
         GROUP BY 1
         ORDER BY 1
-
       )
 
       SELECT
@@ -273,12 +263,12 @@ view: sessions {
   dimension: session_start_window {
     case: {
       when: {
-        sql: ${session_start_time} >= DATEADD(day, -28, GETDATE()) ;;
+        sql: ${session_start_time} >= DATEADD(day, -7, GETDATE()) ;;
         label: "current_period"
       }
 
       when: {
-        sql: ${session_start_time} >= DATEADD(day, -56, GETDATE()) AND ${session_start_time} < DATEADD(day, -28, GETDATE()) ;;
+        sql: ${session_start_time} >= DATEADD(day, -14, GETDATE()) AND ${session_start_time} < DATEADD(day, -7, GETDATE()) ;;
         label: "previous_period"
       }
 

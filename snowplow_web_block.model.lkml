@@ -47,4 +47,4 @@ explore: sessions {
 
 explore: users {}
 
-explore: example_event_streams {}
+explore: aggregated_table_sample_citizens {}

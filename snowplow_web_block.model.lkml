@@ -46,3 +46,5 @@ explore: sessions {
 }
 
 explore: users {}
+
+explore: example_event_streams {}

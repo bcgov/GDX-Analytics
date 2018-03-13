@@ -25,22 +25,19 @@ include: "*.dashboard"
 
 explore: page_views {
   join: sessions {
-    sql_on: page_views.session_id = sessions.session_id
-      ;;
+    sql_on: ${page_views.session_id} = ${sessions.session_id} ;;
     relationship: many_to_one
   }
 
   join: users {
-    sql_on: page_views.user_snowplow_domain_id = users.user_snowplow_domain_id
-      ;;
+    sql_on: ${page_views.user_snowplow_domain_id} = ${users.user_snowplow_domain_id} ;;
     relationship: many_to_one
   }
 }
 
 explore: sessions {
   join: users {
-    sql_on: sessions.user_snowplow_domain_id = users.user_snowplow_domain_id
-      ;;
+    sql_on: ${sessions.user_snowplow_domain_id} = ${users.user_snowplow_domain_id} ;;
     relationship: many_to_one
   }
 }

@@ -219,6 +219,11 @@ view: page_views {
     sortkeys: ["page_view_start"]
   }
 
+  dimension: p_key {
+    primary_key: yes
+    sql: ${user_custom_id} || ${user_snowplow_domain_id} || ${session_id} || ${page_view_id} || ${page_view_index} ;;
+  }
+
   # DIMENSIONS
 
   # User

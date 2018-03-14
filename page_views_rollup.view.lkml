@@ -5,7 +5,8 @@ view: page_views_rollup {
   derived_table: {
     explore_source: page_views {
       column: session_start_date { field: sessions.session_start_date }
-      column: session_count { field: sessions.session_count }
+      column: session_count {field: sessions.session_count}
+      column: user_count { field: sessions.user_count }
       derived_column: p_key {
         sql: ROW_NUMBER() OVER (ORDER BY TRUE) ;;
       }
@@ -18,15 +19,25 @@ view: page_views_rollup {
     sql: ${TABLE}.session_start_date  ;;
   }
 
+  dimension: user_count {
+    type: number
+  }
+
   dimension: session_count {
     type: number
   }
 
-  dimension: session_count_1_day_distribution {
+  dimension: unique_sessions_1_day_distribution {
+    type: tier
+    style: integer
+    tiers: [0,1,2,5,10,12,15]
+    sql: ${session_count} ;;
+  }
+  dimension: unique_visits_1_day_distribution {
     type: tier
     style: integer
     tiers: [0,20,30,50,75,100,150,300,500,1000]
-    sql: ${session_count} ;;
+    sql: ${user_count} ;;
   }
 
   dimension: p_key {

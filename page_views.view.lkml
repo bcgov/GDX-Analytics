@@ -920,6 +920,12 @@ view: page_views {
     group_label: "Engagement"
   }
 
+  measure: average_page_views_per_visit {
+    type: average
+    sql: ${page_view_in_session_index} ;;
+    group_label: "Engagement"
+  }
+
   measure: average_time_engaged {
     type: average
     sql: ${time_engaged} ;;

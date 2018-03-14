@@ -33,6 +33,11 @@ explore: page_views {
     sql_on: ${page_views.user_snowplow_domain_id} = ${users.user_snowplow_domain_id} ;;
     relationship: many_to_one
   }
+
+  join: page_views_rollup {
+    sql_on: ${page_views_rollup.session_start_raw} = ${sessions.session_start_date} ;;
+    relationship: one_to_many
+  }
 }
 
 explore: sessions {

@@ -24,6 +24,7 @@ include: "*.view"
 include: "*.dashboard"
 
 explore: page_views {
+  sql_always_where: ${page_url} NOT LIKE '%video.web.%' ;;
   join: sessions {
     sql_on: ${page_views.session_id} = ${sessions.session_id} ;;
     relationship: many_to_one
@@ -47,7 +48,9 @@ explore: sessions {
   }
 }
 
-explore: users {}
+explore: users {
+  sql_always_where: ${first_page_url} NOT LIKE '%video.web.%' ;;
+}
 
 explore: aggregated_table_sample_citizens {}
 

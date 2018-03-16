@@ -451,7 +451,10 @@ view: page_views {
 
   dimension: search_field {
     type: string
-    sql:  split_part(${page_url},'search',2) ;;
+#     sql: decode(split_part(${page_url},'/search/',2),'%20', ' ');;
+
+    sql: REPLACE(split_part(${page_url},'/search/',2), '%20', ' ')
+ ;;
   }
 
   dimension: page_width {
@@ -638,6 +641,11 @@ view: page_views {
   }
 
   # IP
+
+  dimension: is_government {
+    type: yesno
+    sql: ${ip_address} LIKE '%142%' ;;
+  }
 
   dimension: ip_address {
     type: string
@@ -938,6 +946,11 @@ view: page_views {
   }
 
   # Engagement
+
+#   measure: page_2_count {
+#     type: count_distinct
+#     sql: ${page_views_2.page_title} ;;
+#   }
 
   measure: total_time_engaged {
     type: sum

@@ -26,8 +26,9 @@ include: "*.dashboard"
 explore: page_views {
   sql_always_where: ${page_url} NOT LIKE '%video.web.%' ;;
   join: sessions {
-    sql_on: ${page_views.session_id} = ${sessions.session_id} ;;
-    relationship: many_to_one
+    type: left_outer
+    sql_on: ${sessions.session_id} = ${page_views.session_id};;
+    relationship: many_to_many
   }
 
   join: users {
@@ -41,7 +42,8 @@ explore: page_views {
   }
 
   join: sessions_rollup {
-    sql_on: ${sessions_rollup.session_id} = ${sessions.session_id} ;;
+    sql_on: ${sessions_rollup.session_id} = ${sessions.session_id}
+            AND ${page_views.page_view_index} = ${sessions_rollup.max_page_view_index} ;;
     type: left_outer
     relationship: many_to_many
   }

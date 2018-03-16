@@ -39,6 +39,11 @@ explore: page_views {
     sql_on: ${page_views_rollup.session_start_raw} = ${sessions.session_start_date} ;;
     relationship: one_to_many
   }
+
+  join: sessions_rollup {
+    sql_on: ${sessions_rollup.session_id} = ${sessions.session_id} ;;
+    type: left_outer
+  }
 }
 
 explore: sessions {

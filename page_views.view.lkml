@@ -438,6 +438,22 @@ view: page_views {
     group_label: "Page"
   }
 
+  dimension: first_page_title_test {
+    label: "FIRST PAGE TITLE"
+    type: string
+    sql: CASE WHEN ${page_view_in_session_index} = 1 THEN ${page_title} ELSE NULL END ;;
+  }
+
+  dimension: last_page_title {
+    type: string
+    sql: CASE WHEN ${page_view_in_session_index} = ${sessions_rollup.max_page_view_index} THEN ${page_title} ELSE NULL END ;;
+  }
+
+  dimension: search_field {
+    type: string
+    sql:  split_part(${page_url},'search',2) ;;
+  }
+
   dimension: page_width {
     type: number
     sql: ${TABLE}.page_width ;;
@@ -890,6 +906,11 @@ view: page_views {
     }
 
     group_label: "Counts"
+  }
+
+  measure: max_page_view_index {
+    type: max
+    sql: ${page_view_in_session_index} ;;
   }
 
   measure: engaged_page_view_count {

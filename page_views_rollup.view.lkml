@@ -30,7 +30,7 @@ view: page_views_rollup {
   dimension: unique_sessions_1_day_distribution {
     type: tier
     style: integer
-    tiers: [0,1,2,5,10,12,15]
+    tiers: [0,2,5,10,20,50,75,100,150,500]
     sql: ${session_count} ;;
   }
   dimension: unique_visits_1_day_distribution {

@@ -257,7 +257,7 @@ view: sessions {
     timeframes: [time, minute10, hour, date, week, month, quarter, year]
     sql: ${TABLE}.session_end ;;
     #X# group_label:"Session Time"
-    hidden: yes
+#     hidden: yes
   }
 
   dimension: session_start_window {

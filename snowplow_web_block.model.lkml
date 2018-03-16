@@ -43,6 +43,7 @@ explore: page_views {
   join: sessions_rollup {
     sql_on: ${sessions_rollup.session_id} = ${sessions.session_id} ;;
     type: left_outer
+    relationship: many_to_many
   }
 }
 

@@ -20,7 +20,7 @@
   layout: grid
 
   rows:
-    - elements: [number_of_users, number_of_new_users, number_of_engaged_new_users, number_of_new_users_that_returned]
+    - elements: [number_of_users, number_of_new_users, number_of_engaged_new_users]
       height: 200
     - elements: [referer_breakdown, map]
       height: 450
@@ -81,25 +81,6 @@
     filters:
       sessions.user_engaged: yes
     sorts: sessions.session_start_window
-    show_comparison: true
-    comparison_type: change
-    comparison_label: compared to last period
-    show_comparison_label: true
-
-  - name: number_of_new_users_that_returned
-    title: Number of new users that returned
-    type: single_value
-    model: snowplow_web_block
-    explore: sessions
-    dimensions: users.first_session_start_window
-    measures: sessions.user_count
-    dynamic_fields:
-    - table_calculation: change
-      label: Change since last period
-      expression: offset(${sessions.user_count}, 0) - offset(${sessions.user_count}, 1)
-    filters:
-      sessions.session_index: '>1'
-    sorts: users.first_session_start_window
     show_comparison: true
     comparison_type: change
     comparison_label: compared to last period

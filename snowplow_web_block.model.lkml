@@ -57,6 +57,7 @@ explore: sessions {
     sql_on: ${sessions.session_id} = ${page_views_2.session_id}
             and ${page_views_2.page_view_in_session_index} = 2
             and ${page_views_2.page_title} != ${sessions.first_page_title};;
+    relationship: many_to_one
   }
   join: page_views_3 {
     fields: [page_views_3.page_title, page_views_3.session_count]
@@ -66,6 +67,7 @@ explore: sessions {
             and ${page_views_3.page_view_in_session_index} = 3
             and ${page_views_3.page_title} != ${sessions.first_page_title}
             and ${page_views_3.page_title} != ${page_views_2.page_title};;
+    relationship: many_to_one
   }
 }
 

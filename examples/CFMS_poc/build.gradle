@@ -1,0 +1,26 @@
+apply plugin: 'java'
+group = 'ca.bc.gov.CFMS_poc'
+version = '0.5'
+
+repositories {
+     maven { url "http://maven.snplow.com/releases" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+dependencies {
+    compile 'com.google.code.gson:gson:2.8+'
+    compile 'com.snowplowanalytics:snowplow-java-tracker:0.8.2'
+    testCompile 'junit:junit:4.12'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'CFMS_poc',
+                'Implementation-Version': version,
+                'Main-Class': 'ca.bc.gov.CFMS_poc.App'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+tasks.jar.dependsOn(fatJar)

@@ -9,8 +9,8 @@ Currently this project is still in development.
 ## To Build and Run
 
 ```
-gradle build
-java -jar build/libs/CFMS_poc-all-0.5.jar
+$ gradle build
+$ java -jar build/libs/CFMS_poc-all-0.5.jar
 ```
 
 ## Special files in this repository

@@ -13,6 +13,12 @@ $ gradle build
 $ java -jar build/libs/CFMS_poc-all-0.5.jar
 ```
 
+## To download all dependencies to the "runtime" directory
+
+```
+$ gradel getDeps
+```
+
 ## Special files in this repository
 The files in [schemas/ca.bc.gov.cfmspoc](schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
 

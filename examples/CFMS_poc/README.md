@@ -1,6 +1,6 @@
 ## GDX Analytics CFMS Instrumentation Proof of Concept 
 
-This code is a proof of concept of Java code required to add Snowplow instrumentation to the CFMS application. 
+This code is a proof of concept of Java code required to add Snowplow instrumentation to the CFMS application. For more information on the Snowplow Java Tracker see https://github.com/snowplow/snowplow-java-tracker.
 
 ## Project Status
 

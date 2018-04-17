@@ -16,7 +16,7 @@ $ java -jar build/libs/CFMS_poc-all-0.5.jar
 ## To download all dependencies to the "runtime" directory
 
 ```
-$ gradel getDeps
+$ gradle getDeps
 ```
 
 ## Special files in this repository

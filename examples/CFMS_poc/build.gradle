@@ -23,4 +23,9 @@ task fatJar(type: Jar) {
     with jar
 }
 
+task getDeps(type: Copy) {
+  from sourceSets.main.runtimeClasspath
+  into 'runtime/'
+}
+
 tasks.jar.dependsOn(fatJar)

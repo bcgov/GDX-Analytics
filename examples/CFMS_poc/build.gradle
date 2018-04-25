@@ -1,6 +1,6 @@
 apply plugin: 'java'
 group = 'ca.bc.gov.CFMS_poc'
-version = '0.6'
+version = '0.6.1'
 
 repositories {
      maven { url "http://maven.snplow.com/releases" }

@@ -1,9 +1,9 @@
 {
 	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
-	"description": "Schema for an additional service event after 'finish'. Moves to State 6 then State 5 then State 8",
+	"description": "Schema for a add citizen event. Does not lead to a State change.",
 	"self": {
 		"vendor": "ca.bc.gov.cfmspoc",
-		"name": "additionalservice",
+		"name": "addcitizen",
 		"format": "jsonschema",
 		"version": "1-0-0"
 	},

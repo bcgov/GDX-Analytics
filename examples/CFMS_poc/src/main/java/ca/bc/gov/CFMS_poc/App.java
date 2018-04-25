@@ -81,8 +81,9 @@ public class App {
     //----------------------------------------
     // Create a Map of the data you want to include...
     Map<String, Object> citizenMap = new HashMap<>();
-    citizenMap.put("client_id", 123456);
-    SelfDescribingJson citizen = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/1-0-0", citizenMap);
+    citizenMap.put("client_id", 111111);
+    citizenMap.put("quick_txn", false);
+    SelfDescribingJson citizen = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/2-0-0", citizenMap);
 
     //----------------------------------------
     Map<String, Object> officeMap = new HashMap<>();
@@ -94,7 +95,8 @@ public class App {
     Map<String, Object> agentMap = new HashMap<>();
     agentMap.put("agent_id", 12);
     agentMap.put("role", "CSR");
-    SelfDescribingJson agent = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/agent/jsonschema/1-0-0", agentMap);
+    agentMap.put("quick_txn", true);
+    SelfDescribingJson agent = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/agent/jsonschema/2-0-0", agentMap);
     
     //----------------------------------------
     List<SelfDescribingJson> contexts = new ArrayList<>();
@@ -105,7 +107,7 @@ public class App {
     // Create your event data -- in this example the event has data of its own
     Map<String, Object> chooseserviceMap = new HashMap<>();
     chooseserviceMap.put("channel","in-person");
-    chooseserviceMap.put("program_id",45);
+    chooseserviceMap.put("program_id",12);
     chooseserviceMap.put("parent_id",0);
     chooseserviceMap.put("program_name","An amazing program");
     chooseserviceMap.put("transaction_name","A fantastic transaction");

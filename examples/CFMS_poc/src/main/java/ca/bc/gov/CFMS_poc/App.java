@@ -83,7 +83,7 @@ public class App {
     Map<String, Object> citizenMap = new HashMap<>();
     citizenMap.put("client_id", 111111);
     citizenMap.put("quick_txn", false);
-    SelfDescribingJson citizen = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/1-1-0", citizenMap);
+    SelfDescribingJson citizen = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/2-0-0", citizenMap);
 
     //----------------------------------------
     Map<String, Object> officeMap = new HashMap<>();
@@ -96,7 +96,7 @@ public class App {
     agentMap.put("agent_id", 12);
     agentMap.put("role", "CSR");
     agentMap.put("quick_txn", true);
-    SelfDescribingJson agent = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/agent/jsonschema/1-1-0", agentMap);
+    SelfDescribingJson agent = new SelfDescribingJson("iglu:ca.bc.gov.cfmspoc/agent/jsonschema/2-0-0", agentMap);
     
     //----------------------------------------
     List<SelfDescribingJson> contexts = new ArrayList<>();

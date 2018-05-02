@@ -1,4 +1,4 @@
-#((# GDX Analytics Python Example
+## GDX Analytics Python Example
 
 This code is a proof of concept of Python code required to add Snowplow instrumentation using the initial CFMS proof of concept model. For more information on the Snowplow Java Tracker see https://github.com/snowplow/snowplow-python-tracker.
 

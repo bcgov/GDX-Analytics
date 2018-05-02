@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Example Events for Looker</title>
+  </head>
+
+  <body>
+    <header>
+      <h3>Example Events for Looker</h3>
+    </header>
+
+    <!-- Snowplow starts plowing -->
+    <script type="text/javascript">
+      ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
+      p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
+      };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
+      n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","https://d1fc8wv8zag5ca.cloudfront.net/2.8.2/sp.js","snowplow"));
+      var collector = 'spm.gov.bc.ca';
+      window.snowplow('newTracker','rt',collector, {
+        encodeBase64: false,
+        appId: 'demo',
+        platform: 'web',
+        discoverRootDomain: true,
+        encodeBase64: false,
+        post: true
+      });
+
+// CITIZEN NUMBER 1
+// ARRIVAL (1)
+      window.snowplow('trackSelfDescribingEvent', {
+        schema: 'iglu:ca.bc.gov.poc/arrival/jsonschema/1-0-0',
+        data: {
+          source: 'website'
+        }
+      }, [{
+        schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+        data: {
+          ticketNumber: 'exampleTicket',
+          postalCode: 'examplePostcode'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+        data: {
+          name: 'exampleOffice',
+          location: 'exampleLocation',
+          type: 'exampleType'
+        }
+      }]);
+
+// APPLICATION (1)
+      window.snowplow('trackSelfDescribingEvent', {
+        schema: 'iglu:ca.bc.gov.poc/application/jsonschema/1-0-0',
+        data: {
+          service: 'exampleService'
+        }
+      }, [{
+        schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+        data: {
+          ticketNumber: 'exampleTicket',
+          postalCode: 'examplePostcode'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+        data: {
+          name: 'exampleOffice',
+          location: 'exampleLocation',
+          type: 'exampleType'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+        data: {
+          name: 'exampleAgent',
+          id: 'exampleID',
+          role: 'exampleRole'
+        }
+      }]);
+
+// INFORMATION (1)
+      window.snowplow('trackSelfDescribingEvent', {
+        schema: 'iglu:ca.bc.gov.poc/information/jsonschema/1-0-0',
+        data: {
+          type: 'service required',
+          details: 'example details about the exampleService'
+        }
+      }, [{
+        schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+        data: {
+          ticketNumber: 'exampleTicket',
+          postalCode: 'examplePostcode'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+        data: {
+          name: 'exampleOffice',
+          location: 'exampleLocation',
+          type: 'exampleType'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+        data: {
+          name: 'exampleAgent',
+          id: 'exampleID',
+          role: 'exampleRole'
+        }
+      }]);
+
+// REFERRAL (1)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/referral/jsonschema/1-0-0',
+      data: {
+        destination: 'CATS terminal'
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket',
+        postalCode: 'examplePostcode'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice',
+        location: 'exampleLocation',
+        type: 'exampleType'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+      data: {
+        name: 'exampleAgent',
+        id: 'exampleID',
+        role: 'exampleRole'
+      }
+    }]);
+
+// RESOLUTION (1)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/resolution/jsonschema/1-0-0',
+      data: {
+        success: true
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket',
+        postalCode: 'examplePostcode'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice',
+        location: 'exampleLocation',
+        type: 'exampleType'
+      }
+    }]);
+
+// CITIZEN NUMBER 2
+// ARRIVAL (2)
+      window.snowplow('trackSelfDescribingEvent', {
+        schema: 'iglu:ca.bc.gov.poc/arrival/jsonschema/1-0-0',
+        data: {
+          source: 'reception'
+        }
+      }, [{
+        schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+        data: {
+          ticketNumber: 'exampleTicket2',
+          postalCode: 'examplePostcode2'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+        data: {
+          name: 'exampleOffice2',
+          location: 'exampleLocation2',
+          type: 'exampleType2'
+        }
+      }]);
+
+// APPLICATION (2)
+      window.snowplow('trackSelfDescribingEvent', {
+        schema: 'iglu:ca.bc.gov.poc/application/jsonschema/1-0-0',
+        data: {
+          service: 'exampleService2'
+        }
+      }, [{
+        schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+        data: {
+          ticketNumber: 'exampleTicket2',
+          postalCode: 'examplePostcode2'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+        data: {
+          name: 'exampleOffice2',
+          location: 'exampleLocation2',
+          type: 'exampleType2'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+        data: {
+          name: 'exampleAgent2',
+          id: 'exampleID2',
+          role: 'exampleRole2'
+        }
+      }]);
+
+// INFORMATION (2)
+      window.snowplow('trackSelfDescribingEvent', {
+        schema: 'iglu:ca.bc.gov.poc/information/jsonschema/1-0-0',
+        data: {
+          type: 'has kids',
+          details: 'example details about the exampleService2'
+        }
+      }, [{
+        schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+        data: {
+          ticketNumber: 'exampleTicket2',
+          postalCode: 'examplePostcode2'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+        data: {
+          name: 'exampleOffice2',
+          location: 'exampleLocation2',
+          type: 'exampleType2'
+        }
+      }, {
+        schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+        data: {
+          name: 'exampleAgent2',
+          id: 'exampleID2',
+          role: 'exampleRole2'
+        }
+      }]);
+
+// REFERRAL (2)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/referral/jsonschema/1-0-0',
+      data: {
+        destination: 'website'
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket2',
+        postalCode: 'examplePostcode2'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice2',
+        location: 'exampleLocation2',
+        type: 'exampleType2'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+      data: {
+        name: 'exampleAgent2',
+        id: 'exampleID2',
+        role: 'exampleRole2'
+      }
+    }]);
+
+// RESOLUTION (2)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/resolution/jsonschema/1-0-0',
+      data: {
+        success: false
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket2',
+        postalCode: 'examplePostcode2'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice2',
+        location: 'exampleLocation2',
+        type: 'exampleType2'
+      }
+    }]);
+
+// CITIZEN NUMBER 3
+// ARRIVAL (3)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/arrival/jsonschema/1-0-0',
+      data: {
+        source: 'agent'
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket3',
+        postalCode: 'examplePostcode3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice3',
+        location: 'exampleLocation3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+      data: {
+        name: 'exampleAgent3',
+        id: 'exampleID3',
+        role: 'exampleRole3'
+      }
+    }]);
+
+// APPLICATION (3)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/application/jsonschema/1-0-0',
+      data: {
+        service: 'exampleService3'
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket3',
+        postalCode: 'examplePostcode3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice3',
+        location: 'exampleLocation3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+      data: {
+        name: 'exampleAgent3',
+        id: 'exampleID3',
+        role: 'exampleRole3'
+      }
+    }]);
+
+// INFORMATION (3)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/information/jsonschema/1-0-0',
+      data: {
+        type: 'phone number',
+        details: 'example details about the exampleService3'
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket3',
+        postalCode: 'examplePostcode3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice3',
+        location: 'exampleLocation3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+      data: {
+        name: 'exampleAgent3',
+        id: 'exampleID3',
+        role: 'exampleRole3'
+      }
+    }]);
+
+// REFERRAL (3)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/referral/jsonschema/1-0-0',
+      data: {
+        destination: 'null'
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket3',
+        postalCode: 'examplePostcode3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice3',
+        location: 'exampleLocation3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/agent/jsonschema/1-0-0',
+      data: {
+        name: 'exampleAgent3',
+        id: 'exampleID3',
+        role: 'exampleRole3'
+      }
+    }]);
+
+// RESOLUTION (3)
+    window.snowplow('trackSelfDescribingEvent', {
+      schema: 'iglu:ca.bc.gov.poc/resolution/jsonschema/1-0-0',
+      data: {
+        success: true
+      }
+    }, [{
+      schema: 'iglu:ca.bc.gov.poc/citizen/jsonschema/1-0-0',
+      data: {
+        ticketNumber: 'exampleTicket3',
+        postalCode: 'examplePostcode3'
+      }
+    }, {
+      schema: 'iglu:ca.bc.gov.poc/office/jsonschema/1-0-0',
+      data: {
+        name: 'exampleOffice3',
+        location: 'exampleLocation3'
+      }
+    }]);
+
+    </script>
+    <!-- Snowplow stops plowing -->
+
+  </body>
+</html>

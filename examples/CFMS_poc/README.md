@@ -19,6 +19,42 @@ $ java -jar build/libs/CFMS_poc-all-0.5.jar
 $ gradle getDeps
 ```
 
+## A note for Maven users
+
+Snowplow may be particular about library versions you are using. You may need to add these lines to your pom.xml file
+
+### In the &lt;dependencies> section:
+```
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>${jackson.version}</version>
+</dependency>
+ 
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>${jackson.version}</version>
+</dependency>
+ 
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>${jackson.version}</version>
+</dependency>
+```
+
+### In a  &lt;properties> section, after  &lt;dependencies>:
+```
+<properties>
+        <jackson.version>2.4.1</jackson.version>
+              <src.dir>src</src.dir>
+              <maven.compiler.source>1.8</maven.compiler.source>
+              <maven.compiler.target>1.8</maven.compiler.target>
+              <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+```
+
 ## Special files in this repository
 The files in [schemas/ca.bc.gov.cfmspoc](schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
 

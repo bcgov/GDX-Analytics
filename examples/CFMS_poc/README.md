@@ -24,7 +24,7 @@ The files in [schemas/ca.bc.gov.cfmspoc](schemas/ca.bc.gov.cfmspoc) are the Snow
 
 ## Getting Help
 
-Please Contact dan.pollock@gov.b.ca for questions related to this work. 
+Please Contact dan.pollock@gov.bc.ca for questions related to this work. 
 
 ## Contributors
 

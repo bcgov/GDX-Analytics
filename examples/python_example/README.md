@@ -19,7 +19,7 @@ $ python sn.py
 ```
 
 ## Special files in this repository
-The files in [schemas/ca.bc.gov.cfmspoc](schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
+The files in [schemas/ca.bc.gov.cfmspoc](../schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
 
 ## Getting Help
 

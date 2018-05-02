@@ -23,7 +23,7 @@ $ gradle getDeps
 
 Snowplow may be particular about library versions you are using. You may need to add these lines to your pom.xml file
 
-# In the <dependencies> section:
+In the &lt;dependencies> section:
 ```
 <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
@@ -44,7 +44,7 @@ Snowplow may be particular about library versions you are using. You may need to
 </dependency>
 ```
 
-# In a <properties> section, after <dependencies>:
+In a  &lt;properties> section, after  &lt;dependencies>:
 ```
 <properties>
         <jackson.version>2.4.1</jackson.version>

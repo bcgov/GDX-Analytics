@@ -8,9 +8,7 @@ Currently this project is still in development.
 
 ## To Run
 
-```
 Open [index.html](index.html) in your web browser. 
-```
 
 ## Getting Help
 

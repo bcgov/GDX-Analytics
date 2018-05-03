@@ -56,11 +56,11 @@ Snowplow may be particular about library versions you are using. You may need to
 ```
 
 ## Special files in this repository
-The files in [schemas/ca.bc.gov.cfmspoc](schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
+The files in [schemas/ca.bc.gov.cfmspoc](../schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
 
 ## Getting Help
 
-Please Contact dan.pollock@gov.b.ca for questions related to this work. 
+Please Contact dan.pollock@gov.bc.ca for questions related to this work. 
 
 ## Contributors
 

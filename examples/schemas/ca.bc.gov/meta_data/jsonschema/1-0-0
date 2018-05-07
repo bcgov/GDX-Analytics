@@ -15,5 +15,8 @@
 		}
 		
 	},
-	"minProperties": 1
+	"minProperties": 1,
+	"required": ["node_id"], 
+	"additionalProperties": false 
+
 }

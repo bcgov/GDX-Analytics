@@ -15,8 +15,8 @@ t = Tracker(e, encode_base64=False, app_id = 'demo')
 client_id = int(time.time())
 
 # Set some sample values for example events
-citizen = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/2-0-0',
-     { "client_id": client_id, "quick_txn": False }
+citizen = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/3-0-0',
+     { "client_id": client_id, "service_count": 1, "quick_txn": False }
 )
 
 office = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/office/jsonschema/1-0-0',

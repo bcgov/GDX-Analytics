@@ -1,6 +1,7 @@
 ## GDX Analytics HTML/Javascript Example
 
-This code demonstrates using the HTML/Javascript tracker to push custom events the the Snowplow Tracker. For more information on the Snowplow Javascript Tracker see https://github.com/snowplow/snowplow-javascript-tracker. NOTE: This is using an old version of the custom event schema. 
+There are currntly 3 HTML/Javascript examples in the folder. index.html code demonstrates using the HTML/Javascript tracker to push custom events the the Snowplow Tracker. For more information on the Snowplow Javascript Tracker see https://github.com/snowplow/snowplow-javascript-tracker. NOTE: This is using an old version of the custom event schema. 
+test_html_node_context.html tests the new context, and the collection of the node id for the gov.bc.ca pages. The third one test_node_id_multi_context.html was used to test what would happening if there was more than one call to a context of the same name.
 
 ## Project Status
 

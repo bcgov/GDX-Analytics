@@ -2,6 +2,10 @@
 
 This code demonstrates using the HTML/Javascript tracker to push custom events the the Snowplow Tracker. For more information on the Snowplow Javascript Tracker see https://github.com/snowplow/snowplow-javascript-tracker. NOTE: This is using an old version of the custom event schema. 
 
+## Multiple Context Example
+
+This HTML/Javascript tracker pushes multiple contexts that pass the same varable (node id). This will be used to test behavior.
+
 ## Project Status
 
 Currently this project is still in development.
@@ -12,7 +16,7 @@ Open [index.html](index.html) in your web browser.
 
 ## Getting Help
 
-Please Contact dan.pollock@gov.bc.ca for questions related to this work. 
+Please Contact ryan.janes@gov.bc.ca for questions related to this work. 
 
 ## Contributors
 

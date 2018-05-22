@@ -4,7 +4,8 @@
  p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
  };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
  n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","//dexqzvifihpcx.cloudfront.net/kFaRq7wlqn92HjDbMi45LjA.js","snowplow"));
-window.snowplow('newTracker', 'co', 'ca-bc-gov-main.collector.snplow.net', {
+var collector = 'spm.gov.bc.ca';
+ window.snowplow('newTracker','rt',collector, {
  platform: 'web',
  respectDoNotTrack: true,
  post: true,

@@ -1,6 +1,6 @@
 ## GDX Analytics CMS Lite Dev Code
 
-This code is the inline script that the CMS Lite team will use to do development on.
+This code is the inline script that the CMS Lite team will use to do development on. It only connects to Snowplow Mini and will need to be updated to the pipeline when development is complete.
 
 ## Project Status
 

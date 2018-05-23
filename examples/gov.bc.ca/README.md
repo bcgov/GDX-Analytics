@@ -1,14 +1,14 @@
 ## GDX Analytics CMS Lite Dev Code
 
-This code is the inline script that the CMS Lite team will use to do development on. It only connects to Snowplow Mini and will need to be updated to the pipeline when development is complete.
+This code demonstrates the inline Javascript to track web analytics events for CMS Lite sites. It includes adding a custom context to include the Node Id. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
 
 ## Project Status
 
-Currently this project is still in development.
+Currently this project is in development.
 
 ## To Run
 
-Add this script in the header section of the html page. Currnetly this script is connecting to the test instance of Snowplow, when the development work is done the collector will have to be changed to the main pipeline.
+Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline.
 
 ## Getting Help
 

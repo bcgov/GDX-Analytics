@@ -2,7 +2,7 @@
 
 This bash script lets you upload files to s3 without installing any additional tools beyond standard Unix utilities. 
 
-Download [s3-upload.sh].
+Download [s3-upload.sh]().
 
 It is based on [vszakats/s3-upload.sh](https://gist.github.com/vszakats/2917d28a951844ab80b1).
 

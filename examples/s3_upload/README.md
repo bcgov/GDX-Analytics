@@ -21,13 +21,13 @@ $ export AWS_SECRET_ACCESS_KEY="<<AWS_SECRET_KEY>>
 And run
 
 ```
-$ sh s3-upload.sh <<localfile>> <<bucket>> <<region>> <<remotepath>> <<OPTIONAL:storageclass>>
+$ sh s3-upload.sh <<localfile>> <<bucket>> <<remotepath>> <<region>> <<OPTIONAL:storageclass>>
 ```
 
 For example:
 
 ```
-$ sh s3-upload.sh  local/path/foo.csv  bucket-name ca-central-1 remote/path 
+$ sh s3-upload.sh  local/path/foo.csv  bucket-name remote/path ca-central-1
 ```
 
 will upload the file "`foo.csv`" in the local directory "`local/path`" and place it in s3 in "`ca-central-1`" at "`bucket-name/bucket-name/remote/path/foo.csv`".

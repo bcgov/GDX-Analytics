@@ -5,8 +5,7 @@
 #               : and load it into Redshift
 #
 #Requirements   : You must set the following environment variables
-#               : to establish the credentials for the microservice 
-#               : user
+#               : to establish credentials for the microservice user
 #
 #               : export AWS_ACCESS_KEY_ID=<<KEY>>
 #               : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>

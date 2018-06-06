@@ -7,12 +7,14 @@
 #Requirements   : You must set the following environment variables
 #               : to establish the credentials for the microservice 
 #               : user
+#
 #               : export AWS_ACCESS_KEY_ID=<<KEY>>
 #               : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>
 #               : export pgpass=<<DB_PASSWD>>
 #
-#TO DO:
-#   add header validation
+#
+#Usage          : python microservice.py configfile.json
+#
 
 import boto3 # s3 access
 import pandas as pd # data processing

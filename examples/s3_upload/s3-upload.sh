@@ -1,9 +1,11 @@
 #!/bin/sh -u
 
-# To the extent possible under law, Viktor Szakats (vszakats.net)
-# has waived all copyright and related or neighboring rights to this
-# script.
-# CC0 - https://creativecommons.org/publicdomain/zero/1.0/
+#Copyright 2015 Province of British Columbia
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+# This script is based on a public domain script by Viktor Szakats (vszakats.net)
 
 # Upload a file to Amazon AWS S3 using Signature Version 4
 #
@@ -13,7 +15,7 @@
 # requires:
 #    curl, openssl 1.x, GNU sed, LF EOLs in this file
 # usage: 
-#    sh s3-upload-aws4.sh <<localfile>> <<bucket>> <<region>> <<remotepath>> <<OPTIONAL:storageclass>>
+#    sh s3-upload.sh <<localfile>> <<bucket>> <<remotepath>> <<region>> <<OPTIONAL:storageclass>>
 #
 # Depends on AWS credentials being set via env:
 # - AWS_ACCESS_KEY_ID
@@ -22,8 +24,8 @@
 
 fileLocal="${1:-example-local-file.ext}"
 bucket="${2:-example-bucket}"
-region="${3:-}"
-remotepath="${4:-}"
+remotepath="${3:-}" # by default will place in the root of the bucket
+region="${4:-ca-central-1}" # optional, will default to ca-central-1
 storageClass="${5:-STANDARD}"  # or 'REDUCED_REDUNDANCY'
 
 m_openssl() {

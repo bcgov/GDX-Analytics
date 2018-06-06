@@ -86,10 +86,7 @@ fi
 
 fileName="${fileLocal##*/}"
 fileRemote="${remotepath%/}/${fileName}" # strip a trailing slash from the remote path and add the filename
-
-echo "---"
-echo $fileRemote
-echo "---"
+fileRemote=$(printf '%s' "${fileRemote}" | m_sed 's/ /%20/g')
 
 if [ -z "${region}" ]; then
   region="${awsRegion}"

@@ -1,6 +1,6 @@
 ## S3 Upload Utility 
 
-The [s3-upload.sh]() bash script lets you upload files to s3 without installing any additional tools beyond standard Unix utilities. 
+The [s3-upload.sh](s3-upload.sh) bash script lets you upload files to s3 without installing any additional tools beyond standard Unix utilities. 
 
 ## Project Status
 

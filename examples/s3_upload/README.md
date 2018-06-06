@@ -8,7 +8,7 @@ Currently this project is still in development.
 
 ## Dependencies
 
-`curl`, `openssl 1.x`, `GNU sed`, LF EOLs in this file
+`curl`, `openssl 1.x`, `GNU sed`, LF EOLs in this file.
 
 ## To Run
 

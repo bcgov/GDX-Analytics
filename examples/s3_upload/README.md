@@ -6,6 +6,10 @@ The [s3-upload.sh]() bash script lets you upload files to s3 without installing 
 
 Currently this project is still in development.
 
+## Dependencies
+
+`curl`, `openssl 1.x`, `GNU sed`, LF EOLs in this file
+
 ## To Run
 
 You must set two environment variables

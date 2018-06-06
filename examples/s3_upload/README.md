@@ -1,6 +1,8 @@
 ## S3 Upload Utility 
 
-This bash script lets you upload files to s3 without installing any additional tools beyond standard Unix utilities. It is based on [vszakats/s3-upload.sh](https://gist.github.com/vszakats/2917d28a951844ab80b1)
+This bash script lets you upload files to s3 without installing any additional tools beyond standard Unix utilities. 
+
+It is based on [vszakats/s3-upload.sh](https://gist.github.com/vszakats/2917d28a951844ab80b1)
 
 ## Project Status
 
@@ -26,7 +28,7 @@ For example:
 $ sh s3-upload.sh  local/path/foo.csv  bucket-name ca-central-1 remote/path 
 ```
 
-will upload the file "foo.csv" in the local directory "local/path" and place it in s3 in "ca-central-1" at "bucket-name/bucket-name/remote/path/foo.csv"
+will upload the file "`foo.csv`" in the local directory "`local/path`" and place it in s3 in "`ca-central-1`" at "`bucket-name/bucket-name/remote/path/foo.csv`"
 
 ## Getting Help
 

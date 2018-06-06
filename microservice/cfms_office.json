@@ -1,0 +1,31 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "cfms_sbc",
+  "doc": "service_bc_office_info.csv",
+  "dbtable": "static.service_bc_office_info",
+  "columns": [
+    "id",
+    "name",
+    "smartboard_type",
+    "External Site",
+    "Address",
+    "Locality",
+    "Site_Phone_No",
+    "Site_Fax_no",
+    "Website_URL",
+    "Site_Email",
+    "Latitude",
+    "Longitude",
+    "Office Code",
+    "Services - Map",
+    "Description",
+    "Item Type",
+    "Path",
+    "Site"
+  ],
+  "dtype_dic_strings": ["Office Code"],
+  "delim": ",",
+  "truncate": true
+}

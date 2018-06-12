@@ -1,5 +1,5 @@
 ###################################################################
-#Script Name    : microservice.py
+#Script Name    : s3_to_redshift.py
 #
 #Description    : Microservice script to load a csv file from s3
 #               : and load it into Redshift
@@ -12,7 +12,7 @@
 #               : export pgpass=<<DB_PASSWD>>
 #
 #
-#Usage          : python microservice.py configfile.json
+#Usage          : python s3_to_redshift.py configfile.json
 #
 
 import boto3 # s3 access
@@ -36,7 +36,7 @@ def log(s):
 
 # Read configuration file
 if (len(sys.argv) != 2): #will be 1 if no arguments, 2 if one argument
-    print "Usage: python microservice.py config.json"
+    print "Usage: python s3_to_redshift.py config.json"
     sys.exit(1)
 configfile = sys.argv[1] 
 if (os.path.isfile(configfile) == False): # confirm that the file exists

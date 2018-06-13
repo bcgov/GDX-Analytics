@@ -3,7 +3,7 @@
   "source": "client",
   "destination": "processed",
   "directory": "cats_gdx",
-  "doc": ".log",
+  "doc": "access.log.*",
   "dbtable": "servicebc.cats_gdx",
   "columns": [
     "ip",

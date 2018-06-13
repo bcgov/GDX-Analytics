@@ -10,9 +10,15 @@
 #               : export export LOOKERKEY=<<Looker embed key>>
 #
 #Usage          : python looker_embed_generator.py <<embed url>>
-#
+#               :
+#               : eg: python looker_embed_generator.py dashboards/18
+#               :
 #               : NOTE: The embed must be accessible to the 
 #               : Embed Shared Group.
+#               :
+# References    : https://docs.looker.com/reference/embedding/sso-embed#building_the_embed_url
+#               : https://docs.looker.com/reference/embedding/embed-javascript-events
+#               :
 
 import urllib
 import base64
@@ -66,9 +72,11 @@ class URL:
     self.session_length = json.dumps(session_length)
     self.force_logout_login = json.dumps(force_logout_login)
 
+  # The current time as a UNIX timestamp.
   def set_time(self):
     self.time = json.dumps(int(time.time()))
 
+  # Random string cannot be repeated within an hour. Prevents an attacker from re-submitting a legitimate user's URL to gather information they shouldn't have.
   def set_nonce(self):
     self.nonce = json.dumps(binascii.hexlify(os.urandom(16)))
 
@@ -129,9 +137,10 @@ def test():
               user_attributes={"can_see_sensitive_data": "YES"} # Add additional filters here. They must match a user attribute that is listed in the LookML with an access_filter}
               )
 
-  fifteen_minutes = 60 * 15
+  # Set TTL for embed code. 60*15 = 15 minutes 
+  timeout = 60 * 15
 
-  url = URL(looker, user, fifteen_minutes, embedurl + "?embed_domain=http://127.0.0.1:5000", force_logout_login=True)
+  url = URL(looker, user, timeout , embedurl + "?embed_domain=http://127.0.0.1:5000", force_logout_login=True)
 
   return  "https://" + url.to_string()
 

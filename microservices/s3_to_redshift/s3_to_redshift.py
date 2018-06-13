@@ -57,7 +57,6 @@ dtype_dic = {}
 if 'dtype_dic_strings' in data:
     for fieldname in data['dtype_dic_strings']:
         dtype_dic[fieldname] = str
-        print dtype_dic
 delim = data['delim']
 truncate = data['truncate']
 
@@ -94,7 +93,19 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         body = obj['Body']
         csv_string = body.read().decode('utf-8')
 
-        df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False, dtype = dtype_dic)
+        # Check for an empty file. If it's empty, accept it as good and move on
+        try:
+            df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False, dtype = dtype_dic)
+        except Exception as e:
+            if (str(e) == "No columns to parse from file"):
+                log("Empty file, proceeding")
+                outfile = goodfile
+            else:
+                print "Parse error: " + str(e)
+                outfile = badfile
+            client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=goodfile)
+            continue
+
         df.columns = columns
 
         

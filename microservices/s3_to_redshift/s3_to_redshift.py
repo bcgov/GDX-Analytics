@@ -52,6 +52,7 @@ destination = data['destination']
 directory = data['directory']
 doc = data['doc']
 dbtable = data['dbtable']
+column_count = data['column_count']
 columns = data['columns']
 dtype_dic = {}
 if 'dtype_dic_strings' in data:
@@ -93,19 +94,20 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         body = obj['Body']
         csv_string = body.read().decode('utf-8')
 
+
         # Check for an empty file. If it's empty, accept it as good and move on
         try:
-            df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False, dtype = dtype_dic)
-        except Exception as e:
+            df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False, dtype = dtype_dic, usecols=range(column_count))
+        except Exception as e: 
             if (str(e) == "No columns to parse from file"):
                 log("Empty file, proceeding")
                 outfile = goodfile
             else:
-                print "Parse error: " + str(e)
-                outfile = badfile
+                print "Parse error: " + str(e) 
+                outfile = badfile 
             client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=goodfile)
             continue
-
+            
         df.columns = columns
 
         
@@ -130,11 +132,12 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         # prep database call to pull the batch file into redshift
         conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='microservice' password=" + os.environ['pgpass']
         query = "copy " + dbtable +" FROM 's3://" + my_bucket.name + "/" + batchfile + "' CREDENTIALS 'aws_access_key_id=" + os.environ['AWS_ACCESS_KEY_ID'] + ";aws_secret_access_key=" + os.environ['AWS_SECRET_ACCESS_KEY'] + "' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;"
+        logquery = "copy " + dbtable +" FROM 's3://" + my_bucket.name + "/" + batchfile + "' CREDENTIALS 'aws_access_key_id=" + 'AWS_ACCESS_KEY_ID' + ";aws_secret_access_key=" + 'AWS_SECRET_ACCESS_KEY' + "' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;"
 
         # if truncate is set to true, truncate the db before loading
         if (truncate):
             query = "TRUNCATE " + dbtable + "; " + query
-        log(query)
+        log(logquery)
         with psycopg2.connect(conn_string) as conn:
             with conn.cursor() as curs:
                 try:
@@ -148,3 +151,4 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                     outfile = goodfile
 
         client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)
+

@@ -5,6 +5,7 @@
   "directory": "cfms_sbc",
   "doc": "datedimension.*.csv",
   "dbtable": "servicebc.datedimension",
+  "column_count": 40,
   "columns": [
 	"DATEKEY",
 	"DT",

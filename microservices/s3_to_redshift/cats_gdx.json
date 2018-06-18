@@ -5,6 +5,7 @@
   "directory": "cats_gdx",
   "doc": "access.log.*",
   "dbtable": "servicebc.cats_gdx",
+  "column_count": 10,
   "columns": [
     "ip",
     "user",

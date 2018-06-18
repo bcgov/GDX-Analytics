@@ -3,8 +3,9 @@
   "source": "client",
   "destination": "processed",
   "directory": "cfms_sbc",
-  "doc": "commentcard-.*.csv",
+  "doc": "CommentCard-.*.csv",
   "dbtable": "servicebc.commentcard",
+  "column_count": 25,
   "columns": [
 	"TELKEY",
 	"AREA",
@@ -30,8 +31,7 @@
 	"Q10_9",
 	"Q11",
 	"Q12",
-	"ASTART_IP",
-	"AQ12"
+	"ASTART_IP"
   ],
   "dateformat": [ { "field": "MONTHENTER", "format": "%Y%m%d" } ],
   "dtype_dic_strings": [
@@ -58,9 +58,8 @@
 	"Q10_9",
 	"Q11",
 	"Q12",
-	"ASTART_IP",
-	"AQ12"
+	"ASTART_IP"
 ],
   "delim": "," ,
-  "truncate": false
+  "truncate": true
 }

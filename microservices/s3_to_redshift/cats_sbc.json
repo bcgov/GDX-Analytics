@@ -5,6 +5,7 @@
   "directory": "cats_sbc",
   "doc": ".csv",
   "dbtable": "servicebc.cats_sbc",
+  "column_count": 14,
   "columns": [
     "End Time",
     "Name",

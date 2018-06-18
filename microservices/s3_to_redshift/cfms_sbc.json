@@ -5,6 +5,7 @@
   "directory": "cfms_sbc",
   "doc": "cats_info.csv",
   "dbtable": "static.cats_info",
+  "column_count": 7,
   "columns": [
     "Site",
     "Asset Tag",

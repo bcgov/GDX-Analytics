@@ -92,7 +92,7 @@ if [ -z "${region}" ]; then
   region="${awsRegion}"
 fi
 
-echo "Uploading" "${fileLocal}" "->" "${bucket}" "${region}" "${storageClass}"
+echo "Uploading" "${fileLocal}" "->" "${bucket}" "${fileRemote}" "${region}" "${storageClass}"
 #echo "| $(uname) | $(m_openssl version) | $(m_sed --version | head -1) |"
 
 # Initialize helper variables

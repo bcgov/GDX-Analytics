@@ -37,7 +37,7 @@ if (len(sys.argv) != 2): #will be 1 if no arguments, 2 if one argument
 embedurl = '/embed/' + sys.argv[1]
 
 lookerkey = os.getenv('LOOKERKEY')
-if (lookerkey is None): # confirm that the file exists
+if (lookerkey is None): # confirm that the environment variable is set
     print "LOOKERKEY environment variable not set"
     sys.exit(1)
 

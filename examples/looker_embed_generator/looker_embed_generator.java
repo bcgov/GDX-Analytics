@@ -24,8 +24,6 @@
  * 
 */
 
-// ***REMOVED***
-
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Calendar;

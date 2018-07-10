@@ -40,17 +40,17 @@ public class looker_embed_generator {
 
         String lookerURL = "52.60.65.121:9999";  // looker host as address:port
         String lookerKey = ""; // LOOKERKEY environment variable (see Requirements)
-        String externalUserID = "\"50\"";  // converted to JSON string
+        String externalUserID = "50";  // converted to JSON string
         String firstName = "\"Dashboard\""; // converted to JSON string
         String lastName = "\"User\""; // converted to JSON string
-        String permissions = "[\"see_lookml_dashboards\",\"access_data\",\"see_user_dashboards\",\"see_looks\"]"; // converted to JSON array
+        String permissions = "[\"see_lookml_dashboards\",+\"access_data\",+\"see_user_dashboards\",+\"see_looks\"]"; // converted to JSON array
         String models = "[\"all\"]"; // converted to JSON array
         String groupIDs = "[]"; // converted to JSON array, can be set to null (value, not JSON) for no groups
         String externalGroupID = "\"external_group_id\"";  // converted to JSON string
         String sessionLength = "900";
         String embedURL = "";
         String forceLogoutLogin = "true"; // converted to JSON bool
-        // String accessFilters = ("{\"thelook\": {\"dimension_a\": 1}}");  // converted to JSON Object of Objects
+        String accessFilters = ("{}");  // converted to JSON Object of Objects
         String userAttributes = "{\"can_see_sensitive_data\": \"YES\"}";  // A Map<String, String> converted to JSON object
 
         if (args.length != 1) {
@@ -69,7 +69,7 @@ public class looker_embed_generator {
         try {
 
             String url = createURL(lookerURL, lookerKey, externalUserID, firstName, lastName, permissions, models,
-                                   sessionLength, /*accessFilters,*/ embedURL, forceLogoutLogin, groupIDs,
+                                   sessionLength, accessFilters, embedURL, forceLogoutLogin, groupIDs,
                                    externalGroupID, userAttributes);
             System.out.println("https://" + url);
 
@@ -81,7 +81,7 @@ public class looker_embed_generator {
     /**TODO: builder pattern */
     public static String createURL(String lookerURL, String lookerKey,
                                    String userID, String firstName, String lastName, String userPermissions,
-                                   String userModels, String sessionLength, /*String accessFilters,*/
+                                   String userModels, String sessionLength, String accessFilters,
                                    String embedURL, String forceLogoutLogin, String groupIDs,
                                    String externalGroupID, String userAttributes) throws Exception {
 
@@ -106,8 +106,8 @@ public class looker_embed_generator {
         urlToSign += userModels + "\n";
         urlToSign += groupIDs + "\n";
         urlToSign += externalGroupID + "\n";
-        urlToSign += userAttributes;
-        // urlToSign += accessFilters;
+        urlToSign += userAttributes + "\n";
+        urlToSign += accessFilters;
 
         String signature =  encodeString(urlToSign, lookerKey);
 
@@ -118,7 +118,7 @@ public class looker_embed_generator {
                 "&external_user_id="   + java.net.URLEncoder.encode(userID, "UTF-8") +
                 "&permissions="        + java.net.URLEncoder.encode(userPermissions, "UTF-8") +
                 "&models="             + java.net.URLEncoder.encode(userModels, "UTF-8") +
-                // "&access_filters="     + java.net.URLEncoder.encode(accessFilters, "UTF-8") +
+                "&access_filters="     + java.net.URLEncoder.encode(accessFilters, "UTF-8") +
                 "&signature="          + java.net.URLEncoder.encode(signature, "UTF-8") +
                 "&first_name="         + java.net.URLEncoder.encode(firstName, "UTF-8") +
                 "&last_name="          + java.net.URLEncoder.encode(lastName, "UTF-8") +

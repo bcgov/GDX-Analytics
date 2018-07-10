@@ -43,7 +43,7 @@ public class looker_embed_generator {
         String externalUserID = "50";  // converted to JSON string
         String firstName = "\"Dashboard\""; // converted to JSON string
         String lastName = "\"User\""; // converted to JSON string
-        String permissions = "[\"see_lookml_dashboards\",+\"access_data\",+\"see_user_dashboards\",+\"see_looks\"]"; // converted to JSON array
+        String permissions = "[\"see_lookml_dashboards\", \"access_data\", \"see_user_dashboards\", \"see_looks\"]"; // converted to JSON array
         String models = "[\"all\"]"; // converted to JSON array
         String groupIDs = "[]"; // converted to JSON array, can be set to null (value, not JSON) for no groups
         String externalGroupID = "\"external_group_id\"";  // converted to JSON string
@@ -78,7 +78,6 @@ public class looker_embed_generator {
         }
     }
 
-    /**TODO: builder pattern */
     public static String createURL(String lookerURL, String lookerKey,
                                    String userID, String firstName, String lastName, String userPermissions,
                                    String userModels, String sessionLength, String accessFilters,

@@ -38,7 +38,7 @@ public class looker_embed_generator {
 
     public static void main(String [] args){
 
-        String lookerURL = "52.60.65.121:9999";  // looker host as address:port
+        String lookerURL = "analytics.gov.bc.ca:9999";  // looker host as address:port
         String lookerKey = ""; // LOOKERKEY environment variable (see Requirements)
         String externalUserID = "50";  // converted to JSON string
         String firstName = "\"Dashboard\""; // converted to JSON string

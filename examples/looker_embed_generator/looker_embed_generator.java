@@ -11,15 +11,15 @@
  *               : set LOOKERKEY=<<Looker embed key>>    :: cmd
  *               : $env:LOOKERKEY = "testing"            ## powershell 
  * 
- *Usage          : java looker_embed_generator.class <<embed url>>
+ *Usage          : java looker_embed_generator.class <<embed url>> <<environment>>
  *               :
  *               : eg: java looker_embed_generator.class dashboards/18 dev
  *               :
  *               : NOTE: The embed must be accessible to the 
  *               : Embed Shared Group.
  *               :
- *References     : https://github.com/looker/looker_embed_sso_examples/
- *               : https://docs.looker.com/reference/embedding/sso-embed#building_the_embed_url
+ *References     : https://github.com/looker/looker_embed_sso_examples
+ *               : https://docs.looker.com/reference/embedding/sso-embed
  *               : https://docs.looker.com/reference/embedding/embed-javascript-events
  * 
 */
@@ -38,8 +38,9 @@ public class looker_embed_generator {
 
     public static void main(String [] args){
 
-        String lookerURL = "analytics.gov.bc.ca:9999";  // looker host as address:port
-        String lookerKey = ""; // LOOKERKEY environment variable (see Requirements)
+        // dev.analytics.gov
+        String lookerURL = "";  // to be assigned by <<environment>> argument
+        String lookerKey = ""; // will be set by the system environment variable LOOKERKEY
         String externalUserID = "50";  // converted to JSON string
         String firstName = "\"Dashboard\""; // converted to JSON string
         String lastName = "\"User\""; // converted to JSON string
@@ -53,12 +54,24 @@ public class looker_embed_generator {
         String accessFilters = ("{}");  // converted to JSON Object of Objects
         String userAttributes = "{\"can_see_sensitive_data\": \"YES\"}";  // A Map<String, String> converted to JSON object
 
-        if (args.length != 1) {
-            System.err.println("Usage: java looker_embed_generator.class <<embed url>>");
+        if (args.length != 2) {
+            System.err.println("Usage: java looker_embed_generator.class <<embed url>> <<environment>>");
             System.exit(1);
         }
 
         embedURL = "/embed/" + args[0] + "?embed_domain=http://127.0.0.1:5000";
+
+        // Production : 52.60.65.121
+        // Development: 35.183.121.58
+        if (args[1].equalsIgnoreCase("PROD") || args[1].equalsIgnoreCase("PRODUCTION")) {
+            lookerURL = "analytics.gov.bc.ca:9999";
+        } else if (args[1].equalsIgnoreCase("DEV") || args[1].equalsIgnoreCase("DEVELOPMENT")){
+            lookerURL = "35.183.121.58:9999";
+        } else {
+            System.err.println("Usage: java looker_embed_generator.class <<embed url>> <<environment>>");
+            System.exit(1);
+        }
+        
 
         lookerKey = System.getenv("LOOKERKEY");
         if (lookerKey == null) {
@@ -78,6 +91,7 @@ public class looker_embed_generator {
         }
     }
 
+    // builds the embed URL from the parameter
     public static String createURL(String lookerURL, String lookerKey,
                                    String userID, String firstName, String lastName, String userPermissions,
                                    String userModels, String sessionLength, String accessFilters,
@@ -93,7 +107,8 @@ public class looker_embed_generator {
         String nonce = "\"" + (new BigInteger(130, random).toString(32)) + "\"";  // converted to JSON string
         String time = Long.toString(cal.getTimeInMillis() / 1000L);
 
-        // Order of these here is very important!
+        // Order of these here is very important! See:
+        // https://docs.looker.com/reference/embedding/sso-embed#signature
         String urlToSign = "";
         urlToSign += lookerURL + "\n";
         urlToSign += path + "\n";
@@ -130,6 +145,7 @@ public class looker_embed_generator {
 
     }
 
+    // return a MAC of the input string cryptographically signed with the LOOKERKEY secret
     public static String encodeString(String stringToEncode, String lookerKey) throws Exception {
         byte[] keyBytes = lookerKey.getBytes();
         SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA1");

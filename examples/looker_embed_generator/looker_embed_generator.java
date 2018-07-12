@@ -52,20 +52,20 @@ public class looker_embed_generator {
         String embedURL = "";
         String forceLogoutLogin = "true"; // converted to JSON bool
         String accessFilters = ("{}");  // converted to JSON Object of Objects
-        String userAttributes = "{\"can_see_sensitive_data\": \"YES\"}";  // A Map<String, String> converted to JSON object
+        String userAttributes = "{\"can_see_sensitive_data\": \"YES\", \"location\": \"Vernon\"}";  // A Map<String, String> converted to JSON object
 
         if (args.length != 2) {
             System.err.println("Usage: java looker_embed_generator.class <<embed url>> <<environment>>");
             System.exit(1);
         }
 
-        embedURL = "/embed/" + args[0] + "?embed_domain=http://127.0.0.1:5000";
+        embedURL = "/embed/" + args[1] + "?embed_domain=http://127.0.0.1:5000";
 
         // Production : 52.60.65.121
         // Development: 35.183.121.58
-        if (args[1].equalsIgnoreCase("PROD") || args[1].equalsIgnoreCase("PRODUCTION")) {
+        if (args[0].equalsIgnoreCase("PROD") || args[0].equalsIgnoreCase("PRODUCTION")) {
             lookerURL = "analytics.gov.bc.ca:9999";
-        } else if (args[1].equalsIgnoreCase("DEV") || args[1].equalsIgnoreCase("DEVELOPMENT")){
+        } else if (args[0].equalsIgnoreCase("DEV") || args[0].equalsIgnoreCase("DEVELOPMENT")){
             lookerURL = "35.183.121.58:9999";
         } else {
             System.err.println("Usage: java looker_embed_generator.class <<embed url>> <<environment>>");

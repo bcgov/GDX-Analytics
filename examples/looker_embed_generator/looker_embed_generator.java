@@ -7,11 +7,11 @@
  *Requirements   : You must set the following environment variable
  *               : to establish credentials for the embed user:
  * 
- *               : export LOOKERKEY=<<Looker embed key>> ## bash
- *               : set LOOKERKEY=<<Looker embed key>>    :: cmd
- *               : $env:LOOKERKEY = "testing"            ## powershell 
+ *               : export LOOKERKEY=<<Looker embed key>>   ## bash
+ *               : set LOOKERKEY=<<Looker embed key>>      :: cmd
+ *               : $env:LOOKERKEY = "<<Looker embed key>>" ## powershell 
  * 
- *Usage          : java looker_embed_generator.class <<embed url>> <<environment>> [<<attribute>> <<filter>>]
+ *Usage          : java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]
  *               :
  *               : eg: java looker_embed_generator prod dashboards/18
  *               :     java looker_embed_generator prod looks/98 browser Chrome
@@ -53,7 +53,7 @@ public class looker_embed_generator {
         String embedURL = "";
         String forceLogoutLogin = "true"; // converted to JSON bool
         String accessFilters = ("{}");  // converted to JSON Object of Objects
-        String userAttributes = "{\"can_see_sensitive_data\": \"YES\", \"location\": \"Vernon\"}";  // A Map<String, String> converted to JSON object
+        String userAttributes = "{\"can_see_sensitive_data\": \"YES\"}";  // A Map<String, String> converted to JSON object
 
         lookerKey = System.getenv("LOOKERKEY");
         if (lookerKey == null) {
@@ -62,7 +62,7 @@ public class looker_embed_generator {
         }
 
         if (args.length < 2) {
-            System.err.println("Usage: java looker_embed_generator.class <<environment>> <<embed url>> [<<attribute>> <<filter>>]");
+            System.err.println("Usage: java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]");
             System.exit(1);
         }
 
@@ -71,11 +71,11 @@ public class looker_embed_generator {
         } else if (args[0].equalsIgnoreCase("DEV") || args[0].equalsIgnoreCase("DEVELOPMENT")){
             lookerURL = "35.183.121.58:9999";
         } else {
-            System.err.println("Usage: java looker_embed_generator.class <<environment>> <<embed url>> [<<attribute>> <<filter>>]");
+            System.err.println("Usage: java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]");
             System.exit(1);
         }
 
-        // An embed url such as: dashboards/18 or looks/96
+        // An embed_url such as: dashboards/18 or looks/96
         embedURL = "/embed/" + args[1] + "?embed_domain=http://127.0.0.1:5000";
 
         // adding a new attribute and filter value to the userAttributes JSON blob
@@ -109,8 +109,6 @@ public class looker_embed_generator {
                                    String externalGroupID, String userAttributes) throws Exception {
 
         String path = "/login/embed/" + java.net.URLEncoder.encode(embedURL, "UTF-8");
-
-
 
         Calendar cal = Calendar.getInstance();
         SecureRandom random = new SecureRandom();

@@ -11,9 +11,10 @@
  *               : set LOOKERKEY=<<Looker embed key>>    :: cmd
  *               : $env:LOOKERKEY = "testing"            ## powershell 
  * 
- *Usage          : java looker_embed_generator.class <<embed url>> <<environment>>
+ *Usage          : java looker_embed_generator.class <<embed url>> <<environment>> [<<attribute>> <<filter>>]
  *               :
- *               : eg: java looker_embed_generator.class dashboards/18 dev
+ *               : eg: java looker_embed_generator prod dashboards/18
+ *               :     java looker_embed_generator prod looks/98 browser Chrome
  *               :
  *               : NOTE: The embed must be accessible to the 
  *               : Embed Shared Group.

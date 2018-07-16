@@ -15,3 +15,12 @@ gradle-app.setting
 
 # Ignore runtime, where dependencies are stored
 /runtime/
+
+# Eclipse
+*.classpath
+*.project
+*.settings
+/bin
+/subprojects/*/bin
+atlassian-ide-plugin.xml
+.metadata/

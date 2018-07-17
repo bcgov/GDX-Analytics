@@ -79,14 +79,14 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         except:
             True
         else:
-            log("File processed already. Skip.\n")
+            log("File processed already. Skip.\n\n")
             continue
         try:
             client.head_object(Bucket=bucket, Key=badfile)
         except:
             True
         else:
-            log("File failed already. Skip.\n")
+            log("File failed already. Skip.\n\n")
             continue
         log("File not already processed. Proceed.\n")
 
@@ -125,7 +125,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
 
         # Put the full data set into a buffer and write it to a "|" delimited file in the batch directory
         csv_buffer = BytesIO()
-        df.to_csv(csv_buffer, header=False, index=False, sep="|")
+        df.to_csv(csv_buffer, header=True, index=False, sep="|")
         resource.Bucket(bucket).put_object(Key=batchfile, Body=csv_buffer.getvalue())
 
 
@@ -143,11 +143,11 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                 try:
                     curs.execute(query)
                 except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
-                    log("Loading failed")
+                    log("Loading failed\n\n")
                     log(e.pgerror)
                     outfile = badfile       # if the DB call succeed, place file in /good
                 else:
-                    log("Loaded successfully")
+                    log("Loaded successfully\n\n")
                     outfile = goodfile
 
         client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)

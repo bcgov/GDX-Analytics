@@ -143,11 +143,11 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                 try:
                     curs.execute(query)
                 except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
-                    log("Loading failed")
+                    log("Loading failed\n")
                     log(e.pgerror)
                     outfile = badfile       # if the DB call succeed, place file in /good
                 else:
-                    log("Loaded successfully")
+                    log("Loaded successfully\n")
                     outfile = goodfile
 
         client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)

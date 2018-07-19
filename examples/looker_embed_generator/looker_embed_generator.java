@@ -67,7 +67,7 @@ public class looker_embed_generator {
         }
 
         if (args[0].equalsIgnoreCase("PROD") || args[0].equalsIgnoreCase("PRODUCTION")) {
-            lookerURL = "analytics.gov.bc.ca:9999";
+            lookerURL = "analytics.gov.bc.ca";
         } else if (args[0].equalsIgnoreCase("DEV") || args[0].equalsIgnoreCase("DEVELOPMENT")){
             lookerURL = "35.183.121.58:9999";
         } else {

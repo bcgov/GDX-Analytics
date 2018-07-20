@@ -1,0 +1,35 @@
+{
+    "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+    "source": "client",
+    "destination": "processed",
+    "directory": "cmslite_gdx",
+    "doc": "cmslist_metadata_2018-06-21.csv",
+    "dbschema": "cmslite",
+    "column_count": 17,
+    "columns_metadata": [
+        "NODE_ID",
+        "PARENT_NODE_ID",
+        "ANCESTOR_NODES",
+        "KEYWORDS",
+        "DESCRIPTION",
+        "PAGE_TYPE",
+        "SYNONYMS",
+        "DCTERMS_CREATOR",
+        "MODIFIED_DATE",
+        "CREATED_DATE",
+        "UPDATED_DATE",
+        "PUBLISHED_DATE"
+    ],
+    "columns_lookup": [
+        "CONTENT_TYPES",
+        "MBCTERMS_SUBJECT_CATEGORIES",
+        "DCTERMS_SUBJECTS",
+        "DCTERMS_LANGUAGES",
+        "AUDIENCES",
+        "DCTERMS_CREATOR"
+    ],
+    "dtype_dic_strings": [],
+    "delim": ",",
+    "nested_delim": "|",
+    "truncate": true
+}

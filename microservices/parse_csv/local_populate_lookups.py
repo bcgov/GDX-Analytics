@@ -1,8 +1,12 @@
 ###################################################################
-#Script Name    : s3_to_redshift.py
+#Script Name    : local_populate_lookups.py
 #
-#Description    : Microservice script to load a csv file from s3
-#               : and load it into Redshift
+#Description    : Microservice script to load a csv file containing
+#               : nested lists of values, and split that into a 
+#               : series of CSV files as an indexed dictionary
+#               : and one metadata table without nested arrays
+#               : TODO: create node_id lookup tables as CSVs
+#               : TODO: move from local to an AWS microservice
 #
 #Requirements   : You must set the following environment variables
 #               : to establish credentials for the microservice user
@@ -10,10 +14,11 @@
 #               : export AWS_ACCESS_KEY_ID=<<KEY>>
 #               : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>
 #               : export pgpass=<<DB_PASSWD>>
+#               : (this is not applicable to local version)
 #
 #
 #Usage          : pip2 install -r requirements.txt
-#               : python27 populate_lookups.py configfile.json
+#               : python27 local_populate_lookups.py configfile.json
 #
 
 import pandas as pd # data processing
@@ -71,15 +76,3 @@ for column in columns_lookup:
     L = list(set(itertools.chain.from_iterable(clean))) # set to exlude duplicates
     df_new = pd.DataFrame({column:L}) # make a dataframe of the list
     df_new.to_csv("out\{0}.csv".format(column), index_label="key") # output the the dataframe as a csv
-
-# TODO: Loop on known pipe separated value columns, e.g., ancestor node (below)
-# for column in columns_lookup:
-#     df_0 = df.copy()
-#     a = df_0.dropna(subset = [column])[column] # drop NANs from column "ancesor nodes"
-#     b =a.str[1:-1] # drop the proceeding and preceding nested delimeter
-#     c = b.str.split(nested_delim).values.flatten() # split on the nested delimeter, then flatten to a list
-#     d = list(set(itertools.chain.from_iterable(c))) # get unique elements by making a set, then back to a list
-#     # for i in d:
-#     #     print "  {0}".format(i)
-#         # TODO: copy to redshift table
-#     print d

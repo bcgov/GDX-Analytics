@@ -3,7 +3,7 @@
     "source": "client",
     "destination": "processed",
     "directory": "cmslite_gdx",
-    "doc": "cmslist_metadata_2018-06-21.csv",
+    "doc": "sample.csv",
     "dbschema": "cmslite",
     "column_count": 17,
     "columns_metadata": [

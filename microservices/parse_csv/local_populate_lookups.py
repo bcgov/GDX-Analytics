@@ -1,21 +1,13 @@
 ###################################################################
 #Script Name    : local_populate_lookups.py
 #
-#Description    : Microservice script to load a csv file containing
-#               : nested lists of values, and split that into a 
-#               : series of CSV files as an indexed dictionary
-#               : and one metadata table without nested arrays
-#               : TODO: create node_id lookup tables as CSVs
-#               : TODO: move from local to an AWS microservice
+#Description    : prototype to create csv artifacts from processing
+#               : a flat file input having multidimensional entires
+#               : 
+#               : file and characteristics are defined by json argv
+#               : TODO: move from prototype to an AWS microservice
 #
-#Requirements   : You must set the following environment variables
-#               : to establish credentials for the microservice user
-#
-#               : export AWS_ACCESS_KEY_ID=<<KEY>>
-#               : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>
-#               : export pgpass=<<DB_PASSWD>>
-#               : (this is not applicable to local version)
-#
+#Requirements   : a csv file to process, and json instruction file
 #
 #Usage          : pip2 install -r requirements.txt
 #               : python27 local_populate_lookups.py configfile.json
@@ -50,12 +42,27 @@ with open(configfile) as f:
     data = json.load(f)
 
 # Set up variables from config file
+bucket = data['bucket']
+source = data['source']
+destination = data['destination']
+directory = data['directory']
 doc = data['doc']
+dbschema = data['dbschema']
+dbtable = data['dbtable']
 column_count = data['column_count']
 columns_metadata = data['columns_metadata']
 columns_lookup = data['columns_lookup']
-delim = data['delim']
+dbtables_dictionaries = data['dbtables_dictionaries']
+dbtables_metadata = data['dbtables_metadata']
 nested_delim = data['nested_delim']
+columns = data['columns']
+dtype_dic = {}
+if 'dtype_dic_strings' in data:
+    for fieldname in data['dtype_dic_strings']:
+        dtype_dic[fieldname] = str
+delim = data['delim']
+truncate = data['truncate']
+
 
 # Check for an empty file. If it's empty, accept it as good and move on
 try:
@@ -66,13 +73,63 @@ except Exception as e:
     else:
         print "Parse error: " + str(e) 
 
+
 # Output Metadata csv
 df.to_csv("out\metadata.csv", index=False, columns=columns_metadata)
 
-for column in columns_lookup:
-    df_0 = df.copy() # make a working copy of the df
+
+# Build dictionary dataframes
+dictionary_dfs = {}
+for i in range (len(columns_lookup)): 
+    section = columns_lookup[i]
+    key = "key"
+    dbtable = dbtables_dictionaries[i]
+
     # drop any nulls and wrapping delimeters, split and flatten:
-    clean = df_0.dropna(subset = [column])[column].str[1:-1].str.split(nested_delim).values.flatten() 
-    L = list(set(itertools.chain.from_iterable(clean))) # set to exlude duplicates
-    df_new = pd.DataFrame({column:L}) # make a dataframe of the list
-    df_new.to_csv("out\{0}.csv".format(column), index_label="key") # output the the dataframe as a csv
+    clean = df.copy().dropna(subset = [section])[section].str[1:-1].str.split(nested_delim).values.flatten()
+
+    # set to exlude duplicates
+    L = list(set(itertools.chain.from_iterable(clean)))
+
+    # make a dataframe of the list
+    df_new = pd.DataFrame({section:L})
+
+    # add this dictionary DF to  dictionaries map
+    dictionary_dfs[columns_lookup[i]] = df_new
+
+# Save dictionary dataframes as .csv files locally
+for i,section in enumerate(columns_lookup):
+    save_dictionary_df = dictionary_dfs[section]
+    save_dictionary_path = 'out/%s.csv' % dbtables_dictionaries[i]
+    save_dictionary_df.to_csv(save_dictionary_path, index_label="id", header='value')
+
+
+# Build lookup dataframes
+lookup_dfs = {}
+for section in columns_lookup:
+
+    # get the dictionary of interest
+    df_dictionary = dictionary_dfs[section]
+
+    # for each row in df
+    df_lookup = pd.DataFrame(columns=['NODE_ID','LOOKUP_ID'])
+    for index, row in df.copy().iterrows():
+        if row[section] is not pd.np.nan:
+            # iterate over the list of delimited terms
+            entry = row[section] # get the full string of delimited values to be looked up
+            entry = entry[1:-1] # remove wrapping delimeters
+            if entry: # skip empties
+                for lookup_entry in entry.split(nested_delim): # split on delimiter and iterate on resultant list
+                    node_id = row.NODE_ID # the node id from the current row
+                    lookup_id = df_dictionary.loc[df_dictionary[section] == lookup_entry].index[0] # its dictionary index
+                    d = pd.DataFrame([[node_id,lookup_id]], columns=['NODE_ID','LOOKUP_ID']) # create the data frame to concat
+                    df_lookup = pd.concat([df_lookup,d], ignore_index=True)
+                lookup_dfs[section] = df_lookup
+
+
+# Save lookup dataframes as .csv files locally
+for i,section in enumerate(columns_lookup):
+    save_metadata_df = lookup_dfs[section]
+    save_metadata_path = 'out/%s.csv' % dbtables_metadata[i]
+    save_metadata_df.to_csv(save_metadata_path, index=False, header=['node_id','id'])
+    

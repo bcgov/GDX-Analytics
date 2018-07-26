@@ -37,15 +37,42 @@ def log(s):
         print s
 
 # define a function to output a dataframe to a CSV on S3
-def to_s3(bucket, batchfile, filename, df, columnlist = None):
+
+
+# Funcion to write a CSV to S3
+#   bucket = the S3 bucket
+#   filename = the name of the original file being processed (eg. example.csv)
+#   batchfile = the name of the batch file. This will be appended to the original filename path (eg. part01.csv -> "example.csv/part01.csv")
+#   df = the dataframe to write out
+#   columnlist = a list of columns to use from the dataframe. Must be the same order as the SQL table. If null (eg None in Python), will write all columns in order.
+#   index = if not Null, add an index column with this label
+#   
+def to_s3(bucket, batchpath, filename, df, columnlist, index):
+
     # Put the full data set into a buffer and write it to a "   " delimited file in the batch directory
     csv_buffer = BytesIO()
-    if (columnlist is None):
-        df.to_csv(csv_buffer, header=True, index=False, sep="	")
-    elif (columnlist == "key"):
-        df.to_csv(csv_buffer, header=True, index=True, sep="	", index_label="key")
+    if (columnlist is None): #no column list, no index
+        if (index is None):
+            log("========================================")
+            log("no column list, no index")
+            log("========================================")
+            df.to_csv(csv_buffer, header=True, index=False, sep="	")
+        else: #no column list, include index
+            log("========================================")
+            log("no column list, include index")
+            log("========================================")
+            df.to_csv(csv_buffer, header=True, index=True, sep="	", index_label=index)
     else:
-        df.to_csv(csv_buffer, header=True, index=False, sep="	", columns=columnlist)
+        if (index is None): #column list, no index
+            log("========================================")
+            log("column list, no index")
+            log("========================================")
+            df.to_csv(csv_buffer, header=True, index=False, sep="	", columns=columnlist)
+        else: # column list, include index
+            log("========================================")
+            log("column list, include index")
+            log("========================================")
+            df.to_csv(csv_buffer, header=True, index=True, sep="	", columns=columnlist, index_label=index)
 
     log("Writing " + filename + " to " + batchfile)
     resource.Bucket(bucket).put_object(Key=batchfile + "/" + filename, Body=csv_buffer.getvalue())
@@ -68,7 +95,10 @@ source = data['source']
 destination = data['destination']
 directory = data['directory']
 doc = data['doc']
-dbschema = data['dbschema']
+if 'dbschema' in data:
+    dbschema = data['dbschema']
+else:
+    dbschema = 'microservice'
 dbtable = data['dbtable']
 
 column_count = data['column_count']
@@ -90,12 +120,15 @@ client = boto3.client('s3') #low-level functional API
 resource = boto3.resource('s3') #high-level object-oriented API
 my_bucket = resource.Bucket(bucket) #subsitute this for your s3 bucket name.
 
+# We will search through all objects in the bucket whose keys begin: source/directory/
 for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory + "/"):
+    # Look for objects that match the filename pattern
     if re.search(doc + '$', object_summary.key):
         log('{0}:{1}'.format(my_bucket.name, object_summary.key))
 
         # Check to see if the file has been processed already
         batchfile = destination + "/batch/" + object_summary.key
+        # XX we have temporarily overriden the check for successfully processed files
         goodfile = destination + "/good_XYZ/" + object_summary.key
         badfile = destination + "/bad/" + object_summary.key
         try:
@@ -114,12 +147,14 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
             continue
         log("File not already processed. Proceed.\n")
 
+        # Load the object from S3 using Boto and set body to be its contents
         obj = client.get_object(Bucket=bucket, Key=object_summary.key)
         body = obj['Body']
-        # We have hard coded the encoding here to 'iso-8859-1' as that seems to be the encoding provided. We should confirm. 
+
+        #XX We have hard coded the encoding here to 'iso-8859-1' as that seems to be the encoding provided. We should confirm. 
         csv_string = body.read().decode('iso-8859-1')
 
-        # temporary fix while we figure out better delimiter handling
+        #XX  temporary fix while we figure out better delimiter handling
         csv_string = csv_string.replace('	',' ')
 
         # Check for an empty file. If it's empty, accept it as good and move on
@@ -132,9 +167,12 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
             else:
                 print "Parse error: " + str(e) 
                 outfile = badfile 
-            client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=goodfile)
+
+            # For the two exceptions cases, write to either the Good or Bad folder. Otherwise, continue to process the file. 
+            client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)
             continue
 
+        # set the data frame to use the columns listed in the .conf file. Note that this overrides the columns in the file, and will give an error if the wrong number of columns is present. It will not validate the existing column names. 
         df.columns = columns
 
         # Run replace on some fields to clean the data up 
@@ -153,14 +191,27 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='microservice' password=" + os.environ['pgpass']
 
         # TODO: Loop on known pipe separated value columns, e.g., ancestor node (below)
+        # We loop over the columns listedin the .conf file. 
+        # There are three sets of values that should match to consider:
+        #   columns_lookup
+        #   dbtables_dictionaries
+        #   dbtables_metadata
+        #   
+        # As well, we add to the beginning of the for loop an index of -1 and process the main metadata table 
+        #   first. The table is built in the same way as the others, but this allows us to resuse the code below 
+        #   in the loop to write the batch file and run the SQL command. We should probably clean this up by 
+        #   converting the later half of the loop to a function instead. 
+
 	for i in range (-1, len(columns_lookup)): 
             if (i == -1):
                 column = "metadata"
                 dbtable = "metadata"
-                key = columns_metadata
+                key = None
+                columnlist = columns_metadata
                 df_new = df.copy()
             else:
                 column = columns_lookup[i]
+                columnlist = [columns_lookup[i]]
                 key = "key"
                 dbtable = dbtables_dictionaries[i]
     
@@ -177,7 +228,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                 df_new = pd.DataFrame({column:L})
     
             # output the the dataframe as a csv
-            to_s3(bucket, batchfile, dbtable +'.csv', df_new, key)
+            to_s3(bucket, batchfile, dbtable +'.csv', df_new, columnlist, key)
      
             # NOTE: batchfile is replaces by: batchfile + "/" + dbtable + ".csv" below
             # if truncate is set to true, truncate the db before loading

@@ -53,25 +53,13 @@ def to_s3(bucket, batchpath, filename, df, columnlist, index):
     csv_buffer = BytesIO()
     if (columnlist is None): #no column list, no index
         if (index is None):
-            log("========================================")
-            log("no column list, no index")
-            log("========================================")
             df.to_csv(csv_buffer, header=True, index=False, sep="	")
         else: #no column list, include index
-            log("========================================")
-            log("no column list, include index")
-            log("========================================")
             df.to_csv(csv_buffer, header=True, index=True, sep="	", index_label=index)
     else:
         if (index is None): #column list, no index
-            log("========================================")
-            log("column list, no index")
-            log("========================================")
             df.to_csv(csv_buffer, header=True, index=False, sep="	", columns=columnlist)
         else: # column list, include index
-            log("========================================")
-            log("column list, include index")
-            log("========================================")
             df.to_csv(csv_buffer, header=True, index=True, sep="	", columns=columnlist, index_label=index)
 
     log("Writing " + filename + " to " + batchfile)

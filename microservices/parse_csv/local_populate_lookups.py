@@ -75,7 +75,7 @@ except Exception as e:
 
 
 # Output Metadata csv
-df.to_csv("out\metadata.csv", index=False, columns=columns_metadata)
+df.to_csv("out/metadata.csv", index=False, columns=columns_metadata)
 
 
 # Build dictionary dataframes
@@ -112,7 +112,7 @@ for section in columns_lookup:
     df_dictionary = dictionary_dfs[section]
 
     # for each row in df
-    df_lookup = pd.DataFrame(columns=['NODE_ID','LOOKUP_ID'])
+    df_lookup = pd.DataFrame(columns=['node_id','lookup_id'])
     for index, row in df.copy().iterrows():
         if row[section] is not pd.np.nan:
             # iterate over the list of delimited terms
@@ -120,9 +120,9 @@ for section in columns_lookup:
             entry = entry[1:-1] # remove wrapping delimeters
             if entry: # skip empties
                 for lookup_entry in entry.split(nested_delim): # split on delimiter and iterate on resultant list
-                    node_id = row.NODE_ID # the node id from the current row
+                    node_id = row.node_id # the node id from the current row
                     lookup_id = df_dictionary.loc[df_dictionary[section] == lookup_entry].index[0] # its dictionary index
-                    d = pd.DataFrame([[node_id,lookup_id]], columns=['NODE_ID','LOOKUP_ID']) # create the data frame to concat
+                    d = pd.DataFrame([[node_id,lookup_id]], columns=['node_id','lookup_id']) # create the data frame to concat
                     df_lookup = pd.concat([df_lookup,d], ignore_index=True)
                 lookup_dfs[section] = df_lookup
 

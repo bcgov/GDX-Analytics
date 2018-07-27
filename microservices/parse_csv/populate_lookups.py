@@ -65,6 +65,13 @@ def to_s3(bucket, batchpath, filename, df, columnlist, index):
     log("Writing " + filename + " to " + batchfile)
     resource.Bucket(bucket).put_object(Key=batchfile + "/" + filename, Body=csv_buffer.getvalue())
 
+def to_dict(df, section):
+    # drop any nulls and wrapping delimeters, split and flatten:
+    clean = df.copy().dropna(subset = [section])[section].str[1:-1].str.split(nested_delim).values.flatten()
+    # set to exlude duplicates
+    L = list(set(itertools.chain.from_iterable(clean)))
+    # make a dataframe of the list
+    return pd.DataFrame({section:sorted(L)})
 
 # Read configuration file
 if (len(sys.argv) != 2): #will be 1 if no arguments, 2 if one argument
@@ -189,35 +196,48 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         #   first. The table is built in the same way as the others, but this allows us to resuse the code below 
         #   in the loop to write the batch file and run the SQL command. We should probably clean this up by 
         #   converting the later half of the loop to a function instead. 
-
-	for i in range (-1, len(columns_lookup)): 
+        #keep the dictionaries in storage
+        dictionary_dfs = {}
+        for i in range (-1, len(columns_lookup)*2): 
             if (i == -1):
                 column = "metadata"
                 dbtable = "metadata"
                 key = None
                 columnlist = columns_metadata
                 df_new = df.copy()
-            else:
+            elif (i < len(columns_lookup)):
+                key = "key"
                 column = columns_lookup[i]
                 columnlist = [columns_lookup[i]]
-                key = "key"
                 dbtable = dbtables_dictionaries[i]
-    
-                # make a working copy of the df
-                df_0 = df.copy()
-    
-                # drop any nulls and wrapping delimeters, split and flatten:
-                clean = df_0.dropna(subset = [column])[column].str[1:-1].str.split(nested_delim).values.flatten()
-    
-                # set to exlude duplicates
-                L = list(set(itertools.chain.from_iterable(clean)))
-    
-                # make a dataframe of the list
-                df_new = pd.DataFrame({column:L})
-    
+                df_new = to_dict(df,column) # make dictionary a dataframe of this column
+                dictionary_dfs[columns_lookup[i]] = df_new
+            else:
+                i_off = i - len(columns_lookup)
+                key = None
+                column = columns_lookup[i_off]
+                columnlist = ['node_id','lookup_id']
+                dbtable = dbtables_dictionaries[i_off]
+
+                df_dictionary = dictionary_dfs[column] #retrieve the dictionary in memory
+
+                # for each row in df
+                df_new = pd.DataFrame(columns=columnlist)
+                for index, row in df.copy().iterrows():
+                    if row[column] is not pd.np.nan:
+                        # iterate over the list of delimited terms
+                        entry = row[column] # get the full string of delimited values to be looked up
+                        entry = entry[1:-1] # remove wrapping delimeters
+                        if entry: # skip empties
+                            for lookup_entry in entry.split(nested_delim): # split on delimiter and iterate on resultant list
+                                node_id = row.NODE_ID # HARDCODED: the node id from the current row
+                                lookup_id = df_dictionary.loc[df_dictionary[column] == lookup_entry].index[0] # its dictionary index
+                                d = pd.DataFrame([[node_id,lookup_id]], columns=columnlist) # create the data frame to concat
+                                df_new = pd.concat([df_new,d], ignore_index=True)
+
             # output the the dataframe as a csv
             to_s3(bucket, batchfile, dbtable +'.csv', df_new, columnlist, key)
-     
+        
             # NOTE: batchfile is replaces by: batchfile + "/" + dbtable + ".csv" below
             # if truncate is set to true, truncate the db before loading
             if (truncate):
@@ -227,7 +247,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
 
             query = "SET search_path TO " + dbschema + ";" + truncate_str + "copy " + dbtable +" FROM 's3://" + my_bucket.name + "/" + batchfile + "/" + dbtable + ".csv" + "' CREDENTIALS 'aws_access_key_id=" + os.environ['AWS_ACCESS_KEY_ID'] + ";aws_secret_access_key=" + os.environ['AWS_SECRET_ACCESS_KEY'] + "' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '	' NULL AS '-' ESCAPE;"
             logquery = "SET search_path TO " + dbschema + ";" + truncate_str + "copy " + dbtable +" FROM 's3://" + my_bucket.name + "/" + batchfile + "/" + dbtable + ".csv" + "' CREDENTIALS 'aws_access_key_id=" + 'AWS_ACCESS_KEY_ID' + ";aws_secret_access_key=" + 'AWS_SECRET_ACCESS_KEY' + "' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '	' NULL AS '-' ESCAPE;"
-    
+
             log(logquery)
             with psycopg2.connect(conn_string) as conn:
                 with conn.cursor() as curs:

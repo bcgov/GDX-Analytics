@@ -51,6 +51,10 @@ source = data['source']
 destination = data['destination']
 directory = data['directory']
 doc = data['doc']
+if 'dbschema' in data:
+    dbschema = data['dbschema']
+else:
+    dbschema = 'microservice'
 dbtable = data['dbtable']
 column_count = data['column_count']
 columns = data['columns']
@@ -105,7 +109,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
             else:
                 print "Parse error: " + str(e) 
                 outfile = badfile 
-            client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=goodfile)
+            client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)
             continue
             
         df.columns = columns

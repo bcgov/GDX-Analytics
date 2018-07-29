@@ -217,7 +217,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                 key = None
                 column = columns_lookup[i_off]
                 columnlist = ['node_id','lookup_id']
-                dbtable = dbtables_dictionaries[i_off]
+                dbtable = dbtables_metadata[i_off]
 
                 df_dictionary = dictionary_dfs[column] #retrieve the dictionary in memory
 

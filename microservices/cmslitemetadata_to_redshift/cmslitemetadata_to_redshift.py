@@ -1,7 +1,7 @@
 ###################################################################
 #Script Name    : cmslitemetadata_to_redshift.py
 #
-#Description    : Microservice script to load a csv file from s3
+#Description    : Microservice script to load a cmslite csv file from s3
 #               : and load it into Redshift
 #
 #Requirements   : You must set the following environment variables

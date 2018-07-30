@@ -1,0 +1,54 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "cmslite_gdx",
+  "doc": "cmslist_metadata_2018-06-21-datefix-urlfix.csv",
+  "dbschema": "cmslite",
+  "dbtable": "metadata",
+  "columns": ["NODE_ID","PARENT_NODE_ID","ANCESTOR_NODES","HR_URL","KEYWORDS","DESCRIPTION","PAGE_TYPE","SYNONYMS","DCTERMS_CREATOR","MODIFIED_DATE","CREATED_DATE","UPDATED_DATE","PUBLISHED_DATE","CONTENT_TYPES","MBCTERMS_SUBJECT_CATEGORIES","DCTERMS_SUBJECTS","DCTERMS_LANGUAGES","AUDIENCES"],
+  "column_count": 18,
+  "columns_metadata": [
+    "NODE_ID",
+    "PARENT_NODE_ID",
+    "ANCESTOR_NODES",
+    "HR_URL",
+    "KEYWORDS",
+    "DESCRIPTION",
+    "PAGE_TYPE",
+    "SYNONYMS",
+    "DCTERMS_CREATOR",
+    "MODIFIED_DATE",
+    "CREATED_DATE",
+    "UPDATED_DATE",
+    "PUBLISHED_DATE"
+  ],
+  "columns_lookup": [
+    "CONTENT_TYPES",
+    "MBCTERMS_SUBJECT_CATEGORIES",
+    "DCTERMS_SUBJECTS",
+    "DCTERMS_LANGUAGES",
+    "AUDIENCES",
+    "DCTERMS_CREATOR"
+  ],
+  "dbtables_dictionaries": [
+    "content_types",
+    "mbcterms_subject_categories",
+    "dcterms_subjects",
+    "dcterms_languages",
+    "audiences",
+    "creators"
+  ],
+  "dbtables_metadata": [
+    "metadata_content_types",
+    "metadata_subject_categories",
+    "metadata_subjects",
+    "metadata_languages",
+    "metadata_audiences",
+    "metadata_creators"
+  ],
+  "dtype_dic_strings": [],
+  "delim": ",",
+  "nested_delim": "|",
+  "truncate": true
+}

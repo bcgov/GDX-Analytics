@@ -1,5 +1,5 @@
 ###################################################################
-#Script Name    : populate_lookups.py
+#Script Name    : cmslitemetadata_to_redshift.py
 #
 #Description    : Microservice script to load a csv file from s3
 #               : and load it into Redshift
@@ -13,7 +13,7 @@
 #
 #
 #Usage          : pip2 install -r requirements.txt
-#               : python27 populate_lookups.py configfile.json
+#               : python27 cmslitemetadata_to_redshift.py configfile.json
 #
 
 import boto3 # s3 access
@@ -75,7 +75,7 @@ def to_dict(df, section):
 
 # Read configuration file
 if (len(sys.argv) != 2): #will be 1 if no arguments, 2 if one argument
-    print "Usage: python27 populate_lookups.py configfile.json"
+    print "Usage: python27 cmslitemetadata_to_redshift.py configfile.json"
     sys.exit(1)
 configfile = sys.argv[1] 
 if (os.path.isfile(configfile) == False): # confirm that the file exists

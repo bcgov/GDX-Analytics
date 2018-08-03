@@ -25,7 +25,7 @@ if (len(sys.argv) < 2): # will be 1 if no arguments, 2 if one argument
     print "Usage: python countlines.py <<bucketname>> <<optional path>>"
     sys.exit(1)
 bucket = sys.argv[1]
-if (len(sys.argv) > 2): # if there are two arguments, set directory as wel
+if (len(sys.argv) > 2): # if there are two arguments, set directory as well
     directory = sys.argv[2]
 else: 
     directory = ""

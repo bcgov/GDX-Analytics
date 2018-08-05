@@ -1,5 +1,5 @@
 ###################################################################
-# Script Name   : s3_file_count.py
+# Script Name   : s3_meta_testing.py
 # Version       : 0.1 
 #
 # Description   : Quick script that counts the number of lines of 
@@ -12,12 +12,7 @@
 #               : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>
 #
 #
-# Usage         : python27 s3_file_count.py <<log_load.json>>
-#
-# NOTE          : nohup python27 s3_file_count.py <<log_load.json>>
-#               : will allow you to run in background and disconnect
-#               : ps -aux | grep s3_file_count | grep -v grep
-#               : will show you the pid if it is still running
+# Usage         : python27 s3_meta_testing.py <<log_load.json>>
 
 import boto3 # s3 acces
 import sys # to read command line parameters
@@ -41,6 +36,7 @@ with open(configfile) as f:
 bucket = data['bucket']
 directory = data['directory']
 profiles = data['profiles']
+date_start = data['read_date_from_byte']
 
 # set up S3 connection
 client = boto3.client('s3') #low-level functional API
@@ -65,8 +61,12 @@ for profile in profiles:
             profile_s3_metadata['empty_file_count'] = empty_file_count          # track the empty files count
             profile_s3_metadata.setdefault('empty_file_keys',[]).append(object_summary.key) # and keynames for later debugging
             continue                                                            # skip this loop if the file is empty
-        date_string = object_summary.get()["Body"].read(10)                     # the first 10 bytes represent a date string
-        date = datetime.strptime(date_string, '%Y-%m-%d')                       # handle the date string as a datetime object
+        date_string = object_summary.get()["Body"].read(date_start+ 10)[date_start:] # read the 10 byte date string
+        try:
+            date = datetime.strptime(date_string, '%Y-%m-%d')                   # handle the date string as a datetime object
+        except:                                                                 # tracks lines that don't conform to expected format
+            profile_s3_metadata.setdefault('exception_file_keys',[]).append(object_summary.key)
+            continue                                                            # skip the misformatted file
 
         if lastdate:    
             if lastdate.month != date.month:                                    # every new month
@@ -83,5 +83,11 @@ for profile in profiles:
 
         lastdate = date                                                         # before next iteration, reset the lastdate to this date
 
-    with open('out/{0}_output.json'.format(profile), 'w') as fp:                # open a new file to write the monthwise metadata to
+    try:
+        os.makedirs('./out/{0}'.format(directory))
+    except:
+        if not os.path.isdir('./out/{0}'.format(directory)):
+            raise
+
+    with open('out/{0}/{1}.json'.format(directory, profile), 'w') as fp:        # open a new file to write the monthwise metadata to
         json.dump(profile_s3_metadata, fp, indent=4, sort_keys=True)            # sort the output file for easy reading

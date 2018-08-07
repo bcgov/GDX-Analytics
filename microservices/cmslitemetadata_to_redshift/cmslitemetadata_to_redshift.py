@@ -170,6 +170,12 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         # set the data frame to use the columns listed in the .conf file. Note that this overrides the columns in the file, and will give an error if the wrong number of columns is present. It will not validate the existing column names. 
         df.columns = columns
 
+        # Run rename to change column names
+        if 'rename' in data:
+            for thisfield in data['rename']:
+                if thisfield['old'] in df.columns:
+                    df.rename(columns = {thisfield['old']:thisfield['new']}, inplace = True)
+
         # Run replace on some fields to clean the data up 
         if 'replace' in data:
             for thisfield in data['replace']:

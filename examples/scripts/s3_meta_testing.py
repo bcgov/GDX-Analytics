@@ -44,44 +44,41 @@ resource = boto3.resource('s3') #high-level object-oriented API
 s3 = resource.Bucket(bucket) #subsitute this for your s3 bucket name.
 
 for profile in profiles:
+
     profile_s3_metadata = {}
-
-    event_count = 0
+    profile_s3_exceptions = {profile:{}}
     empty_file_count = 0
-    files = 0
-    monthly_counts = []
-    monthly_events = []
-
     lastdate = None
 
     # enumerating so as to get a file count
     for i, object_summary in enumerate(s3.objects.filter(Prefix=directory + "/" + profile + "/")):
+
+        # log any empty files and files with exceptions to the expected format, and skip over them
         if object_summary.size == 0:
-            empty_file_count += 1                                               # only one empty file, "_SUCCESS", should exist in path
-            profile_s3_metadata['empty_file_count'] = empty_file_count          # track the empty files count
-            profile_s3_metadata.setdefault('empty_file_keys',[]).append(object_summary.key) # and keynames for later debugging
-            continue                                                            # skip this loop if the file is empty
-        date_string = object_summary.get()["Body"].read(date_start+ 10)[date_start:] # read the 10 byte date string
+            profile_s3_exceptions[profile].setdefault('empty_file_keys',[]).append(object_summary.key)
+            continue
+        date_string = object_summary.get()["Body"].read(date_start+ 10)[date_start:]
         try:
-            date = datetime.strptime(date_string, '%Y-%m-%d')                   # handle the date string as a datetime object
-        except:                                                                 # tracks lines that don't conform to expected format
-            profile_s3_metadata.setdefault('exception_file_keys',[]).append(object_summary.key)
-            continue                                                            # skip the misformatted file
+            date = datetime.strptime(date_string, '%Y-%m-%d')
+        except:
+            profile_s3_exceptions[profile].setdefault('exception_file_keys',[]).append(object_summary.key)
+            continue
 
-        if lastdate:    
-            if lastdate.month != date.month:                                    # every new month
-                monthly_counts.append(files)                                    # append that last months' count to the month count list
-                monthly_events = []                                             # reset the monthly events count list
-            files = 1 + i - sum(monthly_counts) - empty_file_count              # grows with index, left offset from sum of past monthly counts
+        key = str(date.year) + "-" + str(date.month).zfill(2)                       # key this session as 'YYYY-MM'
 
-        file_contents = object_summary.get()["Body"].read()                     # read the entire file
-        monthly_events.append(file_contents.count('\n'))                        # to count the newlines as events, storing that value
+        file_contents = object_summary.get()["Body"].read()                         # read the entire file
+        event_count = (file_contents.count('\n'))                                   # each new line is an event
 
-        key   = str(date.year) + "-" + str(date.month).zfill(2)                 # keying on YYYY-MM
-        value = {'files': files, 'events':sum(monthly_events)}                  # create the entry as a dictionary containing files and events
-        profile_s3_metadata[key] = value                                        # update the existing entry, or create new entry on new month
+        if key in profile_s3_metadata:
+            profile_s3_metadata[key]['files'] += 1
+            profile_s3_metadata[key]['events'] += event_count
+        else:
+            profile_s3_metadata[key]={'files':1, 'events':event_count}              # log that there is a new key
 
-        lastdate = date                                                         # before next iteration, reset the lastdate to this date
+    if 'empty_file_keys' in profile_s3_exceptions[profile]:
+        profile_s3_exceptions[profile]['empty_file_count'] = len(profile_s3_exceptions[profile]['empty_file_keys'])
+    if 'exception_file_keys' in profile_s3_exceptions[profile]:
+        profile_s3_exceptions[profile]['exception_file_count'] = len(profile_s3_exceptions[profile]['exception_file_keys'])
 
     try:
         os.makedirs('./out/{0}'.format(directory))
@@ -89,5 +86,10 @@ for profile in profiles:
         if not os.path.isdir('./out/{0}'.format(directory)):
             raise
 
-    with open('out/{0}/{1}.json'.format(directory, profile), 'w') as fp:        # open a new file to write the monthwise metadata to
-        json.dump(profile_s3_metadata, fp, indent=4, sort_keys=True)            # sort the output file for easy reading
+    with open('out/{0}/{1}.json'.format(directory, profile), 'w') as fp:            # open a new file to write the monthwise metadata to
+        json.dump(profile_s3_metadata, fp, indent=4, sort_keys=True)                # sort the output file for easy reading
+
+    with open('out/{0}/exceptions_{1}.json'.format(directory, profile), 'w') as fp: # open a new file to write the monthwise metadata to
+        json.dump(profile_s3_exceptions, fp, indent=4, sort_keys=True)              # sort the output file for easy reading
+
+

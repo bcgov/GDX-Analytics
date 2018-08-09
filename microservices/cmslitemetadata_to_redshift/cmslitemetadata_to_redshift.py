@@ -47,20 +47,20 @@ def log(s):
 #   columnlist = a list of columns to use from the dataframe. Must be the same order as the SQL table. If null (eg None in Python), will write all columns in order.
 #   index = if not Null, add an index column with this label
 #   
-def to_s3(bucket, batchpath, filename, df, columnlist, index):
+def to_s3(bucket, batchfile, filename, df, columnlist, index):
 
     # Put the full data set into a buffer and write it to a "   " delimited file in the batch directory
     csv_buffer = BytesIO()
     if (columnlist is None): #no column list, no index
         if (index is None):
-            df.to_csv(csv_buffer, header=True, index=False, sep="	")
+            df.to_csv(csv_buffer, header=True, index=False, sep="	", encoding='utf-8')
         else: #no column list, include index
-            df.to_csv(csv_buffer, header=True, index=True, sep="	", index_label=index)
+            df.to_csv(csv_buffer, header=True, index=True, sep="	", index_label=index, encoding='utf-8')
     else:
         if (index is None): #column list, no index
-            df.to_csv(csv_buffer, header=True, index=False, sep="	", columns=columnlist)
+            df.to_csv(csv_buffer, header=True, index=False, sep="	", columns=columnlist, encoding='utf-8')
         else: # column list, include index
-            df.to_csv(csv_buffer, header=True, index=True, sep="	", columns=columnlist, index_label=index)
+            df.to_csv(csv_buffer, header=True, index=True, sep="	", columns=columnlist, index_label=index, encoding='utf-8')
 
     log("Writing " + filename + " to " + batchfile)
     resource.Bucket(bucket).put_object(Key=batchfile + "/" + filename, Body=csv_buffer.getvalue())
@@ -146,8 +146,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         obj = client.get_object(Bucket=bucket, Key=object_summary.key)
         body = obj['Body']
 
-        #XX We have hard coded the encoding here to 'iso-8859-1' as that seems to be the encoding provided. We should confirm. 
-        csv_string = body.read().decode('iso-8859-1')
+        csv_string = body.read().decode('utf-8')
 
         #XX  temporary fix while we figure out better delimiter handling
         csv_string = csv_string.replace('	',' ')
@@ -179,13 +178,13 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         # Run replace on some fields to clean the data up 
         if 'replace' in data:
             for thisfield in data['replace']:
-                df[thisfield['field']].replace (thisfield['old'], thisfield['new'])
+                df[thisfield['field']].replace(thisfield['old'], thisfield['new'])
 
-        # Clean up date fields
-        # for each field listed in the dateformat array named "field" apply "format"
+        # Clean up date fields, for each field listed in the dateformat array named "field" apply "format"
+        # Leaves null entries as blanks instead of NaT
         if 'dateformat' in data:
             for thisfield in data['dateformat']:
-                df[thisfield['field']] = pd.to_datetime(df[thisfield['field']], format=thisfield['format'])
+                df[thisfield['field']] = pd.to_datetime(df[thisfield['field']]).apply(lambda x: x.strftime(thisfield['format'])if not pd.isnull(x) else '')
 
 
         # prep database call to pull the batch file into redshift
@@ -236,7 +235,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                         entry = entry[1:-1] # remove wrapping delimeters
                         if entry: # skip empties
                             for lookup_entry in entry.split(nested_delim): # split on delimiter and iterate on resultant list
-                                node_id = row.NODE_ID # HARDCODED: the node id from the current row
+                                node_id = row.node_id # HARDCODED: the node id from the current row
                                 lookup_id = df_dictionary.loc[df_dictionary[column] == lookup_entry].index[0] # its dictionary index
                                 d = pd.DataFrame([[node_id,lookup_id]], columns=columnlist) # create the data frame to concat
                                 df_new = pd.concat([df_new,d], ignore_index=True)

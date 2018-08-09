@@ -3,33 +3,33 @@
   "source": "client",
   "destination": "processed",
   "directory": "cmslite_gdx",
-  "doc": "cmslist_metadata_2018-06-21-datefix-urlfix.csv",
+  "doc": "results_20180802.csv",
   "dbschema": "cmslite",
   "dbtable": "metadata",
-  "columns": ["NODE_ID","PARENT_NODE_ID","ANCESTOR_NODES","HR_URL","KEYWORDS","DESCRIPTION","PAGE_TYPE","SYNONYMS","DCTERMS_CREATOR","MODIFIED_DATE","CREATED_DATE","UPDATED_DATE","PUBLISHED_DATE","CONTENT_TYPES","MBCTERMS_SUBJECT_CATEGORIES","DCTERMS_SUBJECTS","DCTERMS_LANGUAGES","AUDIENCES"],
+  "columns": ["NODE_ID","PARENT_NODE_ID","ANCESTOR_NODES","KEYWORDS","DESCRIPTION","PAGE_TYPE","SYNONYMS","DCTERMS_CREATOR","MODIFIED_DATE","CREATED_DATE","UPDATED_DATE","PUBLISHED_DATE","CONTENT_TYPES","MBCTERMS_SUBJECT_CATEGORIES","DCTERMS_SUBJECTS","DCTERMS_LANGUAGES","AUDIENCES","URL"],
   "column_count": 18,
   "columns_metadata": [
-    "NODE_ID",
-    "PARENT_NODE_ID",
-    "ANCESTOR_NODES",
-    "HR_URL",
-    "KEYWORDS",
-    "DESCRIPTION",
-    "PAGE_TYPE",
-    "SYNONYMS",
-    "DCTERMS_CREATOR",
-    "MODIFIED_DATE",
-    "CREATED_DATE",
-    "UPDATED_DATE",
-    "PUBLISHED_DATE"
+    "node_id",
+    "parent_node_id",
+    "ancestor_nodes",
+    "hr_url",
+    "keywords",
+    "description",
+    "page_type",
+    "synonyms",
+    "dcterms_creator",
+    "modified_date",
+    "created_date",
+    "updated_date",
+    "published_date"
   ],
   "columns_lookup": [
-    "CONTENT_TYPES",
-    "MBCTERMS_SUBJECT_CATEGORIES",
-    "DCTERMS_SUBJECTS",
-    "DCTERMS_LANGUAGES",
-    "AUDIENCES",
-    "DCTERMS_CREATOR"
+    "content_types",
+    "mbcterms_subject_categories",
+    "dcterms_subjects",
+    "dcterms_languages",
+    "audiences",
+    "dcterms_creator"
   ],
   "dbtables_dictionaries": [
     "content_types",
@@ -47,7 +47,171 @@
     "metadata_audiences",
     "metadata_creators"
   ],
-  "dtype_dic_strings": [],
+  "rename": [
+    {
+      "old": "NODE_ID",
+      "new": "node_id"
+    },
+    {
+      "old": "PARENT_NODE_ID",
+      "new": "parent_node_id"
+    },
+    {
+      "old": "ANCESTOR_NODES",
+      "new": "ancestor_nodes"
+    },
+    {
+      "old": "URL",
+      "new": "hr_url"
+    },
+    {
+      "old": "KEYWORDS",
+      "new": "keywords"
+    },
+    {
+      "old": "DESCRIPTION",
+      "new": "description"
+    },
+    {
+      "old": "PAGE_TYPE",
+      "new": "page_type"
+    },
+    {
+      "old": "SYNONYMS",
+      "new": "synonyms"
+    },
+    {
+      "old": "DCTERMS_CREATOR",
+      "new": "dcterms_creator"
+    },
+    {
+      "old": "MODIFIED_DATE",
+      "new": "modified_date"
+    },
+    {
+      "old": "CREATED_DATE",
+      "new": "created_date"
+    },
+    {
+      "old": "UPDATED_DATE",
+      "new": "updated_date"
+    },
+    {
+      "old": "PUBLISHED_DATE",
+      "new": "published_date"
+    },
+    {
+      "old": "CONTENT_TYPES",
+      "new": "content_types"
+    },
+    {
+      "old": "MBCTERMS_SUBJECT_CATEGORIES",
+      "new": "mbcterms_subject_categories"
+    },
+    {
+      "old": "DCTERMS_SUBJECTS",
+      "new": "dcterms_subjects"
+    },
+    {
+      "old": "DCTERMS_LANGUAGES",
+      "new": "dcterms_languages"
+    },
+    {
+      "old": "AUDIENCES",
+      "new": "audiences"
+    }
+  ],
+  "replace": [
+    {
+      "field": "keywords",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "description",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "synonyms",
+      "old": "NULL",
+      "new": "||"
+    },
+    {
+      "field": "dcterms_creator",
+      "old": "NULL",
+      "new": "||"
+    },
+    {
+      "field": "dcterms_creator",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "modified_date",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "created_date",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "updated_date",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "published_date",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "content_types",
+      "old": "NULL",
+      "new": "||"
+    },
+    {
+      "field": "mbcterms_subject_categories",
+      "old": "NULL",
+      "new": "||"
+    },
+    {
+      "field": "dcterms_subjects",
+      "old": "NULL",
+      "new": "||"
+    },
+    {
+      "field": "dcterms_languages",
+      "old": "NULL",
+      "new": "||"
+    },
+    {
+      "field": "audiences",
+      "old": "NULL",
+      "new": "||"
+    }
+  ],
+  "dateformat": [
+    {
+      "field": "modified_date",
+      "format": "%Y-%m-%d %H:%M:%S"
+    },
+    {
+      "field": "created_date",
+      "format": "%Y-%m-%d %H:%M:%S"
+    },
+    {
+      "field": "updated_date",
+      "format": "%Y-%m-%d %H:%M:%S"
+    },
+    {
+      "field": "published_date",
+      "format": "%Y-%m-%d %H:%M:%S"
+    }
+  ],
+  "dtype_dic_strings": ["NODE_ID","PARENT_NODE_ID","ANCESTOR_NODES","KEYWORDS","DESCRIPTION","PAGE_TYPE","SYNONYMS","DCTERMS_CREATOR","MODIFIED_DATE","CREATED_DATE","UPDATED_DATE","PUBLISHED_DATE","CONTENT_TYPES","MBCTERMS_SUBJECT_CATEGORIES","DCTERMS_SUBJECTS","DCTERMS_LANGUAGES","AUDIENCES","URL"],
   "delim": ",",
   "nested_delim": "|",
   "truncate": true

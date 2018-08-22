@@ -10,7 +10,7 @@ Currently this project is still in development.
 
 ```
 $ gradle build
-$ java -jar build/libs/CFMS_poc-all-0.5.jar
+$ java -jar build/libs/CFMS_java_poc-all-0.5.jar
 ```
 
 ## To download all dependencies to the "runtime" directory
@@ -56,7 +56,7 @@ Snowplow may be particular about library versions you are using. You may need to
 ```
 
 ## Special files in this repository
-The files in [schemas/ca.bc.gov.cfmspoc](../schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
+The files in [../../schemas/ca.bc.gov.cfmspoc](../../schemas/ca.bc.gov.cfmspoc) are the Snowplow schema files. See https://github.com/snowplow/iglu for more info.
 
 ## Getting Help
 

@@ -1,5 +1,5 @@
-<!-- Snowplow starts plowing -->
- <script type="text/javascript">
+// <!-- Snowplow starts plowing -->
+//  <script type="text/javascript">
 ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
  p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
  };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
@@ -22,9 +22,9 @@ var collector = 'spm.gov.bc.ca';
     [{
         schema: 'iglu:ca.bc.gov/meta_data/jsonschema/1-0-0',
         data: {
-            node_id: <place the node id here>
+            node_id: node_id_value // replace node_id_value with actual node_id
         }
     }]
 )
- </script>
- <!-- Snowplow stop plowing -->
+// </script>
+//  <!-- Snowplow stop plowing -->

@@ -1,6 +1,3 @@
-.gradle
-/build/
-
 # Ignore Gradle GUI config
 gradle-app.setting
 
@@ -16,11 +13,29 @@ gradle-app.setting
 # Ignore runtime, where dependencies are stored
 /runtime/
 
-# Eclipse
-*.classpath
-*.project
-*.settings
-/bin
-/subprojects/*/bin
-atlassian-ide-plugin.xml
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+.recommenders/
+
+# Gradle
+.gradle/
+build/
+bin/
+gen/
+
+subprojects/*/bin
 .metadata/
+
+# Java class files
+*.class
+
+# local files
+atlassian-ide-plugin.xml

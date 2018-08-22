@@ -1,18 +1,12 @@
-## GDX Analytics
+## Migration Testing Scripts
 
-This is for the Government of British Columbia’s instance of Snowplow tracking. Snowplow is a Cloud-native web, mobile and event analytics, running on AWS (RedShift).
+Scripts to provide better automation and coverage on the testing strategy of the WebTrends to Snowplow migration.
 
-## Features
-
-Identifies and tracks the way your users engage with your website or application.
-
-## Project Status
-
-Currently this project is still in development.
+These scripts are an ongoing project to
 
 ## Getting Help
 
-Please Contact the GDX Service desk for any analytics service help, for inquiries about starting a new analytics account for Government please contact The GDX Analytics team.
+These scripts are intented for internal use. Please Contact the GDX Analtics Team for more information.
 
 ## Contributors
 

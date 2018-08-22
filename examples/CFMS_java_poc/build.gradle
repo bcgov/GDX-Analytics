@@ -1,5 +1,5 @@
 apply plugin: 'java'
-group = 'ca.bc.gov.CFMS_poc'
+group = 'ca.bc.gov.CFMS_java_poc'
 version = '0.6.1'
 
 repositories {
@@ -14,9 +14,9 @@ dependencies {
 
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'CFMS_poc',
+        attributes 'Implementation-Title': 'CFMS_java_poc',
                 'Implementation-Version': version,
-                'Main-Class': 'ca.bc.gov.CFMS_poc.App'
+                'Main-Class': 'ca.bc.gov.CFMS_java_poc.App'
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }

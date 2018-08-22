@@ -2,7 +2,7 @@
 
 Scripts to provide better automation and coverage on the testing strategy of the WebTrends to Snowplow migration.
 
-These scripts are an ongoing project to
+These scripts are part of an ongoing project while WebTrends migration is ongoing.
 
 ## Getting Help
 

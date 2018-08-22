@@ -190,7 +190,6 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         # prep database call to pull the batch file into redshift
         conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='microservice' password=" + os.environ['pgpass']
 
-        # TODO: Loop on known pipe separated value columns, e.g., ancestor node (below)
         # We loop over the columns listedin the .conf file. 
         # There are three sets of values that should match to consider:
         #   columns_lookup

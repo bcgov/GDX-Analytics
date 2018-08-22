@@ -1,4 +1,4 @@
-## GDX Analytics Looker Embed Generator Example
+## GDX Analytics Looker Embed Generator
 
 These Java and Python examples demonstrate the generation of cryptographically signed SSO embed URL pointing to a dashboard or view exposed through the Looker embed user. The Looker Embed Secret key is required to generate these with the appropriate signature and nonce.
 

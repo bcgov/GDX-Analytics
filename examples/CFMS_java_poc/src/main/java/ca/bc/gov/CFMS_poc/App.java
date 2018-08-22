@@ -6,7 +6,7 @@
  *      it was successful, even if it doesn't close out
  ******************************************************************************/
 
-package ca.bc.gov.CFMS_poc;
+package ca.bc.gov.CFMS_java_poc;
 
 import com.snowplowanalytics.snowplow.tracker.DevicePlatform;
 import com.snowplowanalytics.snowplow.tracker.Tracker;
@@ -41,7 +41,7 @@ public class App {
 
     //========================================
     // Set up the namespace and appID
-    private static final String namespace = "CFMS_poc";
+    private static final String namespace = "CFMS_java_poc";
     private static final String appID = "demo";
     //========================================
     // Set whether or not to send events base64 encoded. For now, we send nonencoded to ease debugging

@@ -1,4 +1,4 @@
-package ca.bc.gov.CFMS_poc;
+package ca.bc.gov.CFMS_java_poc;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

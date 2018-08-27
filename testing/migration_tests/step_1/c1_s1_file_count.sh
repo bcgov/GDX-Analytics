@@ -1,6 +1,9 @@
 #!/bin/bash
-#file: file_count.sh
-#usage: $ ./file_count.sh <path_to_logs>
+# File:   c1_s1_file_count.sh
+# Usage:  $ ./c1_s1_file_count.sh <path_to_logs>
+
+# This script will output counts of logs where the filename
+# contains "YYYY-MM" for all months over 2016 and 2017
 
 path_to_logs="$1"
 

@@ -69,7 +69,7 @@ public class looker_embed_generator {
         if (args[0].equalsIgnoreCase("PROD") || args[0].equalsIgnoreCase("PRODUCTION")) {
             lookerURL = "analytics.gov.bc.ca";
         } else if (args[0].equalsIgnoreCase("DEV") || args[0].equalsIgnoreCase("DEVELOPMENT")){
-            lookerURL = "35.183.121.58:9999";
+            lookerURL = "dev.analytics.gov.bc.ca";
         } else {
             System.err.println("Usage: java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]");
             System.exit(1);

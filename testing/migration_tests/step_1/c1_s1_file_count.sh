@@ -1,8 +1,8 @@
 #!/bin/bash
 #file: file_count.sh
-#usage: $ ./file_count.sh <path>
+#usage: $ ./file_count.sh <path_to_logs>
 
-path = "$1"
+path_to_logs = "$1"
 
 MONTHS=(ZERO Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
  
@@ -15,8 +15,8 @@ for ((year=16;year<=17;year++));
 do
   for ((month=1;month<=12;month++));
   do
-    echo -n "${MONTHS[$month]} $year: ";find $path -type f -print | grep -c "20$year-`printf %02d $month`"
+    echo -n "${MONTHS[$month]} $year: ";find $path_to_logs -type f -print | grep -c "20$year-`printf %02d $month`"
   done
 done
 echo "==============="
-echo -n "Total: ";find $path -type f -print | grep '.log' | wc -l
+echo -n "Total: ";find $path_to_logs -type f -print | grep '.log' | wc -l

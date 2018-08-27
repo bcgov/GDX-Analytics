@@ -2,7 +2,7 @@
 #file: file_count.sh
 #usage: $ ./file_count.sh <path_to_logs>
 
-path_to_logs = "$1"
+path_to_logs="$1"
 
 MONTHS=(ZERO Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
  

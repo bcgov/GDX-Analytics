@@ -1,8 +1,9 @@
 ###################################################################
 # Script Name   : s3_log_count.py
 #
-# Description   : Quick script that counts the number of lines of 
-#               : objects in an S3 bucket 
+# Description   : counts the number of log files in an S3 bucket 
+#               : with a file name matching 2016-01 through 2017-12
+#               : anywhere. Allows filtering on the file name prefix
 #
 # Requirements  : You must set the following environment variables
 #               : to establish credentials for the microservice user
@@ -46,7 +47,15 @@ for object_summary in bucket.objects.filter(Prefix=directory):
     if bool(m):
         log_counts[m.group(0)] += 1
 
+print 'SN/LK - Testing Iteration Step 2 - Uploading SDC logs to S3'
+print ' '+ '-'*18
+print " | SDC logs on S3 | "
+print ' '+ '-'*18
+
 # sort and output dictionary
 log_counts = collections.OrderedDict(sorted(log_counts.items()))
 for i in log_counts.iterkeys():
     print i + ': ' + str(log_counts[i])
+
+print '==============='
+print 'Total: ' + str(sum(log_counts.values()))

@@ -25,4 +25,4 @@ do
   done
 done
 echo "==============="
-echo -n "Total: ";find $path_to_logs -type f -print | grep -c '\.log'
+echo -n "Total: ";find $path_to_logs -maxdepth 1 -type f -print | grep -c '\.log'

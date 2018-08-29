@@ -3,9 +3,9 @@
 # Usage:  $ ./c2_s1_event_count.sh <path_to_logs>
 
 # This script will count the number of lines in the files under <path_to_logs>
-# and subtract the lines containing header information (9 from sed command and
-# 4 from SDC server) and fixes the total. SDC server writes each event to its 
-# own line. Output will display the adjusted event counts present in each logs.
+# and subtract the 5 lines from SDC server containing header information and
+# fixes the total. SDC server writes each event to its own line. Output will
+# display the adjusted event counts present in each logs.
 
 # Caveats:
 # - months contributing 0 log files result in a wc error message

@@ -3,7 +3,10 @@
 #
 # Description   : counts the number of log files in an S3 bucket 
 #               : with a file name matching 2016-01 through 2017-12
-#               : anywhere. Allows filtering on the file name prefix
+#               : anywhere. Allows filtering on the file name prefix.
+#               : Strictly, this is for testing only the unzipped
+#               : log files per Testing Iteration Step 2 and to
+#               : compare to counts from Testing Iteration Step 1.
 #
 # Requirements  : You must set the following environment variables
 #               : to establish credentials for the microservice user

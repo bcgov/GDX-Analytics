@@ -1,9 +1,8 @@
 ###################################################################
 # Script Name   : s3_meta_testing.py
-# Version       : 0.1 
 #
-# Description   : Quick script that counts the number of lines of 
-#               : objects in an S3 bucket 
+# Description   : counts the number of lines of  objects in an S3
+#               : bucket 
 #
 # Requirements  : You must set the following environment variables
 #               : to establish credentials for the microservice user

@@ -1,0 +1,35 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for choose service event. This is used by CFMS to identify which service is being used by an Add Citizen, Add New Service, or Change Service Call",
+	"self": {
+		"vendor": "ca.bc.gov.cfmspoc",
+		"name": "chooseservice",
+		"format": "jsonschema",
+		"version": "3-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"channel": {
+			"type": "string",
+			"enum": ["in-person", "phone", "sms", "back-office", "email-fax-mail", "cats-assist", "mobile-assist"]
+		},
+		"program_id": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"parent_id": {
+			"type": ["string", "null"],
+			"maxLength": 255
+		},
+		"program_name": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"transaction_name": {
+			"type": "string",
+			"maxLength": 255
+		}
+	},
+	"required": ["channel", "program_id", "program_name", "transaction_name"],
+	"additionalProperties": false
+}

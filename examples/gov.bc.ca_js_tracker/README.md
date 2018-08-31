@@ -1,6 +1,6 @@
 ## GDX Analytics CMS Lite Dev Code
 
-This code demonstrates the inline Javascript to track web analytics events for CMS Lite sites. It includes adding a custom context to include the Node Id. The search tracker include a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
+This code demonstrates the inline Javascript to track web analytics events for CMS Lite sites. The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to include the Node Id. The [`gov_search_sp_script.js`](./gov_search_sp_script.js) search tracker includes a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
 
 ## Project Status
 

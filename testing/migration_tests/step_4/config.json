@@ -1,0 +1,9 @@
+{
+  "bucket": "bucket_containing_logs",
+  "directory" : "path/to/profiles",
+  "profiles" : [
+    "dcsid1",
+    "dcsid2"
+  ],
+  "read_date_from_byte" : 0
+}

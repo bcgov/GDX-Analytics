@@ -18,8 +18,9 @@
 dcsIDs="$1"
 
 echo "SN/LK - Testing Iteration Step 4 - Parsing log files in Spark"
-echo "Case #1"
-echo "---"
+echo " -------------------------------- "
+echo " | Case #1 - SDC Log file counts | "
+echo " -------------------------------- "
 
 while read dcsID; do
   echo -n $dcsID

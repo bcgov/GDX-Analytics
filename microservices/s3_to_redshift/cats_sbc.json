@@ -5,7 +5,7 @@
   "directory": "cats_sbc",
   "doc": ".csv",
   "dbtable": "servicebc.cats_sbc",
-  "column_count": 11,
+  "column_count": 12,
   "columns": [
     "End Time",
     "Name",
@@ -17,7 +17,8 @@
     "Source Mac Address",
     "Destination Address",
     "Destination Port",
-    "Edge FW Name"
+    "Edge FW Name",
+    "City"
   ],
   "dtype_dic_strings": [
     "Source Translated Port"

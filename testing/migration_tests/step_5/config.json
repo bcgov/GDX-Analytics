@@ -2,6 +2,7 @@
   "bucket" : "sp-ca-bc-gov-131565110619-12-microservices",
   "destination": "auto_test_output/step5",
   "schema" : "webtrends",
+  "table" : "events",
   "profiles" : [
     "dcsshs4dl00000004jpj0ma1r_5k6n",
     "dcss10s3u000000sljzaima1r_4z5g",

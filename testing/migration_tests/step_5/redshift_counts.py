@@ -50,78 +50,82 @@ if (os.path.isfile(configfile) == False): # confirm that the file exists
 with open(configfile) as f:
     data = json.load(f)
 
+# acquire properties from configuration file
 conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='migrationtest' password=" + os.environ['pgpass_migrationtest']
 profiles = data['profiles']
 bucket_name = data['bucket']
 destination = data['destination']
+schema = data['schema']
+table = data['table']
 
+# Iteration Testing Step 5 pre-formatted queries
 queries = {
     '1A - Rows in Redshift':
     """
     SELECT
-        TO_CHAR(DATE_TRUNC('month', events.date ), 'YYYY-MM') AS "events.date_month",
-        COUNT(*) AS "events.count"
-    FROM webtrends.events  AS events
+        TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
+        COUNT(*) AS "{table}.count"
+    FROM webtrends.{table}  AS {table}
         
     WHERE
-            (events.dcs_id = '{0}')
-    GROUP BY 1,DATE_TRUNC('month', events.date )
+            ({table}.dcs_id = '{dcsid}')
+    GROUP BY 1,DATE_TRUNC('month', {table}.date )
     ORDER BY 2
     """,
     '2A - Page View Events':
     """
     SELECT
-        TO_CHAR(DATE_TRUNC('month', events.date ), 'YYYY-MM') AS "events.date_month",
-        COUNT(*) AS "events.count"
-    FROM webtrends.events  AS events
+        TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
+        COUNT(*) AS "{table}.count"
+    FROM webtrends.{table}  AS {table}
 
-    WHERE (events.dcs_id = '{0}') AND (events.wt_dl = '0')
-    GROUP BY 1,DATE_TRUNC('month', events.date )
+    WHERE ({table}.dcs_id = '{dcsid}') AND ({table}.wt_dl = '0')
+    GROUP BY 1,DATE_TRUNC('month', {table}.date )
     ORDER BY 2
     """,
     '2B - Offsite Events':
     """
     SELECT
-        TO_CHAR(DATE_TRUNC('month', events.date ), 'YYYY-MM') AS "events.date_month",
-        COUNT(*) AS "events.count"
-    FROM webtrends.events  AS events
+        TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
+        COUNT(*) AS "{table}.count"
+    FROM webtrends.{table}  AS {table}
 
-    WHERE (events.dcs_id = '{0}') AND (events.wt_dl = '24')
-    GROUP BY 1,DATE_TRUNC('month', events.date )
+    WHERE ({table}.dcs_id = '{dcsid}') AND ({table}.wt_dl = '24')
+    GROUP BY 1,DATE_TRUNC('month', {table}.date )
     ORDER BY 2 
     """,
     '2C - Download Events':
     """
     SELECT
-        TO_CHAR(DATE_TRUNC('month', events.date ), 'YYYY-MM') AS "events.date_month",
-        COUNT(*) AS "events.count"
-    FROM webtrends.events  AS events
+        TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
+        COUNT(*) AS "{table}.count"
+    FROM webtrends.{table}  AS {table}
 
-    WHERE (events.dcs_id = '{0}') AND (events.wt_dl = '20')
-    GROUP BY 1,DATE_TRUNC('month', events.date )
+    WHERE ({table}.dcs_id = '{dcsid}') AND ({table}.wt_dl = '20')
+    GROUP BY 1,DATE_TRUNC('month', {table}.date )
     ORDER BY 2 
     """,
     '2D - Miscellaneous Events':
     """
     SELECT
-        TO_CHAR(DATE_TRUNC('month', events.date ), 'YYYY-MM') AS "events.date_month",
-        COUNT(*) AS "events.count"
-    FROM webtrends.events  AS events
+        TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
+        COUNT(*) AS "{table}.count"
+    FROM webtrends.{table}  AS {table}
 
-    WHERE (events.dcs_id = '{0}') AND ((events.wt_dl  NOT IN ('24', '0', '20') OR events.wt_dl IS NULL))
-    GROUP BY 1,DATE_TRUNC('month', events.date )
+    WHERE ({table}.dcs_id = '{dcsid}') AND (({table}.wt_dl  NOT IN ('24', '0', '20') OR {table}.wt_dl IS NULL))
+    GROUP BY 1,DATE_TRUNC('month', {table}.date )
     ORDER BY 2 
     """,
     '3A - Visitor Sessions in Redshift':
     """
     SELECT
-        TO_CHAR(DATE_TRUNC('month', events.date ), 'YYYY-MM') AS "events.date_month",
-        COUNT(DISTINCT events.wt_vt_sid ) AS "events.session_count"
-    FROM webtrends.events  AS events
+        TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
+        COUNT(DISTINCT {table}.wt_vt_sid ) AS "{table}.session_count"
+    FROM webtrends.{table}  AS {table}
 
     WHERE 
-        (events.dcs_id = '{0}')
-    GROUP BY 1,DATE_TRUNC('month', events.date )
+        ({table}.dcs_id = '{dcsid}')
+    GROUP BY 1,DATE_TRUNC('month', {table}.date )
     ORDER BY 2 
     """
 }
@@ -135,29 +139,38 @@ bucket = resource.Bucket(bucket_name) #subsitute this for your s3 bucket name.
 # prep database call to pull the batch file into redshift
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
-        curs.execute("SET search_path TO " + data['schema'])
+        curs.execute("SET search_path TO " + schema) # specify the schema
         for dcsid in profiles:
             result = pd.DataFrame()
             for header,query in queries.items():
-                query = query.format(dcsid)
+                query = query.format(dcsid=dcsid, table=table) # formats each SQL queries
                 log(query)
                 try:
-                    curs.execute(query)
+                    curs.execute(query) # try to run the formatted query
                 except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
                     log("Execution failed\n\n")
                     log(e.pgerror)
                 else:
                     log("Execution successful\n\n")
-                data = np.array(curs.fetchall())
-                df = pd.DataFrame(data, columns=['0',header])
-                if not result.empty:
-                    result = pd.merge(result,df,how='outer',on=['0'])
-                else:
-                    result = df
+                
+                try:
+                    data = np.array(curs.fetchall())
+                except  psycopg2.ProgrammingError as e: # the query did not produce a result set
+                    log("No result set from query execution\n\n")
+                    log(e.pgerror)
+                else: # there was a query result
+                    df = pd.DataFrame(data, columns=['0',header]) # make a dataframe of the query result
+                    if not result.empty:
+                        result = pd.merge(result,df,how='outer',on=['0']) # merge this dataframe with the existing results
+                    else:
+                        result = df # the first query with a result set will initialize the result
 
-            # reindexes a results dataframe ordered lexically on columns, and in descending session chronology on rows
-            result = result.sort_values(by=['0']).sort_index(axis=1).rename(columns={'0': 'session'}).reset_index(drop=True)
+            if not result.empty:
+                # keeps session column leftmost while reindexes the remaining results dataframe lexically,
+                # and in descending session chronology on rows
+                result = result.sort_values(by=['0']).sort_index(axis=1).rename(columns={'0': 'session'}).reset_index(drop=True)
 
-            csv_buffer = BytesIO()
-            result.to_csv(csv_buffer, header=True, index=False, sep=",")
-            resource.Bucket(bucket_name).put_object(Key=destination + "/" + dcsid + "_step5.csv", Body=csv_buffer.getvalue())
+                # save the results as a csv into S3
+                csv_buffer = BytesIO()
+                result.to_csv(csv_buffer, header=True, index=False, sep=",")
+                resource.Bucket(bucket_name).put_object(Key=destination + "/" + dcsid + "_step5.csv", Body=csv_buffer.getvalue())

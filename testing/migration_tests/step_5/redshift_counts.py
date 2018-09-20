@@ -58,6 +58,34 @@ destination = data['destination']
 schema = data['schema']
 table = data['table']
 
+# model an empty data result for error handling null data responses
+empty_data = {
+    '2016-01':'0',
+    '2016-02':'0',
+    '2016-03':'0',
+    '2016-04':'0',
+    '2016-05':'0',
+    '2016-06':'0',
+    '2016-07':'0',
+    '2016-08':'0',
+    '2016-09':'0',
+    '2016-10':'0',
+    '2016-11':'0',
+    '2016-12':'0',
+    '2017-01':'0',
+    '2017-02':'0',
+    '2017-03':'0',
+    '2017-04':'0',
+    '2017-05':'0',
+    '2017-06':'0',
+    '2017-07':'0',
+    '2017-08':'0',
+    '2017-09':'0',
+    '2017-10':'0',
+    '2017-11':'0',
+    '2017-12':'0',
+}
+
 # Iteration Testing Step 5 pre-formatted queries
 queries = {
     '1A - Rows in Redshift':
@@ -148,17 +176,21 @@ with psycopg2.connect(conn_string) as conn:
                 try:
                     curs.execute(query) # try to run the formatted query
                 except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
-                    log("Execution failed\n\n")
+                    log("Execution {0} failed\n\n".format(header))
                     log(e.pgerror)
                 else:
-                    log("Execution successful\n\n")
+                    log("Execution {0} successful\n\n".format(header))
                 
                 try:
                     data = np.array(curs.fetchall())
                 except  psycopg2.ProgrammingError as e: # the query did not produce a result set
-                    log("No result set from query execution\n\n")
+                    log("No result set from query execution {0}\n\n".format(header))
                     log(e.pgerror)
                 else: # there was a query result
+                    #TODO: handle if the data is empty
+                    if data.size is 0:
+                        log("Result set {0} was empty\n\n".format(header))
+                        data=empty_data
                     df = pd.DataFrame(data, columns=['0',header]) # make a dataframe of the query result
                     if not result.empty:
                         result = pd.merge(result,df,how='outer',on=['0']) # merge this dataframe with the existing results
@@ -173,4 +205,4 @@ with psycopg2.connect(conn_string) as conn:
                 # save the results as a csv into S3
                 csv_buffer = BytesIO()
                 result.to_csv(csv_buffer, header=True, index=False, sep=",")
-                resource.Bucket(bucket_name).put_object(Key=destination + "/" + dcsid + "_step5.csv", Body=csv_buffer.getvalue())
+                resource.Bucket(bucket_name).put_object(Key=destination + "/" + dcsid + ".csv", Body=csv_buffer.getvalue())

@@ -123,7 +123,6 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
 
         # Check to see if the file has been processed already
         batchfile = destination + "/batch/" + object_summary.key
-        # XX we have temporarily overriden the check for successfully processed files
         goodfile = destination + "/good/" + object_summary.key
         badfile = destination + "/bad/" + object_summary.key
         try:

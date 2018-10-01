@@ -3,7 +3,7 @@
   "source": "client",
   "destination": "processed",
   "directory": "cmslite_gdx",
-  "doc": "results_20180802.csv",
+  "doc": "cmslite.csv*",
   "dbschema": "cmslite",
   "dbtable": "metadata",
   "columns": ["NODE_ID","PARENT_NODE_ID","ANCESTOR_NODES","KEYWORDS","DESCRIPTION","PAGE_TYPE","SYNONYMS","DCTERMS_CREATOR","MODIFIED_DATE","CREATED_DATE","UPDATED_DATE","PUBLISHED_DATE","CONTENT_TYPES","MBCTERMS_SUBJECT_CATEGORIES","DCTERMS_SUBJECTS","DCTERMS_LANGUAGES","AUDIENCES","URL"],

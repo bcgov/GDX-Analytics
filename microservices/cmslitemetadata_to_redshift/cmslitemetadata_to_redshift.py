@@ -230,7 +230,11 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                     if row[column] is not pd.np.nan:
                         # iterate over the list of delimited terms
                         entry = row[column] # get the full string of delimited values to be looked up
-                        entry = entry[1:-1] # remove wrapping delimeters
+                        try:
+                            entry = entry[1:-1] # remove wrapping delimeters
+                        except:
+                            # log("EXCEPTION RAISED\n---\ncolumn: {0}, row: {1}, index: {2}, entry: \n{3}".format(column, row, index, entry))
+                            continue
                         if entry: # skip empties
                             for lookup_entry in entry.split(nested_delim): # split on delimiter and iterate on resultant list
                                 node_id = row.node_id # HARDCODED: the node id from the current row
@@ -241,7 +245,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
             # output the the dataframe as a csv
             to_s3(bucket, batchfile, dbtable +'.csv', df_new, columnlist, key)
         
-            # NOTE: batchfile is replaces by: batchfile + "/" + dbtable + ".csv" below
+            # NOTE: batchfile is replaced by: batchfile + "/" + dbtable + ".csv" below
             # if truncate is set to true, truncate the db before loading
             if (truncate):
                 truncate_str = "TRUNCATE " + dbtable + "; "
@@ -259,9 +263,15 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                     except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
                         log("Loading failed\n\n")
                         log(e.pgerror)
-                        outfile = badfile       # if the DB call succeed, place file in /good
-                    else:
+                        outfile = badfile
+                    else:                       # if the DB call succeed, place file in /good
                         log("Loaded successfully\n\n")
-                        outfile = goodfile
-
-
+                        try:                    # if any of the csv's generated are bad, the file must output to /bad/
+                            outfile
+                        except NameError:
+                            outfile = goodfile  # the case where outfile is not yet defined (first case)
+                        else:
+                            if outfile is not badfile: # if outfile is already a badfile, never assign it as a goodfile
+                                outfile = goodfile
+            
+            client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)

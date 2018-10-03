@@ -8,7 +8,7 @@ Currently this project is in development.
 
 ## To Run
 
-Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline.
+Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline. When adding this to the page please remove the '//' before the <script> tag at the top and bottom of the tracker.
 
 ## Getting Help
 

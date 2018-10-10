@@ -19,20 +19,21 @@
 #               : export AWS_ACCESS_KEY_ID=<<KEY>>
 #               : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>
 #
-# Usage         : python27 s3_meta_testing.py <<config.json>> [output_path]
+# Usage         : python27 s3_meta_testing.py <<config.json>>
 
-import boto3 # s3 acces
+import boto3 # s3 access
 import sys # to read command line parameters
 import os # to read environment variables
 import os.path #file handling
-import json # to read json config files
+from io import BytesIO # to create buffers
+import json # to read write json
 import csv # to write csv files
 import collections # to sort collections
 from datetime import datetime # handle stripping string date to datetime objects
 
 # check invocation
-if (len(sys.argv) not in [2,3]): #will be 1 if no arguments, 2 if one argument
-    print "Usage: python27 s3_file_count.py <<config.json>> [output_path]"
+if (len(sys.argv) != 2): #will be 1 if no arguments, 2 if one argument
+    print "Usage: python27 s3_file_count.py <<config.json>> "
     sys.exit(1)
 # Read configuration file
 configFile = sys.argv[1] 
@@ -45,30 +46,19 @@ if (configFile.endswith('.json') == False): # confirm the file is of json
 with open(configFile) as f:
     data = json.load(f)
 
-# set the output folder, creating if it doesn't exist
-if len(sys.argv) == 3:
-    out = sys.argv[2] + '/'   # add trailing / to path
-    while out.endswith('//'): # leave only one trailing /
-        out = out[:-1]
-else:
-    out = './' # default to current path
-
-try:
-    os.mkdir(out)
-except:
-    if not os.path.isdir(out):
-        raise
-
 # Set up variables from config file
-bucket_name = data['bucket']
-directory = data['directory']
+input_bucket = data['input_bucket']
+directory = data['directory'] # the S3 location of the input files
 profiles = data['profiles']
-date_start = data['read_date_from_byte']
+date_start = data['read_date_from_byte'] # critical to determining date of a file
+output_bucket = data['output_bucket']
+destination = data['destination']
 
 # set up S3 connection
 client = boto3.client('s3') #low-level functional API
 s3 = boto3.resource('s3') #high-level object-oriented API
-bucket = s3.Bucket(bucket_name) #subsitute this for your s3 bucket name.
+input_bucket = s3.Bucket(input_bucket)   # bucket to read from
+output_bucket = s3.Bucket(output_bucket) # bucket to write to
 
 for profile in profiles:
 
@@ -78,7 +68,7 @@ for profile in profiles:
     lastdate = None
 
     # enumerating so as to get a file count
-    for i, object_summary in enumerate(bucket.objects.filter(Prefix=directory + "/" + profile + "/")):
+    for i, object_summary in enumerate(input_bucket.objects.filter(Prefix=directory + "/" + profile + "/")):
 
         # log any empty files and files with exceptions to the expected format, and skip over them
         if object_summary.size == 0: # report on empty files
@@ -110,12 +100,15 @@ for profile in profiles:
 
     profile_s3_metadata = collections.OrderedDict(sorted(profile_s3_metadata.items()))
 
-    # write out the csv for this profile
-    with open('{0}{1}.csv'.format(out,profile), 'w') as fp:          # open a new file to write the monthwise metadata to
-        writer = csv.writer(fp)
+    ### Write output to S3
+    # write out the results for this profile
+    with BytesIO() as csv_buffer:
+        writer = csv.writer(csv_buffer)
         for key,value in profile_s3_metadata.iteritems():
             writer.writerow([key,value['files'],value['events']])
+        output_bucket.put_object(Key="{0}/{1}.csv".format(destination,profile), Body=csv_buffer.getvalue())
 
     # write out exceptions for this profile
-    with open('{0}exceptions_{1}.json'.format(out,profile), 'w') as fp: # open a new file to write the monthwise metadata to
-        json.dump(profile_s3_exceptions, fp, indent=4, sort_keys=True)              # sort the output file for easy reading
+    with BytesIO() as json_buffer: # write the monthwise metadata to a buffer
+        json.dump(profile_s3_exceptions, json_buffer, indent=4, sort_keys=True) # sort the output file for human readability
+        output_bucket.put_object(Key="{0}/exceptions_{1}.json".format(destination,profile), Body=json_buffer.getvalue())

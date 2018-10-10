@@ -53,7 +53,7 @@ with open(configfile) as f:
 # acquire properties from configuration file
 conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='migrationtest' password=" + os.environ['pgpass_migrationtest']
 profiles = data['profiles']
-bucket_name = data['bucket']
+output_bucket = data['output_bucket']
 destination = data['destination']
 schema = data['schema']
 table = data['table']
@@ -161,7 +161,7 @@ queries = {
 # set up S3 connection
 client = boto3.client('s3') #low-level functional API
 resource = boto3.resource('s3') #high-level object-oriented API
-bucket = resource.Bucket(bucket_name) #subsitute this for your s3 bucket name.
+output_bucket = resource.Bucket(output_bucket) #subsitute this for your s3 bucket name.
 
 
 # prep database call to pull the batch file into redshift
@@ -205,4 +205,4 @@ with psycopg2.connect(conn_string) as conn:
                 # save the results as a csv into S3
                 csv_buffer = BytesIO()
                 result.to_csv(csv_buffer, header=True, index=False, sep=",")
-                resource.Bucket(bucket_name).put_object(Key=destination + "/" + dcsid + ".csv", Body=csv_buffer.getvalue())
+                output_bucket.put_object(Key="{0}/{1}.csv".format(destination,dcsid), Body=csv_buffer.getvalue())

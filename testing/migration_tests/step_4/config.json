@@ -1,9 +1,11 @@
 {
-  "bucket": "bucket_containing_logs",
+  "input_bucket": "sp-ca-bc-gov-2018-sdc-log-load",
   "directory" : "path/to/profiles",
   "profiles" : [
     "dcsid1",
     "dcsid2"
   ],
-  "read_date_from_byte" : 0
+  "read_date_from_byte" : 0,
+  "output_bucket" : "sp-ca-bc-gov-131565110619-12-migration-tests",
+  "destination": "auto_test_output/step4"
 }

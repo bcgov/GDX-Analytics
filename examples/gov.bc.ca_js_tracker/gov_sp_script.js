@@ -1,5 +1,4 @@
-// <!-- Snowplow starts plowing -->
-//  <script type="text/javascript">
+
 ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
  p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
  };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
@@ -28,5 +27,4 @@
 		}
 	}]
 )
-// </script>
-//  <!-- Snowplow stop plowing -->
+

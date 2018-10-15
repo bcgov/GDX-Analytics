@@ -177,7 +177,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         # Run replace on some fields to clean the data up 
         if 'replace' in data:
             for thisfield in data['replace']:
-                df[thisfield['field']].replace(thisfield['old'], thisfield['new'])
+                df[thisfield['field']].str.replace(thisfield['old'], thisfield['new'])
 
         # Clean up date fields, for each field listed in the dateformat array named "field" apply "format"
         # Leaves null entries as blanks instead of NaT

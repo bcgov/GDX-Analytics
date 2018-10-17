@@ -6,8 +6,8 @@
   "doc": "cmslite.csv.*",
   "dbschema": "cmslite",
   "dbtable": "metadata",
-  "columns": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url"],
-  "column_count": 18,
+  "columns": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title"],
+  "column_count": 21,
   "columns_metadata": [
     "node_id",
     "parent_node_id",
@@ -21,7 +21,10 @@
     "modified_date",
     "created_date",
     "updated_date",
-    "published_date"
+    "published_date",
+    "title",
+    "nav_title",
+    "eng_nav_title"
   ],
   "columns_lookup": [
     "content_types",
@@ -51,7 +54,7 @@
     {
       "field": "keywords",
       "old": "NULL",
-      "new": "||"
+      "new": ""
     },
     {
       "field": "description",
@@ -117,6 +120,21 @@
       "field": "audiences",
       "old": "NULL",
       "new": "||"
+    },
+    {
+      "field": "title",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "nav_title",
+      "old": "NULL",
+      "new": ""
+    },
+    {
+      "field": "eng_nav_title",
+      "old": "NULL",
+      "new": ""
     }
   ],
   "dateformat": [
@@ -137,7 +155,7 @@
       "format": "%Y-%m-%d %H:%M:%S"
     }
   ],
-  "dtype_dic_strings": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url"],
+  "dtype_dic_strings": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title"],
   "delim": ",",
   "nested_delim": "|",
   "truncate": true

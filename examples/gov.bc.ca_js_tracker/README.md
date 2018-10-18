@@ -2,7 +2,7 @@
 
 This code demonstrates the inline Javascript to track web analytics events for CMS Lite sites. The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to include the Node Id. The [`gov_search_sp_script.js`](./gov_search_sp_script.js) search tracker includes a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
 
-##Trackers
+## Trackers
 Engage - engage_sp_tracker.js
 www2.gov.bc.ca - Main - gov_sp_script.js
 www2.gov.bc.ca - Search - gov_search_sp_script.js

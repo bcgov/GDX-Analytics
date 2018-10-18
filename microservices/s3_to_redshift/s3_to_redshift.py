@@ -64,6 +64,10 @@ if 'dtype_dic_strings' in data:
         dtype_dic[fieldname] = str
 delim = data['delim']
 truncate = data['truncate']
+if 'drop_columns' in data:
+    drop_columns = data['drop_columns']
+else:
+    drop_columns = {}
 
 # set up S3 connection
 client = boto3.client('s3') #low-level functional API
@@ -114,7 +118,9 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
             
         df.columns = columns
 
-        
+        if 'drop_columns' in data: # Drop any columns marked for dropping
+            df = df.drop(columns=drop_columns)
+
         # Run replace on some fields to clean the data up 
         if 'replace' in data:
             for thisfield in data['replace']:

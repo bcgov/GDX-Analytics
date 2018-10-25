@@ -13,7 +13,7 @@ Standalone sites - This tracker can be placed on any standalone site that uses G
 Currently this project is in development.
 
 ## To Run
-
+**Please Confirm with GDX Analytics before add the tracker to a web site.**   
 Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline. When adding to a standalone site please remove the '//' before the <script> tag at the top and bottom of the tracker.
 
 ## Getting Help

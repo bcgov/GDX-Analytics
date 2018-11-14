@@ -2,13 +2,19 @@
 
 This code demonstrates the inline Javascript to track web analytics events for CMS Lite sites. The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to include the Node Id. The [`gov_search_sp_script.js`](./gov_search_sp_script.js) search tracker includes a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
 
+## Trackers
+* Engage - This should only be used on engage.gov.bc.ca - engage_sp_tracker.js  
+* www2.gov.bc.ca - Should only be used on www2.gov.bc.ca - Main - gov_sp_script.js  
+* www2.gov.bc.ca - Should only be used on www2.gov.bc.ca - Search - gov_search_sp_script.js  
+* Standalone sites - This tracker can be placed on any standalone site that uses GDX Analytics services - Snowplow_inline_code.js  
+
 ## Project Status
 
 Currently this project is in development.
 
 ## To Run
-
-Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline. When adding this to the page please remove the '//' before the <script> tag at the top and bottom of the tracker.
+**Please Confirm with GDX Analytics before add the tracker to a web site.**   
+Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline. When adding to a standalone site please remove the '//' before the <script> tag at the top and bottom of the tracker.
 
 ## Getting Help
 

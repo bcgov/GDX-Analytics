@@ -115,6 +115,9 @@ client = boto3.client('s3') #low-level functional API
 resource = boto3.resource('s3') #high-level object-oriented API
 my_bucket = resource.Bucket(bucket) #subsitute this for your s3 bucket name.
 
+# prep database call to pull the batch file into redshift
+conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='microservice' password=" + os.environ['pgpass']
+
 # We will search through all objects in the bucket whose keys begin: source/directory/
 for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory + "/"):
     # Look for objects that match the filename pattern
@@ -184,10 +187,6 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
         if 'dateformat' in data:
             for thisfield in data['dateformat']:
                 df[thisfield['field']] = pd.to_datetime(df[thisfield['field']]).apply(lambda x: x.strftime(thisfield['format'])if not pd.isnull(x) else '')
-
-
-        # prep database call to pull the batch file into redshift
-        conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='microservice' password=" + os.environ['pgpass']
 
         # We loop over the columns listedin the .conf file. 
         # There are three sets of values that should match to consider:
@@ -273,5 +272,50 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
                         else:
                             if outfile is not badfile: # if outfile is already a badfile, never assign it as a goodfile
                                 outfile = goodfile
-            
+
             client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)
+
+# now we run the single-time load on the cmslite.themes
+query = """
+    SET search_path TO cmslite;
+    TRUNCATE cmslite.themes;
+    INSERT INTO cmslite.themes
+    WITH ids AS (
+        SELECT cm.node_id,
+            cm.title,
+            CASE
+                WHEN cm.parent_node_id = 'CA4CBBBB070F043ACF7FB35FE3FD1081' and cm.page_type = 'BC Gov Theme' THEN cm.node_id
+                WHEN cm.ancestor_nodes = '||' THEN cm.parent_node_id
+                ELSE TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) -- take the second entry. The first is always blank as the string has '|' on each end
+            END AS theme_id,
+            CASE
+                WHEN cm.parent_node_id = 'CA4CBBBB070F043ACF7FB35FE3FD1081' THEN NULL -- this page IS a theme, not a sub-theme
+                WHEN cm.ancestor_nodes = '||' AND cm.page_type = 'BC Gov Theme' THEN cm.node_id -- this page is a sub-theme
+                WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' AND cm_parent.page_type = 'BC Gov Theme' THEN cm.parent_node_id -- the page's parent is a sub-theme
+                WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) <> '' THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) -- take the third entry. The first is always blank as the string has '|' on each end and the second is the theme
+                ELSE NULL
+            END AS subtheme_id
+            FROM cmslite.metadata AS cm
+            LEFT JOIN cmslite.metadata AS cm_parent ON cm_parent.page_type = 'BC Gov Theme' AND cm_parent.node_id = cm.parent_node_id
+        )
+    SELECT
+        ids.*,
+        cm_theme.title AS theme,
+        cm_sub_theme.title AS subtheme
+        FROM ids
+        LEFT JOIN cmslite.metadata AS cm_theme ON cm_theme.node_id = theme_id
+        LEFT JOIN cmslite.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
+    ;
+    GRANT SELECT ON TABLE cmslite.themes TO LOOKER;
+    """
+
+log(query)
+with psycopg2.connect(conn_string) as conn:
+    with conn.cursor() as curs:
+        try:
+            curs.execute(query)
+        except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
+            log("Themes table loading failed\n\n")
+            log(e.pgerror)
+        else:                       # if the DB call succeed, place file in /good
+            log("Themes table loaded successfully\n\n")

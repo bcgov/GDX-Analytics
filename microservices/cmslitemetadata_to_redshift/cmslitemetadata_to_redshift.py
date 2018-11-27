@@ -275,7 +275,9 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
 
             client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)
 
-# now we run the single-time load on the cmslite.themes
+# Now we run the single-time load on the cmslite.themes
+# This generates a table that is available to data models in Looker to append theme and subtheme 
+#     information to content on gov.bc.ca based on a node_id/GUID.
 query = """
     SET search_path TO cmslite;
     TRUNCATE cmslite.themes;

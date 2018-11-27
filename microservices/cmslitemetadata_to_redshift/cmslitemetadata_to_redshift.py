@@ -306,7 +306,6 @@ query = """
         LEFT JOIN cmslite.metadata AS cm_theme ON cm_theme.node_id = theme_id
         LEFT JOIN cmslite.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
     ;
-    GRANT SELECT ON TABLE cmslite.themes TO LOOKER;
     """
 
 log(query)

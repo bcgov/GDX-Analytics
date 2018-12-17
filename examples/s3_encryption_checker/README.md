@@ -19,9 +19,12 @@ $ export AWS_SECRET_ACCESS_KEY="<<AWS_SECRET_KEY>>
 ```
 
 And run
-
 ```
 $ python s3_encryption_checker.py bucket
+```
+or
+```
+$ python s3_encryption_checker.py bucket prefix
 ```
 
 ## Getting Help

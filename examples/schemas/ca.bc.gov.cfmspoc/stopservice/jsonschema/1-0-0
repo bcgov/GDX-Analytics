@@ -1,0 +1,23 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for stopping an event when an additional service is started. If the service is not restarted, this will be the finish time for the service.",
+	"self": {
+		"vendor": "ca.bc.gov.cfmspoc",
+		"name": "stopservice",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"inaccurate_time": {
+			"type": "boolean"
+		},
+		"count": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 32767
+		}
+	},
+	"required": ["inaccurate_time", "count"],
+	"additionalProperties": false
+}

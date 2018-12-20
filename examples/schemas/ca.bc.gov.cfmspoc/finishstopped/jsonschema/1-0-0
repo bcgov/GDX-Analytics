@@ -1,0 +1,13 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for finally closing out a previously stopped service. The time of stopservice will generally be used as the finishing time.",
+	"self": {
+		"vendor": "ca.bc.gov.cfmspoc",
+		"name": "finishstopped",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {},
+	"additionalProperties": false
+}

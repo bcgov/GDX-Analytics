@@ -9,15 +9,12 @@
 	},
 	"type": "object",
 	"properties": {
-		"inaccurate_time": {
-			"type": "boolean"
-		},
 		"count": {
 			"type": "integer",
 			"minimum": 1,
 			"maximum": 32767
 		}
 	},
-	"required": ["inaccurate_time", "count"],
+	"required": ["count"],
 	"additionalProperties": false
 }

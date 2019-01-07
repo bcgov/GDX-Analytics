@@ -8,6 +8,12 @@
 		"version": "1-0-0"
 	},
 	"type": "object",
-	"properties": {},
+	"properties": {
+	        "quantity": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 32767
+		}},
+		"required": ["quantity"],
 	"additionalProperties": false
 }

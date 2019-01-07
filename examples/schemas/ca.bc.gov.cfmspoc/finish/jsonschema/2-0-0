@@ -1,0 +1,23 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for an finish event. Goes from Being Server to Citizen Left",
+	"self": {
+		"vendor": "ca.bc.gov.cfmspoc",
+		"name": "finish",
+		"format": "jsonschema",
+		"version": "2-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"inaccurate_time": {
+			"type": "boolean"
+		},
+		"quantity": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 32767
+		}
+	},
+	"required": ["inaccurate_time", "quantity"],
+	"additionalProperties": false
+}

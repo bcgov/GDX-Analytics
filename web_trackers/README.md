@@ -1,8 +1,8 @@
 ## GDX Analytics Snowplow Web Tracker Code
 
-This code demonstrates the inline Javascript to track web analytics events for CMS Lite, Wordpress, Search Appliance and Standalone sites. 
+This code demonstrates the inline Javascript to track web analytics events for CMS Lite, Wordpress, Search, and Standalone sites. **Please Confirm with GDX Analytics before add the tracker to a web site.** 
 
-The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to include the Node Id for CMS Lite. The [`gov_search_sp_script.js`](./gov_search_sp_script.js) search tracker includes a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
+It will connects to Snowplow Mini, which is used for development and testing. Once ready, the GDX Analytics Team will help you update it to the push data to the production Snowplow pipeline. 
 
 ## Trackers
 * [`gov_sp_script.js`](./gov_sp_script.js) should only be used by CMS Lite. It includes a custom context to capture the Node ID of the current page. 

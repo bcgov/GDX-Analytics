@@ -1,6 +1,6 @@
 ## GDX Analytics Snowplow Web Tracker Code
 
-This code demonstrates the inline Javascript to track web analytics events for CMS Lite, Wordpress, Search, and Standalone sites. **Please Confirm with GDX Analytics before add the tracker to a web site.** 
+This code demonstrates the inline Javascript to track web analytics events for CMS Lite, Wordpress, Search, and Standalone sites. **Please Confirm with GDX Analytics before adding the tracker to your website.** 
 
 It will connects to Snowplow Mini, which is used for development and testing. Once ready, the GDX Analytics Team will help you update it to the push data to the production Snowplow pipeline. 
 
@@ -18,7 +18,7 @@ The tracker version will be of the form `vX.A.B.C`, where `X` refers to the GDX 
 Currently this project is in development.
 
 ## To Run
-**Please Confirm with GDX Analytics before add the tracker to a web site.**   
+**Please Confirm with GDX Analytics before adding the tracker to you website.**   
 Add this script in the header section of the html page in a `<script type="text/javascript">` block. 
 
 This script connects to the test instance of Snowplow (Snowplow Mini). When the testing is completed, the collector must be changed to use the main Snowplow pipeline. Please contact the GDX Analytics Team for instructions to move to the production version. **NOTE:** You should not use the test version on a production site. 

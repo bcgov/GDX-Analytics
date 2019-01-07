@@ -7,7 +7,7 @@ import random
 
 # Set up core Snowplow environment
 s = Subject()#.set_platform("app") 
-e = AsyncEmitter("spm.gov.bc.ca", on_failure=SnowPlow.failure, protocol="https")
+e = AsyncEmitter("spm.gov.bc.ca", protocol="https")
 t = Tracker(e, encode_base64=False, app_id = 'demo')
 
 # get time stamp to create new "citizen" (be sure to convert to a string)

@@ -1,19 +1,23 @@
 {
 	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
-	"description": "Schema for finally closing out a previously stopped service. The time of stopservice will generally be used as the finishing time.",
+	"description": "Schema for an finish event. Goes from Being Server to Citizen Left",
 	"self": {
 		"vendor": "ca.bc.gov.cfmspoc",
-		"name": "finishstopped",
+		"name": "finish",
 		"format": "jsonschema",
-		"version": "1-0-0"
+		"version": "2-0-0"
 	},
 	"type": "object",
 	"properties": {
-	        "quantity": {
+		"inaccurate_time": {
+			"type": "boolean"
+		},
+		"quantity": {
 			"type": "integer",
 			"minimum": 1,
 			"maximum": 32767
-		}},
-		"required": ["quantity"],
+		}
+	},
+	"required": ["inaccurate_time", "quantity"],
 	"additionalProperties": false
 }

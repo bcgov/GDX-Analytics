@@ -7,7 +7,7 @@ The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to
 ## Trackers
 * [`gov_sp_script.js`](./gov_sp_script.js) should only be used by CMS Lite. It includes a custom context to capture the Node ID of the current page. 
 * [`gov_search_sp_script.js`](./gov_search_sp_script.js) should only be used for Search pages in CMS Lite.
-* [`wordpress_sp_script.js`]((./wordpress_sp_script.js) should be used by sites using the standard Wordpress setup. This includes Engage.gov sites and Standalone sites. 
+* [`wordpress_sp_script.js`](./wordpress_sp_script.js) should be used by sites using the standard Wordpress setup. This includes Engage.gov sites and Standalone sites. 
 * [`Snowplow_inline_code.js`](./Snowplow_inline_code.js) can be placed on any Standalone site that uses GDX Analytics services.
 
 ## Versioning

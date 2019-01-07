@@ -1,13 +1,13 @@
 #See https://github.com/snowplow/snowplow/wiki/Python-Tracker
 #   and https://github.com/snowplow-proservices/ca.bc.gov-schema-registry
-from snowplow_tracker import Subject, Tracker, Emitter
+from snowplow_tracker import Subject, Tracker, AsyncEmitter
 from snowplow_tracker import SelfDescribingJson
 import time
 import random
 
 # Set up core Snowplow environment
 s = Subject()#.set_platform("app") 
-e = Emitter("spm.gov.bc.ca", protocol="https")
+e = AsyncEmitter("spm.gov.bc.ca", protocol="https")
 t = Tracker(e, encode_base64=False, app_id = 'demo')
 
 # get time stamp to create new "citizen" (be sure to convert to a string)

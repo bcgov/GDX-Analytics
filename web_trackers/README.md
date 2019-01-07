@@ -29,7 +29,7 @@ Please Contact ryan.janes@gov.bc.ca for questions related to this work.
 
 ## Contributors
 
-The GDX analytics team will be the main contributors to this project currently. They will also maintain the code as well. 
+The GDX Analytics Team will be the main contributors to this project currently. They will also maintain the code. 
 
 ## License
 

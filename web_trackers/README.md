@@ -1,12 +1,17 @@
-## GDX Analytics CMS Lite Dev Code
+## GDX Analytics Snowplow Web Tracker Code
 
-This code demonstrates the inline Javascript to track web analytics events for CMS Lite sites. The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to include the Node Id. The [`gov_search_sp_script.js`](./gov_search_sp_script.js) search tracker includes a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
+This code demonstrates the inline Javascript to track web analytics events for CMS Lite, Wordpress, Search Appliance and Standalone sites. 
+
+The [`gov_sp_script.js`](./gov_sp_script.js) includes adding a custom context to include the Node Id for CMS Lite. The [`gov_search_sp_script.js`](./gov_search_sp_script.js) search tracker includes a search event that will collect the search terms for gov. It only connects to Snowplow Mini and will need to be updated to the push data to the production Snowplow pipeline when development is complete.
 
 ## Trackers
-* Engage - This should only be used on engage.gov.bc.ca - engage_sp_tracker.js  
-* www2.gov.bc.ca - Should only be used on www2.gov.bc.ca - Main - gov_sp_script.js  
-* www2.gov.bc.ca - Should only be used on www2.gov.bc.ca - Search - gov_search_sp_script.js  
-* Standalone sites - This tracker can be placed on any standalone site that uses GDX Analytics services - Snowplow_inline_code.js  
+* [`gov_sp_script.js`](./gov_sp_script.js) should only be used by CMS Lite. It includes a custom context to capture the Node ID of the current page. 
+* [`gov_search_sp_script.js`](./gov_search_sp_script.js) should only be used for Search pages in CMS Lite.
+* [`wordpress_sp_script.js`]((./wordpress_sp_script.js) should be used by sites using the standard Wordpress setup. This includes Engage.gov sites and Standalone sites. 
+* [`Snowplow_inline_code.js`](./Snowplow_inline_code.js) can be placed on any Standalone site that uses GDX Analytics services.
+
+## Versioning
+The tracker version will be of the form `vX.A.B.C`, where `X` refers to the GDX Analytics release and `A.B.C` refers to the Snowplow Javascript version.
 
 ## Project Status
 
@@ -14,7 +19,9 @@ Currently this project is in development.
 
 ## To Run
 **Please Confirm with GDX Analytics before add the tracker to a web site.**   
-Add this script in the header section of the html page. Currently this script is connecting to the test instance of Snowplow (Snowplow Mini), when the development work is done the collector will have to be changed to the main pipeline. When adding to a standalone site please remove the '//' before the <script> tag at the top and bottom of the tracker.
+Add this script in the header section of the html page in a `<script type="text/javascript">` block. 
+
+This script connects to the test instance of Snowplow (Snowplow Mini). When the testing is completed, the collector must be changed to use the main Snowplow pipeline. Please contact the GDX Analytics Team for instructions to move to the production version. **NOTE:** You should not use the test version on a production site. 
 
 ## Getting Help
 

@@ -15,14 +15,17 @@ The contents by directory are:
 #### [examples/](./examples/)
 
 - proof of concept examples of the code required to add Snowplow instrumentation client applications;
-- examples of the Javascript tracker used to push custom events to Snowplow;
 - embed generators in Java and Python demonstrating the generation of cryptographically signed SSO embed URL;
 - The `s3-upload.sh` script, to upload files to S3 with standard Unix utilities, for example: to run as a cron job and load scheduled data dumps;
 - Snowplow schema files.
 
-####  [microservices/](./microservices/)
+#### [microservices/](./microservices/)
 
 - microservices running on EC2 to perform automated data loads of well formed data into RedShift.
+
+#### [web_trackers/](./web_trackers)
+
+- examples of the Javascript tracker used to push custom events to Snowplow;
 
 #### [testing/](./testing/)
 

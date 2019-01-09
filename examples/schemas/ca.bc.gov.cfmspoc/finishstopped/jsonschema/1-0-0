@@ -13,7 +13,8 @@
 			"type": "integer",
 			"minimum": 1,
 			"maximum": 32767
-		}},
-		"required": ["quantity"],
+		}
+	},
+	"required": ["quantity"],
 	"additionalProperties": false
 }

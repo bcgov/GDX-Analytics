@@ -329,7 +329,7 @@ with psycopg2.connect(conn_string) as conn:
             query = "SET search_path TO cmslite; INSERT INTO microservice_log VALUES ('" + starttime + "', '" + endtime + "');"
             try:
                 curs.execute(query)
-                except psycopg2.Error as e: # if the DB call fails, print error
-                    log("Failed to write to cmslite.microservice_log")
-                    log(e.pgerror)
+            except psycopg2.Error as e: # if the DB call fails, print error
+                log("Failed to write to cmslite.microservice_log")
+                log(e.pgerror)
 

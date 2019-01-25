@@ -30,6 +30,12 @@ import os.path #file handling
 import itertools
 import string #string functions
 
+import datetime
+
+# we will use this timestamp to write to the cmslite.microservice_log tablee
+starttime = str(datetime.datetime.now())
+
+
 # set up debugging
 debug = True
 def log(s):
@@ -275,9 +281,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/" + directory +
 
             client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", CopySource="sp-ca-bc-gov-131565110619-12-microservices/"+object_summary.key, Key=outfile)
 
-# Now we run the single-time load on the cmslite.themes
-# This generates a table that is available to data models in Looker to append theme and subtheme 
-#     information to content on gov.bc.ca based on a node_id/GUID.
+# now we run the single-time load on the cmslite.themes
 query = """
     SET search_path TO cmslite;
     TRUNCATE cmslite.themes;
@@ -320,3 +324,12 @@ with psycopg2.connect(conn_string) as conn:
             log(e.pgerror)
         else:                       # if the DB call succeed, place file in /good
             log("Themes table loaded successfully\n\n")
+            #if the job was succesful, write to the cmslite.microservice_log table
+            endtime = str(datetime.datetime.now())
+            query = "SET search_path TO cmslite; INSERT INTO microservice_log VALUES ('" + starttime + "', '" + endtime + "');"
+            try:
+                curs.execute(query)
+            except psycopg2.Error as e: # if the DB call fails, print error
+                log("Failed to write to cmslite.microservice_log")
+                log(e.pgerror)
+

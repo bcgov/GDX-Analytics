@@ -19,6 +19,6 @@
         }
     },
     "minProperties": 2,
-    "required": ["title, url"],
+    "required": ["title","url"],
     "additionalProperties": false
 }

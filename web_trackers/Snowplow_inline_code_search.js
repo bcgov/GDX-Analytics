@@ -18,9 +18,10 @@ window.snowplow('newTracker','rt',collector, {
 window.snowplow('enableActivityTracking', 30, 30); // Ping every 30 seconds after 30 seconds
 window.snowplow('enableLinkClickTracking');
 window.snowplow('trackPageView');
-if (window.location.search.indexOf('q') > -1) {
+// Change the 'Search term parameter' to what is being used on the site, generally it is q.
+if (window.location.search.indexOf('Search term parameter') > -1) {
   window.snowplow('trackSiteSearch',
-      getUrlParamArray('q','')
+      getUrlParamArray('Search term parameter','')
   );
 }
 

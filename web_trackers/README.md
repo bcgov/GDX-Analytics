@@ -9,6 +9,7 @@ It will connects to Snowplow Mini, which is used for development and testing. On
 * [`gov_search_sp_script.js`](./gov_search_sp_script.js) should only be used for Search pages in CMS Lite.
 * [`wordpress_sp_script.js`](./wordpress_sp_script.js) should be used by sites using the standard Wordpress setup. This includes Engage.gov sites and Standalone sites. 
 * [`Snowplow_inline_code.js`](./Snowplow_inline_code.js) can be placed on any Standalone site that uses GDX Analytics services.
+* [`Snowplow_inline_code_search.js`](./Snowplow_inline_code_search.js) can be placed on any Standalone site that uses GDX Analytics services and has a search fuction. Please change the parameter in the if statment called 'search term parameter' to what is being used as the search parameter on your site. In most cases it is 'q' and for wordpress it is 's'.
 
 ## Versioning
 The tracker version will be of the form `vX.A.B.C`, where `X` refers to the GDX Analytics release and `A.B.C` refers to the Snowplow Javascript version.

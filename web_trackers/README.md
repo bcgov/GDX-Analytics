@@ -17,7 +17,7 @@ It will connects to Snowplow Mini, which is used for development and testing. On
    ```
    should be reassigned as:
    ```javascript
-   var searchParameter = 'q'
+   var searchParameter = 's'
    ```
 
 ## Versioning

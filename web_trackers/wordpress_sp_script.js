@@ -7,7 +7,6 @@ var collector = 'spm.gov.bc.ca';
 window.snowplow('newTracker','rt',collector, {
     appId: "Snowplow_engage",
     platform: 'web',
-    respectDoNotTrack: true,
     post: true,
     forceSecureTracker: true,
     contexts: {

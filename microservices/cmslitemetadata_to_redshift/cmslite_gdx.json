@@ -6,8 +6,8 @@
   "doc": "cmslite.csv.*",
   "dbschema": "cmslite",
   "dbtable": "metadata",
-  "columns": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title"],
-  "column_count": 21,
+  "columns": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title","site_key","site_id"],
+  "column_count": 23,
   "columns_metadata": [
     "node_id",
     "parent_node_id",
@@ -24,7 +24,9 @@
     "published_date",
     "title",
     "nav_title",
-    "eng_nav_title"
+    "eng_nav_title",
+    "site_key",
+    "site_id"
   ],
   "columns_lookup": [
     "content_types",
@@ -155,7 +157,7 @@
       "format": "%Y-%m-%d %H:%M:%S"
     }
   ],
-  "dtype_dic_strings": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title"],
+  "dtype_dic_strings": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title","site_key","site_id"],
   "delim": ",",
   "nested_delim": "|",
   "truncate": true

@@ -1,0 +1,26 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Demo Schema for Passing an Array",
+	"self": {
+		"vendor": "ca.bc.gov.demo",
+		"name": "list_array",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"fieldname": {
+			"type": ["string"],
+			"maxLength": 255
+		},
+		"selected": {
+                        "type": "array",
+                        "items": {
+                                "type": "string",
+                                "maxLength": 255
+                        }
+		}
+	},
+        "required": ["fieldname", "selected"],
+	"additionalProperties": false
+}

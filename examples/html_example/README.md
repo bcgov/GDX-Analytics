@@ -3,8 +3,7 @@
 This code demonstrates using the HTML/Javascript tracker to push custom events the the Snowplow Tracker. For more information on the Snowplow Javascript Tracker see https://github.com/snowplow/snowplow-javascript-tracker. 
 
 This includes two examples:
-* [index.html](index.html) demonstrates how to push non-website events to a custom Snowplow schema (NOTE: This is using an old version of the CFMS custom event schema.)
-* [test_html_node_context.html](test_html_node_context.html) demonstrates how to add a custom context to a Snowplow page view event. 
+* [index.html](index.html) demonstrates how to push non-website events to a custom Snowplow schema as defined in [../schemas/ca.bc.gov.demo](../schemas/ca.bc.gov.demo).
 
 ## Project Status
 
@@ -12,7 +11,7 @@ Currently this project is still in development.
 
 ## To Run
 
-Open [index.html](index.html) or [test_html_node_context.html](test_html_node_context.html) in your web browser and the events will be sent to Snowplow Mini for viewing. 
+Open [index.html](index.html) in your web browser and the events will be sent to Snowplow Mini for viewing. 
 
 ## Getting Help
 

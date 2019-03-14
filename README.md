@@ -4,11 +4,11 @@ This block represents an instance of Government of British Columbia’s Snowplow
 
 ## Features
 
-Snowplow is a Cloud-native web, mobile and event analytics that runs on AWS (RedShift) which identifies and tracks the way users engage with the website or application.
+Snowplow is a Cloud-native web, mobile, and offline event analytics service that runs on Amazon AWS (RedShift) which identifies and tracks the way users engage with the website or application.
 
 ## Project Status
 
-This project is currently in development mode. The GDX analytics team will contribute to the content of this project as a resource.
+This project is currently under development and actively supported by the GDX Analytics Team.
 
 ## Contents by Directory:
 
@@ -52,7 +52,7 @@ Please Contact the GDX Service desk at gcpe.servicedesk@gov.bc.ca for any analyt
 
 ## Contributors
 
-The GDX analytics team will be the main contributors to this project currently. They will maintain the code as well. 
+The GDX Analytics Team will be the main contributors to this project.
 
 ## License
 

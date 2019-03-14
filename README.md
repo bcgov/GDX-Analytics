@@ -33,18 +33,18 @@ This project is currently in development mode. The GDX analytics team will contr
 
 ## Relavant Repositories
 
-#### [GDX-Analytics-Looker-AWS-Cost-And-Usage/](bcgov/GDX-Analytics-Looker-AWS-Cost-And-Usage) 
+#### [GDX-Analytics-Looker-AWS-Cost-And-Usage/](https://github.com/bcgov/GDX-Analytics-Looker-AWS-Cost-And-Usage) 
 Provides GDX Analyitics with reporting to track AWS usage, estimated charges, and line items by AWS product, usage type, and operation.
-#### [GDX-Analytics-Looker-cfms_block/](bcgov/GDX-Analytics-Looker-cfms_block)
+#### [GDX-Analytics-Looker-cfms_block/](https://github.com/bcgov/GDX-Analytics-Looker-cfms_block)
 Represents an instance of the Government of British Columbia’s Service BC [LookerML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml) project.
-#### [GDX-Analytics-Looker-Redshift_Admin_By_AWS/](bcgov/GDX-Analytics-Looker-Redshift_Admin_By_AWS)
+#### [GDX-Analytics-Looker-Redshift_Admin_By_AWS/](https://github.com/bcgov/GDX-Analytics-Looker-Redshift_Admin_By_AWS)
 Provides a substitute for the AWS Console, helping users identify how tables are structured and if data flow is normal.
-#### [GDX-Analytics-Looker-Snowplow-Web-Block/](bcgov/GDX-Analytics-Looker-Snowplow-Web-Block)
+#### [GDX-Analytics-Looker-Snowplow-Web-Block/](https://github.com/bcgov/GDX-Analytics-Looker-Snowplow-Web-Block)
 Represents an instance of the Government of British Columbia’s [LookerML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml) project.
 #### [GDX-Analytics-Looker-Webtrends-Testing-Block/](https://github.com/bcgov/GDX-Analytics-Looker-Webtrends-Testing-Block)
 Represents the testing related to migration of Government of British Columbia’s data from WebTrends to Looker/Snowplow using [LookerML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml).
-#### [GDX-Analytics-OpenShift-Snowplow-Gateway-Service/](bcgov/GDX-Analytics-OpenShift-Snowplow-Gateway-Service)
-
+#### [GDX-Analytics-OpenShift-Snowplow-Gateway-Service/](https://github.com/bcgov/GDX-Analytics-OpenShift-Snowplow-Gateway-Service)
+A description will be added here soon.
 
 ## Getting Help
 

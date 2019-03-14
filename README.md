@@ -1,6 +1,6 @@
 ## GDX Analytics
 
-This block represents an instance of Government of British Columbia’svSnowplow tracking which identifies and tracks the way users engage with the website or application.
+This block represents an instance of Government of British Columbia’s Snowplow tracking which identifies and tracks the way users engage with the website or application.
 
 ## Features
 

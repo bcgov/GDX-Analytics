@@ -41,7 +41,7 @@ Represents an instance of the Government of British Columbia’s Service BC [Loo
 Provides a substitute for the AWS Console, helping users identify how tables are structured and if data flow is normal.
 #### [GDX-Analytics-Looker-Snowplow-Web-Block/](bcgov/GDX-Analytics-Looker-Snowplow-Web-Block)
 Represents an instance of the Government of British Columbia’s [LookerML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml) project.
-#### [GDX-Analytics-Looker-Webtrends-Testing-Block/](bcgov/GDX-Analytics-Looker-Webtrends-Testing-Block)
+#### [GDX-Analytics-Looker-Webtrends-Testing-Block/](bcgov/GDX-Analytics-Looker-Webtrends-Testing-Block/)
 Represents the testing related to migration of Government of British Columbia’s data from WebTrends to Looker/Snowplow using [LookerML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml).
 #### [GDX-Analytics-OpenShift-Snowplow-Gateway-Service/](bcgov/GDX-Analytics-OpenShift-Snowplow-Gateway-Service)
 

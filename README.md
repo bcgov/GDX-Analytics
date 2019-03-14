@@ -31,7 +31,7 @@ This project is currently in development mode. The GDX analytics team will contr
 
 - scripts automating the testing strategies of the WebTrends to Snowplow migration.
 
-## Relavant Repositories
+## Relevant Repositories
 
 #### [GDX-Analytics-Looker-AWS-Cost-And-Usage/](https://github.com/bcgov/GDX-Analytics-Looker-AWS-Cost-And-Usage) 
 Provides GDX Analyitics with reporting to track AWS usage, estimated charges, and line items by AWS product, usage type, and operation.

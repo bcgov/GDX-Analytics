@@ -22,7 +22,7 @@ office = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/office/jsonschema/1-0-0',
      { "office_id": 8, "office_type": "non-reception" }
 )
 
-agent = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/agent/jsonschema/2-0-0',
+agent = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/agent/jsonschema/2-0-1',
     { "agent_id": 42, "role" : "CSR", "quick_txn": False }
 )
 
@@ -30,7 +30,7 @@ agent = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/agent/jsonschema/2-0-0',
 addcitizen = SelfDescribingJson( 'iglu:ca.bc.gov.cfmspoc/addcitizen/jsonschema/1-0-0', {})
 
 # for chooseservices, we build a JSON array and pass it 
-chooseservice = SelfDescribingJson('iglu:ca.bc.gov.cfmspoc/chooseservice/jsonschema/2-0-0',
+chooseservice = SelfDescribingJson('iglu:ca.bc.gov.cfmspoc/chooseservice/jsonschema/3-0-0',
     { "channel": "in-person", "program_id" : 100, "parent_id" : 0, "program_name":"example program name", "transaction_name":"example transaction name" }
 )
 

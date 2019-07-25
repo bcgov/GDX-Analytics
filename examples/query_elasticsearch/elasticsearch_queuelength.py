@@ -24,20 +24,17 @@
 #                   : export ES_ENDPOINT='<<ElasticSearch_Endpoint>>'
 #                   : export ES_INDEX='<<ElasticSearch_Index>>'
 #
-# Usage             : To query a list of Service BC, run:
+# Usage             : To query a list of Service BC offices, run:
 #
 #                   : python3 elasticsearch_queuelength.py --config
-#                   :   domainlist.txt
+#                   :   officelist.txt
 #                   :   --username ES_USER --password ES_PASS
 #                   :   --endpoint ES_ENDPOINT --index ES_INDEX
 #
-#                   : where 'domainlist.txt' is a text file containing the
+#                   : where 'officelist.txt' is a text file containing the
 #                   : newline separated list of Service BC field offices you
-#                   : wish to query. You can optionally specify a start time
-#                   : and an end time using flags:
-#
-#                   : python3 elasticsearch_pageviews.py -c domainlist.txt
-#                   :   -u ES_USER -p ES_PASS -s 'now-60m' -e 'now'
+#                   : wish to query.
+
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
@@ -49,8 +46,8 @@ import signal
 
 # Arguments parsing
 parser = ArgumentParser(
-  description='Counts page views for given domains using Elastisearch \
-               and Snowplow.')
+  description='Counts queue length  for given Service BC field offices\
+               using Elastisearch and Snowplow.')
 parser.add_argument('-c', '--config', help='Config file listing the Service \
                     BC field offies of interest.', required=True)
 parser.add_argument('-u', '--username', help='Username.', required=True)
@@ -77,3 +74,23 @@ logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
+# Validate config file
+config = args.config
+if os.path.isfile(config):
+    with open(config) as f:
+        offices = tuple(line.rstrip() for line in f)
+else:
+    logger.error("a config file listing Sewrvice BC field offices by line is required. \
+                 Use --config <file_path>")
+
+# Assign credentials and collector information
+http_user = args.username
+http_pass = args.password
+endpoint = args.endpoint
+index = args.index
+
+client = Elasticsearch(endpoint, http_auth=(http_user, http_pass))
+logger.debug('Elastic search object: ', client)
+
+for office in office:

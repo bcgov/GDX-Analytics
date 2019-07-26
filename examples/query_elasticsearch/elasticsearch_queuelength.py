@@ -156,9 +156,9 @@ for office in offices:
         logger.debug(e)
     finish = s.count()
 
-    # Calculate the total number of citizens in the queue for
+    # Calculate the current number of citizens in the queue for
     # the current office
     queueSize = addCitizenCount - (customerLeft + finish)
 
     logger.info(office + ' queue size successfully queried')
-    print ('Office: ', office, ' Total queue size: ', queueSize)
+    print ('Office: ', office, ' Current queue size: ', queueSize)

@@ -61,7 +61,7 @@ Domain:  www.env.gov.bc.ca  Page Views:  4554
 ### [elasticsearch_queuelength.py](./elasticsearch_queuelength.py)
 Queries elasticsearch for the current day and calculates the queue length for given Service BC offices.
 
-Configuration file should contain line separated list of Service BC to query from Elasticsearch index and endpoint specified.
+Configuration file should contain line separated list of Service BC office locations (eg: Kelowna, Kamloops) to query from Elasticsearch index and endpoint specified.
 
 A file containing the json export of a Looker explore is required in order to search by Service BC office names. This can be exported from the following Explore: https://analytics.gov.bc.ca/explore/cfms_poc/cfms_poc?toggle=fil&qid=DWe1cjJI5lYB084l8fjZ1M
 
@@ -76,9 +76,9 @@ A sample result will appear as
 
 ```
 2019-07-26 14:06:25,355:[INFO]: Kelowna queue size successfully queried
-Office:  Kelowna  Total queue size:  4
+Office:  Kelowna  Current queue size:  4
 2019-07-26 14:06:25,623:[INFO]: Kamloops queue size successfully queried
-Office:  Kamloops  Total queue size:  9
+Office:  Kamloops  Current queue size:  9
 2019-07-26 14:06:25,889:[INFO]: Burnaby queue size successfully queried
-Office:  Burnaby  Total queue size:  0
+Office:  Burnaby  Current queue size:  0
 ```

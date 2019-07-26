@@ -16,8 +16,9 @@
 #                     https://analytics.gov.bc.ca/
 #                       explore/cfms_poc/cfms_poc?toggle=fil&qid=DWe1cjJI5lYB084l8fjZ1M
 #
-#                     Name the json export into a file called serviceBCOfficeList.json
-#                     and place it in the same directory as this script.
+#                     Name the json export into a file called
+#                     serviceBCOfficeList.json and place it in the same
+#                     directory as this script.
 #
 # Requirements      : Install the following python packages to allow
 #                     querying the elasticsearch endpoint, credentials, and

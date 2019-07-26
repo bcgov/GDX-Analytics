@@ -3,7 +3,7 @@
 #
 # Description       : Queries elasticsearch and calculates the current
 #                     number of citizens in line for a given Service BC
-#                     fierld office
+#                     field office
 #
 #                     Configuration file should contain line separated list of
 #                     Service BC offices to query from Elasticsearch, index and

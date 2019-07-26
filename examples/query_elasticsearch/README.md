@@ -1,4 +1,4 @@
-## GDX Analytics Elastisearch Query Example
+## GDX Analytics Elasticsearch Query Example
 
 ### [elasticsearch_tail.py](./elasticsearch_tail.py)
 Simulates a unix like tail command for Elasticsearch

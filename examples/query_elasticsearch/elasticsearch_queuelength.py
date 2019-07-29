@@ -11,10 +11,7 @@
 #
 #                     In order to query by office location (eg: Kelowna,
 #                     Kamloops), it is necessary to include a JSON export
-#                     of office names and id's. This json export can be
-#                     created in the looker explore, here:
-#                     https://analytics.gov.bc.ca/
-#                       explore/cfms_poc/cfms_poc?toggle=fil&qid=DWe1cjJI5lYB084l8fjZ1M
+#                     of office names and id's.
 #
 #                     Name the json export into a file called
 #                     serviceBCOfficeList.json and place it in the same
@@ -26,6 +23,11 @@
 #
 #                   : elasticsearch-dsl>=6.0.0,<7.0.0
 #                   : elasticsearch>=6.0.0,<7.0.0
+#
+#                   : serviceBCOfficeList.json is a json file 
+#                   : containing office locations and ID's and
+#                   : is requried to run the script.
+#
 #
 # Recommendations   : It's recommended to set environment variables for
 #                     the elastic search endpoint.
@@ -51,10 +53,12 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 import logging
 from argparse import ArgumentParser
+from datetime import date
 import json
 import sys
 import os
 import signal
+import time
 
 # Arguments parsing
 parser = ArgumentParser(
@@ -68,7 +72,6 @@ parser.add_argument('-d', '--debug', help='Debug', action="store_true")
 parser.add_argument('-i', '--index', help='Index', required=True)
 parser.add_argument('-ep', '--endpoint', help='Endpoint', required=True)
 args = parser.parse_args()
-
 
 # Ctrl+C
 def signal_handler(signal, frame):
@@ -93,7 +96,7 @@ if os.path.isfile(config):
     with open(config) as f:
         offices = tuple(line.rstrip() for line in f)
 else:
-    logger.error("a config file listing Sewrvice BC field offices by line is required. \
+    logger.error("a config file listing Service BC field offices by line is required. \
                  Use --config <file_path>")
 
 # Assign credentials and collector information
@@ -101,6 +104,8 @@ http_user = args.username
 http_pass = args.password
 endpoint = args.endpoint
 index = args.index
+
+anchordate = date.today().strftime("%Y-%m-%d")
 
 client = Elasticsearch(endpoint, http_auth=(http_user, http_pass))
 logger.debug('Elastic search object: ', client)
@@ -114,42 +119,43 @@ for office in offices:
         if serviceCenter["cfms_poc.office_name"] == office:
             office_id = serviceCenter['cfms_poc.office_id']
 
-    # Query for number of addcitizen events. Note: The derived timestamp looks
-    # weird but 'now/d+7h' is rounding down to the start of the day in UTC
-    # which is 1700 which is 17h00 local on the previous day, so I am adding
-    # 5 hours to get midnight.
+    # Query for number of addcitizen events.
+    # Note: Uses IANA time zone code 'America/Vancouver' to account for PDT and UTC offset.
     params = Q('term', app_id='TheQ') & \
         Q('term', event_name='addcitizen') & \
         Q('term', **{'contexts_ca_bc_gov_cfmspoc_office_1.office_id':
                      office_id}) & \
-        Q('range', derived_tstamp={'gte': 'now/d+7h'}) & \
-        Q('range', derived_tstamp={'lt': 'now'})
+        Q('range', derived_tstamp={'gte': anchordate}) & \
+        Q('range', derived_tstamp={'lt': "now"}) & \
+        Q('range', derived_tstamp={'time_zone': "America/Vancouver"})
     try:
         s = Search(using=client, index=index).filter(params)
     except Exception as e:
         logger.debug(e)
     addCitizenCount = s.count()
 
-    # Query for number of customerleft events
+    # Query for number of customerleft events.
     params = Q('term', app_id='TheQ') & \
         Q('term', event_name='customerleft') & \
         Q('term', **{'contexts_ca_bc_gov_cfmspoc_office_1.office_id':
                      office_id}) & \
-        Q('range', derived_tstamp={'gte': 'now/d+7h'}) & \
-        Q('range', derived_tstamp={'lt': 'now'})
+        Q('range', derived_tstamp={'gte': anchordate}) & \
+        Q('range', derived_tstamp={'lt': "now"}) & \
+        Q('range', derived_tstamp={'time_zone': "America/Vancouver"})
     try:
         s = Search(using=client, index=index).filter(params)
     except Exception as e:
         logger.debug(e)
     customerLeft = s.count()
 
-    # Query for number of finish events
+    # Query for number of finish events.
     params = Q('term', app_id='TheQ') & \
         Q('term', event_name='finish') & \
         Q('term', **{'contexts_ca_bc_gov_cfmspoc_office_1.office_id':
                      office_id}) & \
-        Q('range', derived_tstamp={'gte': 'now/d+7h'}) & \
-        Q('range', derived_tstamp={'lt': 'now'})
+        Q('range', derived_tstamp={'gte': anchordate}) & \
+        Q('range', derived_tstamp={'lt': "now"}) & \
+        Q('range', derived_tstamp={'time_zone': "America/Vancouver"})
     try:
         s = Search(using=client, index=index).filter(params)
     except Exception as e:

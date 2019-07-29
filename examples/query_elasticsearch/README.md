@@ -63,9 +63,7 @@ Queries elasticsearch for the current day and calculates the queue length for gi
 
 Configuration file should contain line separated list of Service BC office locations (eg: Kelowna, Kamloops) to query from Elasticsearch index and endpoint specified.
 
-A file containing the json export of a Looker explore is required in order to search by Service BC office names. This can be exported from the following Explore: https://analytics.gov.bc.ca/explore/cfms_poc/cfms_poc?toggle=fil&qid=DWe1cjJI5lYB084l8fjZ1M
-
-This json export file needs to be placed in the same directory as elasticsearch_queuelength.py in order to look up office names.
+A json file, serviceBCOfficeList.json, containing Service BC office names and IDs must be included in the same directory as the script.
 
 Example Usage:
 ````

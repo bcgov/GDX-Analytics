@@ -19,7 +19,7 @@ window.snowplow('enableLinkClickTracking');
 window.snowplow('trackPageView');
 // Change the 'Search term parameter' to what is being used on the site, generally it is q.
 var searchParameter = 'Search term parameter'
-// This checks for the search parameter that was put in ablove along with an equal, for example q= or s=
+// This checks for the search parameter that was put in above along with an equal, for example q= or s=
 if (window.location.search.indexOf(searchParameter + '=') > -1) {
   window.snowplow('trackSiteSearch',
       getUrlParamArray(searchParameter,'')

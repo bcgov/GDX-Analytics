@@ -53,6 +53,8 @@ import httplib2
 import pandas as pd
 import dateutil.relativedelta
 
+import googleapiclient.errors
+
 from io import BytesIO
 import datetime
 from datetime import timedelta
@@ -265,7 +267,8 @@ for account in validated_accounts:
         # query RedShift to see if there is a date already loaded
         last_loaded_date = last_loaded(config_dbtable, loc['name'])
         if last_loaded_date is None:
-            logger.info("first time loading {}".format(account['name']))
+            logger.info("first time loading {}: {}"
+                        .format(account['name'], loc['name']))
 
         # If it is loaded with some data for this ID, use that date plus
         # one day as the start_date.
@@ -277,12 +280,14 @@ for account in validated_accounts:
         start_time = start_date + 'T00:00:00Z'
 
         # if an end_date is defined in the config file, use that date
+        date_api_upper_limit = (
+            datetime.datetime.today().date() - timedelta(days=2)).isoformat()
         end_date = account['end_date']
         if end_date == '':
             # The most recent data available is from two days ago
-            end_date = (
-                datetime.datetime.today().date() - timedelta(days=2)
-                ).isoformat()
+            end_date = date_api_upper_limit
+        if end_date > date_api_upper_limit:
+            logger.warning("The end_date is more recent than 2 days ago.")
 
         end_time = end_date + 'T00:00:00Z'
 
@@ -318,10 +323,17 @@ for account in validated_accounts:
                 }
             }
 
+        logger.debug("Request body:\n{0}"
+                     .format(json.dumps(bodyvar, indent=2)))
+
         # retrieves the request for this location.
-        reportInsights = \
-            service.accounts().locations().\
-            reportInsights(body=bodyvar, name=account_uri).execute()
+        try:
+            reportInsights = \
+                service.accounts().locations().\
+                reportInsights(body=bodyvar, name=account_uri).execute()
+        except googleapiclient.errors.HttpError as e:
+            logger.info("Request contains an invalid argument. Skipping.")
+            continue
 
         # # dump reportInsights to a file for manual review
         # with open(location_uri + 'json', 'w', encoding='utf-8') as f:
@@ -421,6 +433,3 @@ for account in validated_accounts:
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
-        # 
-        # # END EARLY WHILE TESTING
-        # sys.exit(1)

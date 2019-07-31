@@ -41,6 +41,15 @@
 #               :   When you first run it, it will ask you do do an OAUTH
 #               :   validation, which will create a file 'mybusiness.dat',
 #               :   saving that auhtorization.
+#               :
+# Usage         : e.g.:
+#               : $ python google_mybusiness.py -o credentials_mybusiness.json\
+#               :  -a mybusiness.dat -c google_mybusiness.json
+#               :
+#               : the flags specified in the usage example above are:
+#               : -o <OAuth Credentials JSON file>
+#               : -a <Stored authorization dat file>
+#               : -c <Microservice configuration file>
 
 import os
 import sys
@@ -97,7 +106,7 @@ parser = argparse.ArgumentParser(
     parents=[tools.argparser],
     description='GDX Analytics ETL utility for Google My Business insights.')
 parser.add_argument('-o', '--cred', help='OAuth Credentials JSON file.')
-parser.add_argument('-a', '--auth', help='Stored authorization dat file')
+parser.add_argument('-a', '--auth', help='Stored authorization dat file.')
 parser.add_argument('-c', '--conf', help='Microservice configuration file.',)
 parser.add_argument('-d', '--debug', help='Run in debug mode.',
                     action='store_true')
@@ -279,12 +288,15 @@ for account in validated_accounts:
 
         start_time = start_date + 'T00:00:00Z'
 
-        # if an end_date is defined in the config file, use that date
+        # the most recently available data from the Google API is 2 days before
+        # the query time. More details in the API reference at:
+        # https://developers.google.com/my-business/reference/rest/v4/accounts.locations/reportInsights
         date_api_upper_limit = (
             datetime.datetime.today().date() - timedelta(days=2)).isoformat()
+        # if an end_date is defined in the config file, use that date
         end_date = account['end_date']
         if end_date == '':
-            # The most recent data available is from two days ago
+
             end_date = date_api_upper_limit
         if end_date > date_api_upper_limit:
             logger.warning("The end_date is more recent than 2 days ago.")

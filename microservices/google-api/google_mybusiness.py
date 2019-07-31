@@ -347,10 +347,6 @@ for account in validated_accounts:
             logger.info("Request contains an invalid argument. Skipping.")
             continue
 
-        # # dump reportInsights to a file for manual review
-        # with open(location_uri + 'json', 'w', encoding='utf-8') as f:
-        #     json.dump(reportInsights, f, indent=2)
-
         # We constrain API calls to one location at a time, so
         # there is only one element in the locationMetrics list:
         metrics = reportInsights['locationMetrics'][0]['metricValues']

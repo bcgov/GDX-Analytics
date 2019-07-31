@@ -43,10 +43,10 @@ Google makes location insights data available for a time range spanning 18 month
 - `"locations"`: an object that annotates account information from clients that have provided us access”
   - `"client_shortname"`: the client name to be recorded in the client column of the table for filtering
   - `"name"`: The account Name label
-  - `"names_replacement"`: An list to replace matched values from the locations under this account as suggested by: `['find','replace']`. For example, in the case of Service BC, all locations are prefixed with "Service BC Centre". We replace this with nothing in order to get _just_ the unique names.
-  - `"id"`: the account ID, used for validation when querying the API.
+  - `"names_replacement"`: a list to replace matched values from the locations under this account as suggested by: `['find','replace']`. For example, in the case of Service BC, all locations are prefixed with "Service BC Centre". We replace this with nothing in order to get _just_ the unique names (the locations' community names).
+  - `"id"`: the location group, used for validation when querying the API.
   - `"start_date"`: the query start date as `"YYYY-MM-DD"`, leave as `""` to get the oldest data possible (18 months ago)
-  - `"end_date"`: the query end date as `"YYYY-MM-DD"`, leave as `""` to get the most recent data possible (2 days ago) 
+  - `"end_date"`: the query end date as `"YYYY-MM-DD"`, leave as `""` to get the most recent data possible (2 days ago)
 
 
 ## Project Status

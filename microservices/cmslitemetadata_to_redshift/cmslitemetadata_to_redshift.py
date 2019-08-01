@@ -284,12 +284,14 @@ for object_summary in objects_to_process:
     # build an aggregate query which will be used to make one transaction
     copy_queries = {}
     for i in range(-1, len(columns_lookup)*2):
+        # the metadata table is built once
         if (i == -1):
             column = "metadata"
             dbtable = "metadata"
             key = None
             columnlist = columns_metadata
             df_new = df.copy()
+        # the column lookup tables are built
         elif (i < len(columns_lookup)):
             key = "key"
             column = columns_lookup[i]
@@ -297,6 +299,7 @@ for object_summary in objects_to_process:
             dbtable = dbtables_dictionaries[i]
             df_new = to_dict(df, column)  # make dictionary a dataframe of this column
             dictionary_dfs[columns_lookup[i]] = df_new
+        # the metadata tables are built
         else:
             i_off = i - len(columns_lookup)
             key = None
@@ -328,7 +331,7 @@ for object_summary in objects_to_process:
         to_s3(bucket, batchfile, dbtable + '.csv', df_new, columnlist, key)
 
         copy_query_unformatted = "".join((
-            "COPY {dbtable} FROM ",
+            "COPY {dbtable}_scratch FROM ",
             "'s3://{my_bucket_name}/{batchfile}/{dbtable}.csv' ",
             "CREDENTIALS 'aws_access_key_id={aws_access_key_id};",
             "aws_secret_access_key={aws_secret_access_key}' ",
@@ -336,6 +339,7 @@ for object_summary in objects_to_process:
             "DELIMITER '	' NULL AS '-' ESCAPE;")
             )
 
+        # append the formatted copy query to the copy_queries dictionary
         copy_queries[dbtable] = copy_query_unformatted.format(
             dbtable=dbtable,
             my_bucket_name=bucket_name,
@@ -343,8 +347,7 @@ for object_summary in objects_to_process:
             aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
             aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
 
-    # TODO: prepare the aggregate query
-    # prep the single-transaction this_query
+    # prepare the single-transaction query
     query = 'BEGIN; SET search_path TO {dbschema};'.format(
         dbschema=dbschema)
     for table, copy_query in copy_queries.items():

@@ -179,6 +179,7 @@ def is_processed(object_summary):
 # This bucket scan will find unprocessed objects.
 # objects_to_process will contain zero or one objects if truncate=True;
 # objects_to_process will contain zero or more objects if truncate=False.
+
 objects_to_process = []
 for object_summary in my_bucket.objects.filter(Prefix=source + "/"
                                                + directory + "/"):
@@ -187,6 +188,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
     if is_processed(object_summary):
         continue
     else:
+        logger.debug("Processing {}".format(object_summary))
         # only review those matching our configued 'doc' regex pattern
         if re.search(doc + '$', key):
             # under truncate, we will keep list length to 1
@@ -331,12 +333,12 @@ for object_summary in objects_to_process:
         to_s3(bucket, batchfile, dbtable + '.csv', df_new, columnlist, key)
 
         copy_query_unformatted = "".join((
-            "COPY {dbtable}_scratch FROM ",
-            "'s3://{my_bucket_name}/{batchfile}/{dbtable}.csv' ",
-            "CREDENTIALS 'aws_access_key_id={aws_access_key_id};",
-            "aws_secret_access_key={aws_secret_access_key}' ",
-            "IGNOREHEADER AS 1 MAXERROR AS 0 ",
-            "DELIMITER '	' NULL AS '-' ESCAPE;")
+            "COPY {dbtable}_scratch FROM \n",
+            "'s3://{my_bucket_name}/{batchfile}/{dbtable}.csv' \n",
+            "CREDENTIALS 'aws_access_key_id={aws_access_key_id};\n",
+            "aws_secret_access_key={aws_secret_access_key}' \n",
+            "IGNOREHEADER AS 1 MAXERROR AS 0 \n",
+            "DELIMITER '	' NULL AS '-' ESCAPE;\n")
             )
 
         # append the formatted copy query to the copy_queries dictionary
@@ -348,29 +350,29 @@ for object_summary in objects_to_process:
             aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
 
     # prepare the single-transaction query
-    query = 'BEGIN; SET search_path TO {dbschema};'.format(
+    query = 'BEGIN; \nSET search_path TO {dbschema};'.format(
         dbschema=dbschema)
     for table, copy_query in copy_queries.items():
-        query = query.join((
-            'DROP TABLE IF EXISTS {table}_scratch;',
-            'DROP TABLE IF EXISTS {table}_old;',
-            'CREATE TABLE {table}_scratch (LIKE {table});',
-            'ALTER TABLE {table}_scratch OWNER TO microservice;',
-            'GRANT SELECT ON {table}_scratch TO looker;')).format(
+        start_query = "".join((
+            'DROP TABLE IF EXISTS {table}_scratch;\n',
+            'DROP TABLE IF EXISTS {table}_old;\n',
+            'CREATE TABLE {table}_scratch (LIKE {table});\n',
+            'ALTER TABLE {table}_scratch OWNER TO microservice;\n',
+            'GRANT SELECT ON {table}_scratch TO looker;\n')).format(
                 table=table)
-        query = query + copy_query
-        query = query.join((
-            'ALTER TABLE {table} RENAME TO {table}_old;',
-            'ALTER TABLE {table}_scratch RENAME TO {table};',
-            'DROP TABLE {table}_old;')).format(
+        end_query = "".join((
+            'ALTER TABLE {table} RENAME TO {table}_old;\n',
+            'ALTER TABLE {table}_scratch RENAME TO {table};\n',
+            'DROP TABLE {table}_old;\n')).format(
                 table=table)
-    query = query + 'COMMIT;'
+        query = query + start_query + copy_query + end_query
+    query = query + 'COMMIT;\n'
     logquery = (
         query.replace
         (os.environ['AWS_ACCESS_KEY_ID'], 'AWS_ACCESS_KEY_ID').replace
         (os.environ['AWS_SECRET_ACCESS_KEY'], 'AWS_SECRET_ACCESS_KEY'))
 
-    logger.debug(logquery)
+    logger.debug('\n' + logquery)
     with psycopg2.connect(conn_string) as conn:
         with conn.cursor() as curs:
             try:
@@ -392,9 +394,9 @@ for object_summary in objects_to_process:
 
 # now we run the single-time load on the cmslite.themes
 query = """
-    SET search_path TO cmslite;
-    TRUNCATE cmslite.themes;
-    INSERT INTO cmslite.themes
+    SET search_path TO {dbschema};
+    TRUNCATE {dbschema}.themes;
+    INSERT INTO {dbschema}.themes
     WITH ids AS (
         SELECT cm.node_id,
             cm.title,
@@ -419,8 +421,8 @@ query = """
                 WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) <> '' THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) -- take the fourth entry. The first is always blank as the string has '|' on each end and the second is the theme, third is sub-theme
                 ELSE NULL
             END AS topic_id
-            FROM cmslite.metadata AS cm
-            LEFT JOIN cmslite.metadata AS cm_parent ON cm_parent.node_id = cm.parent_node_id
+            FROM {dbschema}.metadata AS cm
+            LEFT JOIN {dbschema}.metadata AS cm_parent ON cm_parent.node_id = cm.parent_node_id
         ),
     biglist AS (
         SELECT
@@ -430,12 +432,12 @@ query = """
             cm_sub_theme.title AS subtheme,
             cm_topic.title AS topic
             FROM ids
-            LEFT JOIN cmslite.metadata AS cm_theme ON cm_theme.node_id = theme_id
-            LEFT JOIN cmslite.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
-            LEFT JOIN cmslite.metadata AS cm_topic ON cm_topic.node_id = topic_id
+            LEFT JOIN {dbschema}.metadata AS cm_theme ON cm_theme.node_id = theme_id
+            LEFT JOIN {dbschema}.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
+            LEFT JOIN {dbschema}.metadata AS cm_topic ON cm_topic.node_id = topic_id
         )
         SELECT node_id, title, hr_url, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
-    """
+    """.format(dbschema=dbschema)
 
 logger.debug(query)
 with psycopg2.connect(conn_string) as conn:
@@ -448,8 +450,13 @@ with psycopg2.connect(conn_string) as conn:
             logger.info("Themes table loaded successfully")
             # if the job was succesful, write to the cmslite.microservice_log table
             endtime = str(datetime.datetime.now())
-            query = "SET search_path TO cmslite; INSERT INTO microservice_log VALUES ('" + starttime + "', '" + endtime + "');"
+            query = "".join(("SET search_path TO {dbschema}; ",
+                             "INSERT INTO microservice_log VALUES ",
+                             "('{starttime}', '{endtime}');")).format(
+                                 dbschema=dbschema,
+                                 starttime=starttime,
+                                 endtime=endtime)
             try:
                 curs.execute(query)
             except psycopg2.Error as e:  # if the DB call fails, print error
-                logger.error("Failed to write to cmslite.microservice_log\n{0}".format(e.pgerror))
+                logger.exception("Failed to write to {dbschema}.microservice_log".format(dbschema=dbschema))

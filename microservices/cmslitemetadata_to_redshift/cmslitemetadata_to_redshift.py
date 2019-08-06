@@ -335,7 +335,7 @@ for object_summary in objects_to_process:
         copy_query_unformatted = "".join((
             "COPY {dbtable}_scratch FROM \n",
             "'s3://{my_bucket_name}/{batchfile}/{dbtable}.csv' \n",
-            "CREDENTIALS 'aws_access_key_id={aws_access_key_id};\n",
+            "CREDENTIALS 'aws_access_key_id={aws_access_key_id};",
             "aws_secret_access_key={aws_secret_access_key}' \n",
             "IGNOREHEADER AS 1 MAXERROR AS 0 \n",
             "DELIMITER '	' NULL AS '-' ESCAPE;\n")

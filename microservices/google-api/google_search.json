@@ -20,6 +20,10 @@
     {
        "name":"https://betterbuildingsbc.ca/",
        "start_date_default":"2019-05-21"
+    },
+    {
+      "name":"https://studentsuccess.gov.bc.ca/",
+      "start_date_default":"2019-07-31"
     }
   ]
 }

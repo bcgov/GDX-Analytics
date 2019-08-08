@@ -61,7 +61,7 @@ import signal
 
 # Arguments parsing
 parser = ArgumentParser(
-    description='Counts queue length  for given Service BC field offices\
+    description='Counts number of poeple in line for given Service BC field offices\
            using Elastisearch and Snowplow.')
 parser.add_argument('-c', '--config', help='Config file listing the Service \
                     BC field offies of interest.', required=True)
@@ -98,7 +98,7 @@ if os.path.isfile(config):
 else:
     logger.error("a config file listing Service BC field offices by line is required. \
                  Use --config <file_path>")
-   
+
 # Assign credentials and collector information
 http_user = args.username
 http_pass = args.password
@@ -163,9 +163,10 @@ for office in offices:
         logger.debug(e)
     finish = s.count()
 
-    # Calculate the current number of citizens in the queue for
+    # Calculate the current number of citizens in line
     # the current office
-    queueSize = addCitizenCount - (customerLeft + finish)
+    lineSize = addCitizenCount - (customerLeft + finish)
 
-    logger.info(office + ' queue size successfully queried')
-    print ('Office: ', office, ' Current queue size: ', queueSize)
+    logger.info('Number of people in line in the ' + office +
+                ' Service BC office successfully queried')
+    print ('Office: ', office, ' Current number of people in line: ', lineSize)

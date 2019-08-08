@@ -57,8 +57,8 @@ Domain:  intranet.gov.bc.ca  Page Views:  4260
 2019-07-15 14:54:40,362:[INFO]: www.env.gov.bc.ca page views successfully queried
 Domain:  www.env.gov.bc.ca  Page Views:  4154
 ```
-### [elasticsearch_queuelength.py](./elasticsearch_queuelength.py)
-Queries elasticsearch for the current day and calculates the queue length for given Service BC offices.
+### [elasticsearch_linesize.py](./elasticsearch_linesize.py)
+Queries elasticsearch for the current day and calculates the number of people in line for given Service BC offices.
 
 A configuration file must be created and should contain line separated list of Service BC office locations (eg: Kelowna, Kamloops) to query from Elasticsearch index and endpoint specified.
 
@@ -66,16 +66,16 @@ A json file, serviceBCOfficeList.json, containing Service BC office names and ID
 
 Example Usage:
 ````
-python3 elasticsearch_queuelength.py --config <config_file> --username $ES_USER --password $ES_PASS --endpoint $ES_ENDPOINT --index $ES_INDEX
+python3 elasticsearch_linesize.py --config <config_file> --username $ES_USER --password $ES_PASS --endpoint $ES_ENDPOINT --index $ES_INDEX
 ````
 
 A sample result will appear as
 
 ```
-2019-07-26 14:06:25,355:[INFO]: Kelowna queue size successfully queried
-Office:  Kelowna  Current queue size:  4
-2019-07-26 14:06:25,623:[INFO]: Kamloops queue size successfully queried
-Office:  Kamloops  Current queue size:  9
-2019-07-26 14:06:25,889:[INFO]: Burnaby queue size successfully queried
-Office:  Burnaby  Current queue size:  0
+2019-08-08 13:54:58,053:[INFO]: Number of people in line in the Kelowna Service BC office successfully queried
+Office:  Kelowna  Current number of people in line:  2
+2019-08-08 13:54:58,419:[INFO]: Number of people in line in the Burnaby Service BC office successfully queried
+Office:  Burnaby  Current number of people in line:  1
+2019-08-08 13:54:58,792:[INFO]: Number of people in line in the Kamloops Service BC office successfully queried
+Office:  Kamloops  Current number of people in line:  9
 ```

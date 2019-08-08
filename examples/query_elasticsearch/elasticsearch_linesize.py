@@ -1,5 +1,5 @@
 ###################################################################
-# Script Name       : elasticsearch_queuelength.py
+# Script Name       : elasticsearch_linesize.py
 #
 # Description       : Queries elasticsearch and calculates the current
 #                     number of citizens in line for a given Service BC

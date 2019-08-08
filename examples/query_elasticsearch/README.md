@@ -72,10 +72,10 @@ python3 elasticsearch_linesize.py --config <config_file> --username $ES_USER --p
 A sample result will appear as
 
 ```
-2019-08-08 13:54:58,053:[INFO]: Number of people in line in the Kelowna Service BC office successfully queried
-Office:  Kelowna  Current number of people in line:  2
-2019-08-08 13:54:58,419:[INFO]: Number of people in line in the Burnaby Service BC office successfully queried
-Office:  Burnaby  Current number of people in line:  1
-2019-08-08 13:54:58,792:[INFO]: Number of people in line in the Kamloops Service BC office successfully queried
-Office:  Kamloops  Current number of people in line:  9
+2019-08-08 13:54:58,053:[INFO]: Number of people in line in the Gotham City Service BC office successfully queried
+Office:  Gotham City  Current number of people in line:  2
+2019-08-08 13:54:58,419:[INFO]: Number of people in line in the Metropolis Service BC office successfully queried
+Office:  Metropolis  Current number of people in line:  1
+2019-08-08 13:54:58,792:[INFO]: Number of people in line in the Capital City Service BC office successfully queried
+Office:  Capital City  Current number of people in line:  9
 ```

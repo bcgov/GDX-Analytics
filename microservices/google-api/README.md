@@ -1,4 +1,4 @@
-## Google Search API Loader Microservice
+### Google Search API Loader Microservice
 
 The `google_search.py` script automates the loading of Google Search API data into S3 (as `.csv`) and Redshift (the `google.googlesearch` schema as defined by `google.googlesearch.sql`).
 
@@ -8,7 +8,7 @@ The microservice will begin loading Google data from the date specified in the c
 
 It currently runs in batches of a maximum of 30 days at a time until 2 days ago (the latest available data from the Google Search API).
 
-## Configuration
+#### Configuration
 
 The JSON configuration is loaded as an environmental variable defined as `GOOGLE_MICROSERVICE_CONFIG`. It follows this structure:
 
@@ -30,9 +30,33 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
 }
 ```
 
+### Google My Business Driving Directions Loader Microservice
+
+ #### Script
+ The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. When run, logs are appended to `logs/google_directions.log`. Create the logs directory before running if it does not already exist.
+ #### Table
+ The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
+ #### Configuration
+ The configuration for this microservice is in the `google_directions.json` file.
+
+The JSON configuration fields are as described below:
+
+| Key label | Value type | Value Description |
+|-|-|-|
+| `bucket` | string | The bucket name to write to             |
+| `dbtable` | string | The table name in Redshift to insert on |
+| `locationGroups[]` | object (`location`) | objects representing locations, described below. This is an object to in order to accommodate future expansion on this field as necessary. |
+
+`location` has been structured as an object in order to allow easier future extensibility, if necessary. The fields currently set in `location` are described below:
+
+| Key label | Value type | Value Description |
+|-|-|-|
+| `clientShortname` | string | An internal shortname for a client's location group. An environment variable should be set as: `<clientShortname>_accountid=<accountid>` in order to map the Location Group Account ID to this client shortname. The `clientShortname` is also used  |
+
+
 ## Project Status
 
-Currently microservice itself is implemented. As sites provide GDX Analytics with access to their Google Search APIs, they will be added to the configuration file to be handled by the microservice.
+As clients provide GDX Analytics with access to their Google Search of My Business profiles, they will be added to the configuration file to be handled by the microservice.
 
 ## Getting Help
 

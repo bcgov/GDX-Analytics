@@ -1,9 +1,11 @@
 {
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "dbtable": "google.gmb_directions",
+  "destination": "processed",
   "locationGroups": [
     {
-      "clientShortname": "servicebc"
+      "clientShortname": "servicebc",
+      "aggregate_days": ["SEVEN", "THIRTY", "NINETY"]
     }
   ]
 }

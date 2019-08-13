@@ -43,16 +43,17 @@ The JSON configuration fields are as described below:
 
 | Key label | Value type | Value Description |
 |-|-|-|
-| `bucket` | string | The bucket name to write to             |
+| `bucket` | string | The bucket name to write to |
 | `dbtable` | string | The table name in Redshift to insert on |
+| `destination` | string | A top level path in the S3 bucket to deposit the files after processing (good or bad), and also to check for to determine if this microservice was already run today (in order to avoid inserting duplicate data) |
 | `locationGroups[]` | object (`location`) | objects representing locations, described below. This is an object to in order to accommodate future expansion on this field as necessary. |
 
 `location` has been structured as an object in order to allow easier future extensibility, if necessary. The fields currently set in `location` are described below:
 
 | Key label | Value type | Value Description |
 |-|-|-|
-| `clientShortname` | string | An internal shortname for a client's location group. An environment variable should be set as: `<clientShortname>_accountid=<accountid>` in order to map the Location Group Account ID to this client shortname. The `clientShortname` is also used  |
-
+| `clientShortname` | string | An internal shortname for a client's location group. An environment variable should be set as: `<clientShortname>_accountid=<accountid>` in order to map the Location Group Account ID to this client shortname. The `clientShortname` is also used |
+| `aggregate_days[]` | string | A 1 to 3 item list that can include only unique values of `"SEVEN"`, `"THIRTY"` or `"NINETY"` |
 
 ## Project Status
 

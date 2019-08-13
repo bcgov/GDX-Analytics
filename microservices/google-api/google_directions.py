@@ -58,11 +58,13 @@ import os
 import sys
 import json
 import boto3
+from botocore.exceptions import ClientError
 import logging
 import psycopg2
 import argparse
 import httplib2
 import pandas as pd
+import numpy as np
 from pandas.io.json import json_normalize
 
 import googleapiclient.errors
@@ -125,6 +127,7 @@ with open(CONFIG) as f:
 
 config_bucket = config['bucket']
 config_dbtable = config['dbtable']
+config_destination = config['destination']
 config_locationGroups = config['locationGroups']
 
 # set up the Redshift connection
@@ -137,9 +140,16 @@ conn_string = (
 
 # the copy command will be formatted when the query is ready to be excecuted
 copy_command = (
-    "copy {table} FROM 's3://{bucket}/{object}' "
+    "COPY {table} ({columns}) FROM 's3://{bucket}/{object}' "
     "CREDENTIALS 'aws_access_key_id={key};aws_secret_access_key={secret}' "
     "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;")
+
+copy_cols = ("client_shortname,days_aggregated,location_label,"
+             "location_locality,location_name,"
+             "location_postal_code,location_time_zone,rank_on_query,"
+             "region_label,region_latitude,region_longitude,utc_query_date,"
+             "region_count_seven_days,region_count_ninety_days,"
+             "region_count_thirty_days")
 
 aws_key = os.environ['AWS_ACCESS_KEY_ID']
 aws_secret = os.environ['AWS_SECRET_ACCESS_KEY']
@@ -193,6 +203,32 @@ service = build(
     API_NAME, API_VERSION, http=http, discoveryServiceUrl=DISCOVERY_URI)
 # site_list_response = service.sites().list().execute()
 
+# set up the S3 resource
+client = boto3.client('s3')
+resource = boto3.resource('s3')
+
+def is_processed(key):
+    # Check to see if the file has been processed already
+    filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
+    goodfile = config_destination + "/good/" + key
+    badfile = config_destination + "/bad/" + key
+    try:
+        client.head_object(Bucket=config_bucket, Key=goodfile)
+    except ClientError:
+        pass  # this object does not exist under the good destination path
+    else:
+        logger.debug("{0} was processed as good already.".format(filename))
+        return True
+    try:
+        client.head_object(Bucket=config_bucket, Key=badfile)
+    except ClientError:
+        pass  # this object does not exist under the bad destination path
+    else:
+        logger.debug("{0} was processed as bad already.".format(filename))
+        return True
+    logger.debug("{0} has not been processed.".format(filename))
+    return False
+
 
 # Location Check
 # check that all locations defined in the configuration file are available
@@ -213,6 +249,7 @@ for loc in config_locationGroups:
             next({
                 'name': item['name'],
                 'clientShortname': loc['clientShortname'],
+                'aggregate_days': loc['aggregate_days'],
                 'accountNumber': accountNumber}
                  for item
                  in accounts
@@ -225,6 +262,40 @@ for loc in config_locationGroups:
 
 # iterate over ever validated account
 for account in validated_accounts:
+
+    # check the aggregate_days validity
+    if 1 <= len(account["aggregate_days"]) <= 3:
+        for i in account["aggregate_days"]:
+            if not any(i == s for s in ["SEVEN", "THIRTY", "NINETY"]):
+                logger.error("".join((
+                    "{i} is an invalid aggregate option.",
+                    "Skipping {clientShortname} location group.")).format(
+                        i=i, clientShortname=account['clientShortname']))
+                continue
+    else:
+        logger.error(
+            "aggregate_days on {} is invalid due to size. Skipping.".format(
+                account['clientShortname']))
+        continue
+
+    # Set up the S3 path to write the csv buffer to
+    object_key_path = 'client/google_mybusiness_{}/'.format(
+        account['clientShortname'])
+
+    outfile = 'gmb_directions_{0}_{1}.csv'.format(
+        account['clientShortname'], query_date)
+    object_key = object_key_path + outfile
+
+    if is_processed(object_key):
+        logger.warning(
+            "".join((
+                "The file: {} has already been generated ",
+                "and processed by this script today.")).format(object_key))
+        continue
+
+    goodfile = config_destination + "/good/" + object_key
+    badfile = config_destination + "/bad/" + object_key
+
     # Create a dataframe with dates as rows and columns according to the table
     df = pd.DataFrame()
     name = account['name']
@@ -253,29 +324,31 @@ for account in validated_accounts:
     for key, batch in enumerate(batched_location_names):
         logger.debug("Begin processing on locations batch {0} of {1}".format(
             key + 1, len(batched_location_names)))
-        bodyvar = {
-            'locationNames': batch,
-            # https://developers.google.com/my-business/reference/rest/v4/accounts.locations/reportInsights#DrivingDirectionMetricsRequest
-            'drivingDirectionsRequest': {
-                'numDays': 'SEVEN',
-                'languageCode': 'en-US'
+        for days in account['aggregate_days']:
+            logger.debug("Begin processing on {} day aggregate".format(days))
+            bodyvar = {
+                'locationNames': batch,
+                # https://developers.google.com/my-business/reference/rest/v4/accounts.locations/reportInsights#DrivingDirectionMetricsRequest
+                'drivingDirectionsRequest': {
+                    'numDays': '{}'.format(days),
+                    'languageCode': 'en-US'
+                    }
                 }
-            }
 
-        logger.debug(
-            "Request JSON -- \n{0}".format(json.dumps(bodyvar, indent=2)))
+            logger.debug(
+                "Request JSON -- \n{0}".format(json.dumps(bodyvar, indent=2)))
 
-        # Posts the API request
-        try:
-            response = \
-                service.accounts().locations().\
-                reportInsights(body=bodyvar, name=name).execute()
-        except googleapiclient.errors.HttpError as e:
-            logger.info("Request contains an invalid argument. Skipping.")
-            continue
+            # Posts the API request
+            try:
+                response = \
+                    service.accounts().locations().\
+                    reportInsights(body=bodyvar, name=name).execute()
+            except googleapiclient.errors.HttpError as e:
+                logger.info("Request contains an invalid argument. Skipping.")
+                continue
 
-        stitched_responses['locationDrivingDirectionMetrics'] += \
-            response['locationDrivingDirectionMetrics']
+            stitched_responses['locationDrivingDirectionMetrics'] += \
+                response['locationDrivingDirectionMetrics']
 
     # The stiched_responses now contains all location driving direction data
     # as a list of dictionaries keyed to 'locationDrivingDirectionMetrics'.
@@ -300,6 +373,7 @@ for account in validated_accounts:
         for order, region in enumerate(regions):
             row = {
                 'utc_query_date': query_date,
+                'client_shortname': account['clientShortname'],
                 'location_label':
                     label_lookup[location['locationName']]['locationName'],
                 'location_locality':
@@ -320,42 +394,49 @@ for account in validated_accounts:
     # normalizing the list of dicts to a dataframe
     df = json_normalize(location_region_rows)
 
+    # build three columns: region_count_seven_days, region_count_thirty_days
+    # and region_count_ninety_days to replace region_count column.
+    new_cols = {
+        'region_count_seven_days': 7,
+        'region_count_thirty_days': 30,
+        'region_count_ninety_days': 90
+        }
+    for key, value in new_cols.items():
+        def alert(c):
+            if c['days_aggregated'] == value:
+                return c['region_count']
+            else:
+                return 0
+
+        df[key] = df.apply(alert, axis=1)
+
+    df.drop(columns='region_count', inplace=True)
+
     # output csv formatted dataframe to stream
     csv_stream = BytesIO()
     df.to_csv(csv_stream, sep='|', encoding='utf-8', index=False)
-
-    # Set up the S3 path to write the csv buffer to
-    object_key_path = 'client/google_mybusiness_{}/'.format(
-        account['clientShortname'])
-
-    outfile = 'gmb_directions_{0}_{1}.csv'.format(
-        account['clientShortname'],
-        query_date)
-    object_key = object_key_path + outfile
-
-    # set up the S3 resource
-    client = boto3.client('s3')
-    resource = boto3.resource('s3')
 
     # write csv to S3
     resource.Bucket(config_bucket).put_object(
         Key=object_key,
         Body=csv_stream.getvalue())
-    logger.debug('PUT_OBJECT: {0}:{1}'.format(outfile, config_bucket))
+    logger.debug('S3 PUT_OBJECT: {0}:{1}'.format(outfile, config_bucket))
     object_summary = resource.ObjectSummary(config_bucket, object_key)
-    logger.debug('OBJECT LOADED ON: {0} \nOBJECT SIZE: {1}'
+    logger.debug('S3 OBJECT LOADED ON: {0} \nOBJECT SIZE: {1}'
                  .format(object_summary.last_modified,
                          object_summary.size))
 
     # Prepare the Redshift COPY command.
     query = copy_command.format(
             table=config_dbtable,
+            columns=copy_cols,
             bucket=config_bucket,
             object=object_key,
             key=aws_key,
             secret=aws_secret)
     logquery = copy_command.format(
             table=config_dbtable,
+            columns=copy_cols,
             bucket=config_bucket,
             object=object_key,
             key='AWS_ACCESS_KEY_ID',
@@ -372,8 +453,20 @@ for account in validated_accounts:
                     "Loading driving directions for failed {0} with exception:"
                     .format(account['clientShortname']),
                     " Object key: {0}".format(object_key.split('/')[-1]))))
+                outfile = badfile
             else:
                 logger.info("".join((
                     "Loaded {0} driving directions successfully."
                     .format(account['clientShortname']),
                     ' Object key: {0}'.format(object_key.split('/')[-1]))))
+                outfile = goodfile
+
+    # copy the processed file to the outfile destination path
+    try:
+        client.copy_object(
+            Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+            CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
+            + object_summary.key, Key=outfile)
+    except boto3.exceptions.ClientError as e:
+        logger.exception("S3 copy {key} to {outfile} location failed.".format(
+            key=object_summary.key, outfile=outfile))

@@ -1,3 +1,7 @@
+# Google API microservices
+
+This directory contains scripts, configs, and DDL files describing the Google API calling microservices implemented on the GDX-Analytics platform.
+
 ### Google Search API Loader Microservice
 
 The `google_search.py` script automates the loading of Google Search API data into S3 (as `.csv`) and Redshift (the `google.googlesearch` schema as defined by `google.googlesearch.sql`).
@@ -29,6 +33,28 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
     ]
 }
 ```
+
+### Google My Business API Loader microservice
+The `google_mybusiness.py` script pulling the Google My Business API data for locations according to the accounts specified in `google_mybusiness.json`. The metrics from each location are consecutively recorded as `.csv` files in S3 and then copied to Redshift.
+
+Google makes location insights data available for a time range spanning 18 months ago to 2 days ago (as tests have determined to be a reliable "*to date*"). From the Google My Business API [BasicMetricsRequest reference guide](https://developers.google.com/my-business/reference/rest/v4/BasicMetricsRequest):
+> The maximum range is 18 months from the request date. In some cases, the data may still be missing for days close to the request date. Missing data will be specified in the metricValues in the response.
+
+The script iterates each location for the date range specified on the date range specified by config keys `start_date` and `end_date`. If no range is set (those key values are left as blank strings), then the script attempts to query for the full range of data availability.
+
+#### Configuration
+
+- `"bucket"`: a string to define the S3 bucket where CSV Google My Business API query responses are stored.
+- `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are copied to to after their creation.
+- `"metrics"`: an list containing the list of metrics to pull from Google My Business
+- `"locations"`: an object that annotates account information from clients that have provided us access”
+  - `"client_shortname"`: the client name to be recorded in the client column of the table for filtering. This shortname will also map the path where the `.csv` files loaded into AWS S3 as `'client/google_mybusiness_<client_shortname>/'`.
+  - `"name"`: The account Name label
+  - `"names_replacement"`: a list to replace matched values from the locations under this account as suggested by: `['find','replace']`. For example, in the case of Service BC, all locations are prefixed with "Service BC Centre". We replace this with nothing in order to get _just_ the unique names (the locations' community names).
+  - `"id"`: the location group, used for validation when querying the API.
+  - `"start_date"`: the query start date as `"YYYY-MM-DD"`, leave as `""` to get the oldest data possible (defaults to the longest the API accepts, 18 months ago)
+  - `"end_date"`: the query end date as `"YYYY-MM-DD"`, leave as `""` to get the most recent data possible (defaults to the most recent that the API has been tested to provide, 2 days ago)
+
 
 ### Google My Business Driving Directions Loader Microservice
 

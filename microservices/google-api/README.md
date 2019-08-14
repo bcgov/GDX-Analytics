@@ -8,7 +8,7 @@ The `google_search.py` script automates the loading of Google Search API data in
 
 The accompanying `google_search.json` configuration file specifies the bucket, schema, the sites to query the Google Search API for, and optional start dates on those sites.
 
-The microservice will begin loading Google data from the date specified in the configuration as `"start_date_default"`. If that is unspecified, it will attempt to load data from 16 months ago relative to the script runtime. If more recent data already exists; it will load data from the day after the last date that has already been loaded into Redshift.
+The microservice will begin loading Google data from the date specified in the configuration as `"start_date_default"`. If that is unspecified, it will attempt to load data from 18 months ago relative to the script runtime. If more recent data already exists; it will load data from the day after the last date that has already been loaded into Redshift.
 
 It currently runs in batches of a maximum of 30 days at a time until 2 days ago (the latest available data from the Google Search API).
 
@@ -17,7 +17,7 @@ It currently runs in batches of a maximum of 30 days at a time until 2 days ago 
 The JSON configuration is loaded as an environmental variable defined as `GOOGLE_MICROSERVICE_CONFIG`. It follows this structure:
 
 - `"bucket"`: a string to define the S3 bucket where CSV Google Search API query responses are stored.
-- `"dbtable`: a string to define the Redshift table where the S3 stored CSV files are inserted to to after their creation.
+- `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are inserted to to after their creation.
 - `"sites"`: a JSON array containing objects defining a `"name"` and an optional `"start_date_default"`.
   - `"name"`: the site URL to query the Google Search API on.
   - `"start_date_default"`: an _optional_ key identifying where to begin queries from as a YYYY-MM-DD string. If excluded, the default behaviour is to look back to the earliest date that the Google Search API exposes, which is 16 months (scripted as 480 days).
@@ -35,6 +35,7 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
 ```
 
 ### Google My Business API Loader microservice
+
 The `google_mybusiness.py` script pulling the Google My Business API data for locations according to the accounts specified in `google_mybusiness.json`. The metrics from each location are consecutively recorded as `.csv` files in S3 and then copied to Redshift.
 
 Google makes location insights data available for a time range spanning 18 months ago to 2 days ago (as tests have determined to be a reliable "*to date*"). From the Google My Business API [BasicMetricsRequest reference guide](https://developers.google.com/my-business/reference/rest/v4/BasicMetricsRequest):
@@ -59,12 +60,15 @@ The script iterates each location for the date range specified on the date range
 ### Google My Business Driving Directions Loader Microservice
 
 #### Script
+
 The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. When run, logs are appended to `logs/google_directions.log`. Create the logs directory before running if it does not already exist. The script requires a `JSON` config file as specifid in the "_Configuration_" section below. It also must be passed command line locations for Google Credentials files; a usage example is in the header comment in the script itself.
 
 #### Table
+
 The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
 
 #### Configuration
+
 The configuration for this microservice is in the `google_directions.json` file.
 
 The JSON configuration fields are as described below:

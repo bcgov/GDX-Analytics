@@ -32,12 +32,14 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
 
 ### Google My Business Driving Directions Loader Microservice
 
- #### Script
- The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. When run, logs are appended to `logs/google_directions.log`. Create the logs directory before running if it does not already exist.
- #### Table
- The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
- #### Configuration
- The configuration for this microservice is in the `google_directions.json` file.
+#### Script
+The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. When run, logs are appended to `logs/google_directions.log`. Create the logs directory before running if it does not already exist. The script requires a `JSON` config file as specifid in the "_Configuration_" section below. It also must be passed command line locations for Google Credentials files; a usage example is in the header comment in the script itself.
+
+#### Table
+The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
+
+#### Configuration
+The configuration for this microservice is in the `google_directions.json` file.
 
 The JSON configuration fields are as described below:
 
@@ -52,7 +54,7 @@ The JSON configuration fields are as described below:
 
 | Key label | Value type | Value Description |
 |-|-|-|
-| `clientShortname` | string | An internal shortname for a client's location group. An environment variable should be set as: `<clientShortname>_accountid=<accountid>` in order to map the Location Group Account ID to this client shortname. The `clientShortname` is also used |
+| `clientShortname` | string | An internal shortname for a client's location group. An environment variable must be set as: `<clientShortname>_accountid=<accountid>` in order to map the Location Group Account ID to this client shortname and pull the API data. The `clientShortname` is also used to set the object path on S3 as: `S3://<bucket>/client/google_mybusiness_<clientShortname>` |
 | `aggregate_days[]` | string | A 1 to 3 item list that can include only unique values of `"SEVEN"`, `"THIRTY"` or `"NINETY"` |
 
 ## Project Status

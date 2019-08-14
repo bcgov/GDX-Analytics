@@ -1,4 +1,8 @@
-## Google Search API Loader Microservice
+# Google API microservices
+
+This directory contains scripts, configs, and DDL files describing the Google API calling microservices implemented on the GDX-Analytics platform.
+
+### Google Search API Loader Microservice
 
 The `google_search.py` script automates the loading of Google Search API data into S3 (as `.csv`) and Redshift (the `google.googlesearch` schema as defined by `google.googlesearch.sql`).
 
@@ -8,7 +12,7 @@ The microservice will begin loading Google data from the date specified in the c
 
 It currently runs in batches of a maximum of 30 days at a time until 2 days ago (the latest available data from the Google Search API).
 
-### Configuration
+#### Configuration
 
 The JSON configuration is loaded as an environmental variable defined as `GOOGLE_MICROSERVICE_CONFIG`. It follows this structure:
 
@@ -30,7 +34,8 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
 }
 ```
 
-## Google My Business API Loader microservice
+### Google My Business API Loader microservice
+
 The `google_mybusiness.py` script pulling the Google My Business API data for locations according to the accounts specified in `google_mybusiness.json`. The metrics from each location are consecutively recorded as `.csv` files in S3 and then copied to Redshift.
 
 Google makes location insights data available for a time range spanning 18 months ago to 2 days ago (as tests have determined to be a reliable "*to date*"). From the Google My Business API [BasicMetricsRequest reference guide](https://developers.google.com/my-business/reference/rest/v4/BasicMetricsRequest):
@@ -38,7 +43,7 @@ Google makes location insights data available for a time range spanning 18 month
 
 The script iterates each location for the date range specified on the date range specified by config keys `start_date` and `end_date`. If no range is set (those key values are left as blank strings), then the script attempts to query for the full range of data availability.
 
-### Configuration
+#### Configuration
 
 - `"bucket"`: a string to define the S3 bucket where CSV Google My Business API query responses are stored.
 - `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are copied to to after their creation.
@@ -52,9 +57,39 @@ The script iterates each location for the date range specified on the date range
   - `"end_date"`: the query end date as `"YYYY-MM-DD"`, leave as `""` to get the most recent data possible (defaults to the most recent that the API has been tested to provide, 2 days ago)
 
 
+### Google My Business Driving Directions Loader Microservice
+
+#### Script
+
+The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. When run, logs are appended to `logs/google_directions.log`. Create the logs directory before running if it does not already exist. The script requires a `JSON` config file as specifid in the "_Configuration_" section below. It also must be passed command line locations for Google Credentials files; a usage example is in the header comment in the script itself.
+
+#### Table
+
+The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
+
+#### Configuration
+
+The configuration for this microservice is in the `google_directions.json` file.
+
+The JSON configuration fields are as described below:
+
+| Key label | Value type | Value Description |
+|-|-|-|
+| `bucket` | string | The bucket name to write to |
+| `dbtable` | string | The table name in Redshift to insert on |
+| `destination` | string | A top level path in the S3 bucket to deposit the files after processing (good or bad), and also to check for to determine if this microservice was already run today (in order to avoid inserting duplicate data) |
+| `locationGroups[]` | object (`location`) | objects representing locations, described below. This is an object to in order to accommodate future expansion on this field as necessary. |
+
+`location` has been structured as an object in order to allow easier future extensibility, if necessary. The fields currently set in `location` are described below:
+
+| Key label | Value type | Value Description |
+|-|-|-|
+| `clientShortname` | string | An internal shortname for a client's location group. An environment variable must be set as: `<clientShortname>_accountid=<accountid>` in order to map the Location Group Account ID to this client shortname and pull the API data. The `clientShortname` is also used to set the object path on S3 as: `S3://<bucket>/client/google_mybusiness_<clientShortname>` |
+| `aggregate_days[]` | string | A 1 to 3 item list that can include only unique values of `"SEVEN"`, `"THIRTY"` or `"NINETY"` |
+
 ## Project Status
 
-Currently microservice itself is implemented. As sites provide GDX Analytics with access to their Google Search APIs, they will be added to the configuration file to be handled by the microservice.
+As clients provide GDX Analytics with access to their Google Search of My Business profiles, they will be added to the configuration file to be handled by the microservice.
 
 ## Getting Help
 

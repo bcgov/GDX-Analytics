@@ -64,7 +64,6 @@ import psycopg2
 import argparse
 import httplib2
 import pandas as pd
-import numpy as np
 from pandas.io.json import json_normalize
 
 import googleapiclient.errors
@@ -206,6 +205,7 @@ service = build(
 # set up the S3 resource
 client = boto3.client('s3')
 resource = boto3.resource('s3')
+
 
 def is_processed(key):
     # Check to see if the file has been processed already

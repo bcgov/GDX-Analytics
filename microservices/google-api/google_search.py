@@ -348,7 +348,7 @@ DROP TABLE IF EXISTS cmslite.google_pdt_old;
 CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
         "site"          VARCHAR(255),
         "date"          date,
-        "query"         VARCHAR(2047),
+        "query"         VARCHAR(2048),
         "country"       VARCHAR(255),
         "device"        VARCHAR(255),
         "page"          VARCHAR(2047),

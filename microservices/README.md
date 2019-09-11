@@ -1,14 +1,22 @@
-## S3 to Redshift Microservice
+# GDX Analytics Microservices
 
-These microservice scripts automate the migration of well formed `csv` data on S3 into Redshift. The `json` configuration files specify the expected form of data.
+These microservice scripts automate the loading of data from a well formed `csv` file stored in S3 to Redshift. They use `json` configuration files to specify the expected form of input data and of other options pertaining to processing and output operations. Logging for these services is output to stdout at the INFO level; and aggregated at the DEBUG level to files named as: `./logs/<microservice_name>.log`.
 
-Logging for these services is output to stdout at the INFO level; and aggregated at the DEBUG level to the files named `./logs/<microservice_name>.log`.
+## [S3 to Redshift Microservice](./s3_to_redshift)
+
+The S3 to Redshift microservice will read the config `json` to determine the input data location, it's content and how to process that (including column data types, content replacements, datetime formats), and where to output the results (the Redshift table). Each processed file will land in a `<bucket>/processed/` folder in S3, which can be `/processed/good/` or `/processed/bad/` depending on the success or failure of processing the input file. The Redshift `COPY` command is performed as a single transaction which will not commit the changes unless they are successful in the transaction.
+
+## [CMS Lite Metadata Microservice](./cmslitemetadata_to_redshift)
+
+The CMS Lite Metadata microservice emerged from a specialized use case of the S3 to Redshift microservice which required additional logic to build Lookup tables and Dictionary tables, as indicated though input data columns containing nested delimiters. To do so, it processes a single input `csv` file containing metadata about pages in CMS Lite, to generate several batch CSV files as a batch process. It then runs the `COPY` command on all of these files as a single Redshift transaction. As with the S3 to Redshift Microservice, The `json` configuration files specify the expected form of input data and output options.
+
+## [Google API Microservices](./google-api)
+
+The Google API microservices are a collection of scripts to automate the loading of data collected through various Google APIs such as the [Google My Business API](https://developers.google.com/my-business/) for Location and Driving Direction insights; and the [Google Search Console API](https://developers.google.com/webmaster-tools/) for Search result analytics. Upon accessing the requested data, the Google API microservices build an output `csv` file containing that data, and stores it into S3. From there, the loading of data from S3 to Redshift follows very closely to the flow described in the S3 to Redshift microservice.
 
 ## Project Status
 
-Currently this project is still in development.
-
-The `cmslitemetadata_to_redshift` diverged from `s3_to_redshift` to process data containing nested delimeters, requiring dictonary and lookup tables; but due to inherent overlap, these scripts are good candidates for consolidation.
+The microservices in this project are still under development.
 
 ## Getting Help
 

@@ -14,6 +14,17 @@ It currently runs in batches of a maximum of 30 days at a time until 2 days ago 
 
 #### Configuration
 
+##### Environment Variables
+
+The Google Search API loader microservice requires the following environment variables be set to run correctly.
+
+- `GOOGLE_MICROSERVICE_CONFIG`: the path to the json configuration file, e.g.: `\path\to\google_search.json`;
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+##### Configuration File
+
 The JSON configuration is loaded as an environmental variable defined as `GOOGLE_MICROSERVICE_CONFIG`. It follows this structure:
 
 - `"bucket"`: a string to define the S3 bucket where CSV Google Search API query responses are stored.
@@ -45,6 +56,25 @@ The script iterates each location for the date range specified on the date range
 
 #### Configuration
 
+##### Environment Variables
+
+The Google Search API loader microservice requires the following environment variables be set to run correctly.
+
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+##### Command Line Arguments
+
+- `-o` or `--oauth`: the OAuth Credentials JSON file;
+- `-a` or `--auth`: the stored authorization dat file;
+- `-c` or `--conf`: the microservice configuration file;
+- `-d` or `--debug`: runs the microservice in debug mode (currently unsupported).
+
+##### Configuration File
+
+The JSON configuration is required, following a `-c` or `--conf` flag when running the `google_mybusiness.py` script. It follows this structure:
+
 - `"bucket"`: a string to define the S3 bucket where CSV Google My Business API query responses are stored.
 - `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are copied to to after their creation.
 - `"metrics"`: an list containing the list of metrics to pull from Google My Business
@@ -68,6 +98,23 @@ The `google_directions.py` script automates the loading of Google MyBusiness Dri
 The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
 
 #### Configuration
+
+##### Environment Variables
+
+The Google Search API loader microservice requires the following environment variables be set to run correctly.
+
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+##### Command Line Arguments
+
+- `-o` or `--oauth`: the OAuth Credentials JSON file;
+- `-a` or `--auth`: the stored authorization dat file;
+- `-c` or `--conf`: the microservice configuration file;
+- `-d` or `--debug`: runs the microservice in debug mode (currently unsupported).
+
+##### Configuration File
 
 The configuration for this microservice is in the `google_directions.json` file.
 

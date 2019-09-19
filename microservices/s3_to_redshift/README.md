@@ -21,9 +21,21 @@ Next, a Redshift transaction attempts to `COPY` that file into Redshift as a sin
 
 Finally, if the transaction failed then the input is copied from `<bucket_name>/client/<path-to-file>/<object_summary.key>.csv` to the "`bad`" folder at `<bucket_name>/processed/bad/<path-to-file>/<object_summary.key>.csv`. Otherwise the successful transaction will result in the input file being copied to the "`good`" folder: `<bucket_name>/processed/good/<path-to-file>/<object_summary.key>.csv`.
 
+Log files are appended at the debug level into file called `s3_to_redshift.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
+
 ### Configuration
 
-The JSON configuration is loaded as a second argument when running the `s3_to_redshift.py` script. It follows this structure:
+#### Environment Variables
+
+The S3 to Redshift microservice requires the following environment variables be set to run correctly.
+
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+#### Configuration File
+
+The JSON configuration is required as a second argument when running the `s3_to_redshift.py` script. It follows this structure:
 
 - `"bucket"`: the label defining the S3 bucket that the microservice will reference.
 - `"source"`: the top level S3 prefix for source objects after the bucket label, as in: `<bucket>/<source>/<client>/<doc>`.

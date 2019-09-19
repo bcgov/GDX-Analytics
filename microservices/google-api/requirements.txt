@@ -1,0 +1,7 @@
+boto3==1.9.159
+pandas==0.24.2
+botocore==1.12.159
+httplib2==0.13.0
+psycopg2==2.8.2
+google_api_python_client==1.7.11
+python_dateutil==2.8.0

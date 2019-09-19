@@ -26,21 +26,20 @@ import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
+import logging
 
 # set up logging
-import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-# create console handler for logs at the WARNING level
-# This will be emailed when the cron task runs; formatted to give messages only
+# create stdout handler for logs at the INFO level
 handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter("%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# create file handler for logs at the INFO level
+# create file handler for logs at the DEBUG level in /logs/s3_to_redshift.log
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
                               encoding=None, delay="true")
@@ -49,18 +48,20 @@ formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# Read configuration file
-if (len(sys.argv) != 2):  # will be 1 if no arguments, 2 if one argument
+# check that configuration file was passed as argument
+if (len(sys.argv) != 2):
     print "Usage: python s3_to_redshift.py config.json"
     sys.exit(1)
 configfile = sys.argv[1]
-if os.path.isfile(configfile) is False:  # confirm that the file exists
+# confirm that the file exists
+if os.path.isfile(configfile) is False:
     print "Invalid file name " + configfile
     sys.exit(1)
+# open the confifile for reading
 with open(configfile) as f:
     data = json.load(f)
 
-# Set up variables from config file
+# get variables from config file
 bucket = data['bucket']
 source = data['source']
 destination = data['destination']
@@ -113,8 +114,8 @@ IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;\n
     return query
 
 
+# Check to see if the file has been processed already
 def is_processed(object_summary):
-    # Check to see if the file has been processed already
     key = object_summary.key
     filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
     goodfile = destination + "/good/" + key
@@ -138,8 +139,8 @@ def is_processed(object_summary):
 
 
 # This bucket scan will find unprocessed objects.
-# objects_to_process will contain zero or one objects if truncate=True;
-# objects_to_process will contain zero or more objects if truncate=False.
+# objects_to_process will contain zero or one objects if truncate = True
+# objects_to_process will contain zero or more objects if truncate = False
 objects_to_process = []
 for object_summary in my_bucket.objects.filter(Prefix=source + "/"
                                                + directory + "/"):
@@ -150,7 +151,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
     else:
         # only review those matching our configued 'doc' regex pattern
         if re.search(doc + '$', key):
-            # under truncate, we will keep list length to 1
+            # under truncate = True, we will keep list length to 1
             # only adding the most recently modified file to objects_to_process
             if truncate:
                 if len(objects_to_process) == 0:
@@ -165,6 +166,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
                 # no truncate, so the list may exceed 1 element
                 objects_to_process.append(object_summary)
 
+# an object exists to be processed as a truncate copy to the table
 if truncate and len(objects_to_process) == 1:
     logger.info(
         'truncate is set. processing only one file: {0} (modified {1})'.format(
@@ -176,8 +178,10 @@ for object_summary in objects_to_process:
     goodfile = destination + "/good/" + object_summary.key
     badfile = destination + "/bad/" + object_summary.key
 
+    # get the object from S3 and take its contents as body
     obj = client.get_object(Bucket=bucket, Key=object_summary.key)
     body = obj['Body']
+
     # Create an object to hold the data while parsing
     csv_string = ''
     # Perform regex pattern replacements according to config, if defined
@@ -188,6 +192,7 @@ for object_summary in objects_to_process:
             inline_pattern = data['global_regex']['string_repl']['pattern']
             inline_replace = data['global_regex']['string_repl']['replace']
         body_stringified = body.read()
+        # perform regex replacements by line
         for line in body_stringified.splitlines():
             if(data['global_regex']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
@@ -203,8 +208,10 @@ for object_summary in objects_to_process:
                     parsed_list.append(parsed_line)
         csv_string = linefeed.join(parsed_list)
         logger.info(object_summary.key + " parsed successfully")
+    # no regex replacements to make
     else:
         csv_string = body.read()
+
     # Check that the file decodes as UTF-8. If it fails move to bad and end
     try:
         csv_string = csv_string.decode('utf-8')
@@ -226,7 +233,8 @@ for object_summary in objects_to_process:
             logger.exception("S3 transfer failed.\n{0}".format(e.message))
         continue
 
-    # Check for an empty file. If it's empty, accept it as good and move on
+    # Check for an empty file. If it's empty, accept it as good and skip
+    # to the next object to process
     try:
         df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
                          dtype=dtype_dic, usecols=range(column_count))
@@ -246,6 +254,7 @@ for object_summary in objects_to_process:
                            + object_summary.key, Key=outfile)
         continue
 
+    # map the dataframe column names to match the columns from the configuation
     df.columns = columns
 
     # Truncate strings according to config set column string length limits
@@ -284,6 +293,7 @@ for object_summary in objects_to_process:
 
     # if truncate is set to true, perform a transaction that will
     # replace the existing table data with the new data in one commit
+    # if truncate is not true then the query remains as just the copy command
     if (truncate):
         scratch_start = """
 BEGIN;
@@ -297,10 +307,12 @@ ALTER TABLE {0}_scratch OWNER TO microservice;
 GRANT SELECT ON {0}_scratch TO looker;\n
 GRANT SELECT ON {0}_scratch TO datamodeling;\n
 """.format(dbtable)
+
         scratch_copy = copy_query(
             dbtable + "_scratch", batchfile, log=False)
         scratch_copy_log = copy_query(
             dbtable + "_scratch", batchfile, log=True)
+
         scratch_cleanup = """
 -- Replace main table with scratch table, clean up the old table
 ALTER TABLE {0} RENAME TO {1}_old;
@@ -308,9 +320,11 @@ ALTER TABLE {0}_scratch RENAME TO {1};
 DROP TABLE {0}_old;
 COMMIT;
 """.format(dbtable, table_name)
+
         query = scratch_start + scratch_copy + scratch_cleanup
         logquery = scratch_start + scratch_copy_log + scratch_cleanup
 
+    # Execute the transaction against Redshift using the psycopg2 library
     logger.debug(logquery)
     with psycopg2.connect(conn_string) as conn:
         with conn.cursor() as curs:
@@ -327,6 +341,7 @@ COMMIT;
                             .format(batchfile))
                 outfile = goodfile
 
+    # copy the object to the S3 outfile (processed/good/ or processed/bad/)
     try:
         client.copy_object(
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",

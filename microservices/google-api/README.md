@@ -12,7 +12,20 @@ The microservice will begin loading Google data from the date specified in the c
 
 It currently runs in batches of a maximum of 30 days at a time until 2 days ago (the latest available data from the Google Search API).
 
+Log files are appended at the debug level into file called `google_search.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
+
 #### Configuration
+
+##### Environment Variables
+
+The Google Search API loader microservice requires the following environment variables be set to run correctly.
+
+- `GOOGLE_MICROSERVICE_CONFIG`: the path to the json configuration file, e.g.: `\path\to\google_search.json`;
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+##### Configuration File
 
 The JSON configuration is loaded as an environmental variable defined as `GOOGLE_MICROSERVICE_CONFIG`. It follows this structure:
 
@@ -43,7 +56,28 @@ Google makes location insights data available for a time range spanning 18 month
 
 The script iterates each location for the date range specified on the date range specified by config keys `start_date` and `end_date`. If no range is set (those key values are left as blank strings), then the script attempts to query for the full range of data availability.
 
+Log files are appended at the debug level into file called `google_mybusiness.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
+
 #### Configuration
+
+##### Environment Variables
+
+The Google Search API loader microservice requires the following environment variables be set to run correctly.
+
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+##### Command Line Arguments
+
+- `-o` or `--oauth`: the OAuth Credentials JSON file;
+- `-a` or `--auth`: the stored authorization dat file;
+- `-c` or `--conf`: the microservice configuration file;
+- `-d` or `--debug`: runs the microservice in debug mode (currently unsupported).
+
+##### Configuration File
+
+The JSON configuration is required, following a `-c` or `--conf` flag when running the `google_mybusiness.py` script. It follows this structure:
 
 - `"bucket"`: a string to define the S3 bucket where CSV Google My Business API query responses are stored.
 - `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are copied to to after their creation.
@@ -61,13 +95,32 @@ The script iterates each location for the date range specified on the date range
 
 #### Script
 
-The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. When run, logs are appended to `logs/google_directions.log`. Create the logs directory before running if it does not already exist. The script requires a `JSON` config file as specifid in the "_Configuration_" section below. It also must be passed command line locations for Google Credentials files; a usage example is in the header comment in the script itself.
+The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. Create the logs directory before running if it does not already exist. The script requires a `JSON` config file as specifid in the "_Configuration_" section below. It also must be passed command line locations for Google Credentials files; a usage example is in the header comment in the script itself.
+
+Log files are appended at the debug level into file called `google_directions.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
 
 #### Table
 
 The `google.gmb_directions` schema is defined by the [`google.gmb_directions.sql`](./`google.gmb_directions.sql) ddl  file.
 
 #### Configuration
+
+##### Environment Variables
+
+The Google Search API loader microservice requires the following environment variables be set to run correctly.
+
+- `pgpass`: the database password for the microservice user;
+- `AWS_ACCESS_KEY_ID`: the AWS access key for the account authorized to perform COPY commands from S3 to Redshift; and,
+- `AWS_SECRET_ACCESS_KEY`: the AWS secret access key for the account authorized to perform COPY commands from S3 to Redshift.
+
+##### Command Line Arguments
+
+- `-o` or `--oauth`: the OAuth Credentials JSON file;
+- `-a` or `--auth`: the stored authorization dat file;
+- `-c` or `--conf`: the microservice configuration file;
+- `-d` or `--debug`: runs the microservice in debug mode (currently unsupported).
+
+##### Configuration File
 
 The configuration for this microservice is in the `google_directions.json` file.
 

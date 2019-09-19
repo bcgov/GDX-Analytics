@@ -68,23 +68,19 @@ import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
 
-# Set time zone
-# os.environ['TZ'] = 'Americas/Vancouver'
-
 # set up logging
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-# create console handler for logs at the WARNING level
-# This will be emailed when the cron task runs; formatted to give messages only
+# create stdout handler for logs at the INFO level
 handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter("%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# create file handler for logs at the INFO level
+# create file handler for logs at the DEBUG level
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
                               encoding=None, delay="true")
@@ -94,8 +90,8 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
+# Check for a sites last loaded date in Redshift
 def last_loaded(site_name):
-    # Check for a last loaded date in Redshift
     # Load the Redshift connection
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
@@ -113,7 +109,7 @@ def last_loaded(site_name):
     return last_loaded_date
 
 
-# the latest available Google API data is two less less today
+# the latest available Google API data is two less than the query date (today)
 latest_date = date.today() - timedelta(days=2)
 
 # Read configuration file from env parameter
@@ -135,6 +131,7 @@ conn_string = ("dbname='snowplow' "
                "' port='5439' user='microservice' password="
                + os.environ['pgpass'])
 
+# each site in the config list of sites gets processed in this loop
 for site_item in sites:
     # read the config for the site name and default start date if specified
     site_name = site_item["name"]
@@ -184,7 +181,8 @@ for site_item in sites:
         outfile = "googlesearch-" + site_clean + "-" + str(start_dt) + "-" + str(end_dt) + ".csv"
         object_key = 'client/google_gdx/{0}'.format(outfile)
 
-        # calling the Google API. If credentials.dat is not yet generated, Google Account validation will be necessary
+        # calling the Google API. If credentials.dat is not yet generated
+        # then brower based Google Account validation will be required
         API_NAME = 'searchconsole'
         API_VERSION = 'v1'
         DISCOVERY_URI = 'https://www.googleapis.com/discovery/v1/apis/webmasters/v3/rest'
@@ -229,14 +227,16 @@ for site_item in sites:
         rowlimit = 20000
         index = 0
 
+        # daterange yields a generator of all dates from date1 to date2
         def daterange(date1, date2):
             for n in range(int((date2 - date1).days)+1):
                 yield date1 + timedelta(n)
 
         search_analytics_response = ''
 
+        # loops on each date from start date to the end date, inclusive
         for date_in_range in daterange(start_dt, end_dt):
-            # A wait time of 250ms each query reduces HTTP 429 error
+            # A wait time of 250ms each query reduces chance of HTTP 429 error
             # "Rate Limit Exceeded", handled below
             wait_time = 0.25
             sleep(wait_time)
@@ -337,7 +337,8 @@ for site_item in sites:
             last_loaded_date = last_loaded(site_name)
 
 
-# now we run the single-time load on the cmslite.google_pdt
+# This query will INSERT data that is the result of a JOIN into
+# cmslite.google_pdt, a persistent dereived table which facilitating the LookML
 query = """
 -- perform this as a transaction.
 -- Either the whole query completes, or it leaves the old table intact
@@ -385,6 +386,7 @@ DROP TABLE cmslite.google_pdt_old;
 COMMIT;
 """
 
+# Execute the query and log the outcome
 logger.debug(query)
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

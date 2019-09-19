@@ -83,7 +83,7 @@ def signal_handler(signal, frame):
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-# create console handler for logs at the WARNING level
+# create console handler for logs at the INFO level
 # This will be emailed when the cron task runs; formatted to give messages only
 handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
@@ -91,7 +91,7 @@ formatter = logging.Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# create file handler for logs at the INFO level
+# create file handler for logs at the DEBUG level
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), 'a',
                               encoding=None, delay='true')
@@ -233,7 +233,7 @@ for loc in config_locations:
                  in accounts
                  if item['accountNumber'] == str(loc['id'])))
     except StopIteration:
-        logger.warning(
+        logger.exception(
             'No API access to {0}. Excluding from insights query.'
             .format(loc['name']))
         continue
@@ -343,8 +343,8 @@ for account in validated_accounts:
             reportInsights = \
                 service.accounts().locations().\
                 reportInsights(body=bodyvar, name=account_uri).execute()
-        except googleapiclient.errors.HttpError as e:
-            logger.info("Request contains an invalid argument. Skipping.")
+        except googleapiclient.errors.HttpError:
+            logger.exception("Request contains an invalid argument. Skipping.")
             continue
 
         # We constrain API calls to one location at a time, so

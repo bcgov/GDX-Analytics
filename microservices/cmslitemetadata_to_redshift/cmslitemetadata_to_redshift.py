@@ -12,8 +12,8 @@
 #               : export pgpass=<<DB_PASSWD>>
 #
 #
-# Usage         : pip2 install -r requirements.txt
-#               : python27 cmslitemetadata_to_redshift.py configfile.json
+# Usage         : pip install -r requirements.txt
+#               : python cmslitemetadata_to_redshift.py configfile.json
 #
 
 import boto3  # s3 access
@@ -27,11 +27,13 @@ import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
-import itertools
+import itertools  # functional tools for creating and using iterators
 import logging
 import datetime
 
-# we will use this timestamp to write to the cmslite.microservice_log tablee
+# we will use this timestamp to write to the cmslite.microservice_log table
+# changes to that table trigger Looker cacheing. As a result, Looker refreshes
+# its cmslite metadata cache each time this microservice completes
 starttime = str(datetime.datetime.now())
 
 # set up logging
@@ -54,8 +56,6 @@ handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-
-# define a function to output a dataframe to a CSV on S3
 
 
 # Funcion to write a CSV to S3
@@ -89,6 +89,7 @@ def to_s3(bucket, batchfile, filename, df, columnlist, index):
     resource.Bucket(bucket).put_object(Key=batchfile + "/" + filename, Body=csv_buffer.getvalue())
 
 
+# Create a dictionary dataframe based on a column
 def to_dict(df, section):
     # drop any nulls and wrapping delimeters, split and flatten:
     clean = df.copy().dropna(subset=[section])[section].str[1:-1].str.split(nested_delim).values.flatten()
@@ -154,6 +155,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            password=os.environ['pgpass'])
 
 
+# Check to see if the file has been processed already
 def is_processed(object_summary):
     # Check to see if the file has been processed already
     key = object_summary.key
@@ -179,7 +181,6 @@ def is_processed(object_summary):
 # This bucket scan will find unprocessed objects.
 # objects_to_process will contain zero or one objects if truncate=True;
 # objects_to_process will contain zero or more objects if truncate=False.
-
 objects_to_process = []
 for object_summary in my_bucket.objects.filter(Prefix=source + "/"
                                                + directory + "/"):
@@ -276,9 +277,6 @@ for object_summary in objects_to_process:
     # The table is built in the same way as the others, but this allows us
     # to resuse the code below in the loop to write the batch file and run
     # the SQL command.
-
-    # TODO
-    # refactor to simplify the later half of the loop into a function.
 
     dictionary_dfs = {}  # keep the dictionaries in storage
     # loop starts at index -1 to process the main metadata table.
@@ -439,6 +437,7 @@ query = """
         SELECT node_id, title, hr_url, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
     """.format(dbschema=dbschema)
 
+# Execute the query and log the outcome
 logger.debug(query)
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

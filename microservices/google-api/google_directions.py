@@ -65,9 +65,7 @@ import argparse
 import httplib2
 import pandas as pd
 from pandas.io.json import json_normalize
-
 import googleapiclient.errors
-
 from io import BytesIO
 import datetime
 from apiclient.discovery import build
@@ -94,7 +92,7 @@ formatter = logging.Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# create file handler for logs at the INFO level
+# create file handler for logs at the DEBUG level
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), 'a',
                               encoding=None, delay='true')
@@ -207,8 +205,8 @@ client = boto3.client('s3')
 resource = boto3.resource('s3')
 
 
+# Check to see if the file has been processed already
 def is_processed(key):
-    # Check to see if the file has been processed already
     filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
     goodfile = config_destination + "/good/" + key
     badfile = config_destination + "/bad/" + key
@@ -262,7 +260,6 @@ for loc in config_locationGroups:
 
 # iterate over ever validated account
 for account in validated_accounts:
-
     # check the aggregate_days validity
     if 1 <= len(account["aggregate_days"]) <= 3:
         for i in account["aggregate_days"]:
@@ -314,6 +311,10 @@ for account in validated_accounts:
             'postalCode': i['address']['postalCode']
             } for i in locations['locations']}
 
+    # batched_location_names is a list of lists
+    # each list within batched_location_names contains up to 10 location names
+    # each list of 10 will added pre API request, which can support responsese
+    # of up to 10 locations at a time. The purpose of this is to reduce calls.
     batched_location_names = [
         location_names_list[i * batch_size:(i + 1) * batch_size] for i in
         range((len(location_names_list) + batch_size - 1) // batch_size)]
@@ -343,10 +344,12 @@ for account in validated_accounts:
                 response = \
                     service.accounts().locations().\
                     reportInsights(body=bodyvar, name=name).execute()
-            except googleapiclient.errors.HttpError as e:
-                logger.info("Request contains an invalid argument. Skipping.")
+            except googleapiclient.errors.HttpError:
+                logger.exception(
+                    "Request contains an invalid argument. Skipping.")
                 continue
 
+            # stitch all responses responses for later iterative processing
             stitched_responses['locationDrivingDirectionMetrics'] += \
                 response['locationDrivingDirectionMetrics']
 

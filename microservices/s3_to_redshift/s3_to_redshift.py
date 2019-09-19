@@ -26,9 +26,9 @@ import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
+import logging
 
 # set up logging
-import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -293,6 +293,7 @@ for object_summary in objects_to_process:
 
     # if truncate is set to true, perform a transaction that will
     # replace the existing table data with the new data in one commit
+    # if truncate is not true then the query remains as just the copy command
     if (truncate):
         scratch_start = """
 BEGIN;
@@ -306,10 +307,12 @@ ALTER TABLE {0}_scratch OWNER TO microservice;
 GRANT SELECT ON {0}_scratch TO looker;\n
 GRANT SELECT ON {0}_scratch TO datamodeling;\n
 """.format(dbtable)
+
         scratch_copy = copy_query(
             dbtable + "_scratch", batchfile, log=False)
         scratch_copy_log = copy_query(
             dbtable + "_scratch", batchfile, log=True)
+
         scratch_cleanup = """
 -- Replace main table with scratch table, clean up the old table
 ALTER TABLE {0} RENAME TO {1}_old;
@@ -317,6 +320,7 @@ ALTER TABLE {0}_scratch RENAME TO {1};
 DROP TABLE {0}_old;
 COMMIT;
 """.format(dbtable, table_name)
+
         query = scratch_start + scratch_copy + scratch_cleanup
         logquery = scratch_start + scratch_copy_log + scratch_cleanup
 

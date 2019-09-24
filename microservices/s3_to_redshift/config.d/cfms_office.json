@@ -5,7 +5,7 @@
   "directory": "cfms_sbc",
   "doc": "OfficeDimension-.*.csv",
   "dbtable": "servicebc.office_info",
-  "column_count": 28,
+  "column_count": 29,
   "columns": [
     "id",
     "start_date",
@@ -27,6 +27,7 @@
     "Site_Fax_no",
     "Website_URL",
     "Site_Email",
+    "Google_Location_ID",
     "Latitude",
     "Longitude",
     "Office Code",
@@ -40,6 +41,16 @@
     "Office Code",
     "AREA",
     "RMSOFFICECODE"
+  ],
+  "dateformat": [
+    {
+      "field": "start_date",
+      "format": "%Y%m%d"
+    },
+    {
+      "field": "end_date",
+      "format": "%Y%m%d"
+    }
   ],
   "delim": ",",
   "truncate": true

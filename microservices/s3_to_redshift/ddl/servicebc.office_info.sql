@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS servicebc.office_info;
 CREATE TABLE servicebc.office_info
 ( "id" BIGINT ENCODE ZSTD NOT NULL,
   "start_date" TIMESTAMP ENCODE ZSTD,

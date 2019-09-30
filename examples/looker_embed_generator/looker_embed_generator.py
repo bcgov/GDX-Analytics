@@ -80,8 +80,7 @@ if (lookerkey is None):  # confirm that the environment variable is set
     print "LOOKERKEY environment variable not set"
     sys.exit(1)
 
-lookerurl = 'dev.analytics.gov.bc.ca'  # set to the URL where Looker is hosted
-
+lookerurl = '52.60.65.121:9999'  # set to the URL where Looker is hosted
 
 class Looker:
     def __init__(self, host, secret):

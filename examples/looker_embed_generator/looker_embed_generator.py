@@ -17,7 +17,7 @@
 #               : To create an embed string with a filter:
 #               :
 #               : python looker_embed_generator.py <<embed url>>
-#               :   <<filter name>> <<filter value>>
+#               :   [<<filter name>> <<filter value>>]
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
 #               :   Theme "Birth, Death, Adoption, Marriage and Divorce"
@@ -55,12 +55,12 @@ filtered = False
 # Set configuration
 if (len(sys.argv) < 2):  # Will be 1 if no arguments, 2 if one argument
     print "Usage: python looker_embed_generator.py \
-        <<embed url>> <<optional: filter-name filter-value>>"
+        <<embed url>> [<<filter-name>> <<filter-value>>]"
     sys.exit(1)
 
 if (len(sys.argv) == 3):
-    print "Usage: python looker_embed_generator.py <<embed url>> \
-      <<optional: filter-name filter-value>>"
+    print "Usage: python looker_embed_generator.py \
+        <<embed url>> [<<filter-name>> <<filter-value>>]"
     sys.exit(1)
 
 if (len(sys.argv) == 4):

@@ -42,6 +42,9 @@ import hmac
 import sys  # to read command line parameters
 
 
+# Adds double slashes before commas and then URI encodes.
+# The double slashes are required due to how looker parses
+# filter parameters.
 def parse_filter_value(filter_value):
     parsed_filter_value = urllib.quote(filter_value.replace(',', r'\\,'))
     return parsed_filter_value
@@ -58,18 +61,20 @@ if (len(sys.argv) < 2):  # Will be 1 if no arguments, 2 if one argument
         <<embed url>> [<<filter-name>> <<filter-value>>]"
     sys.exit(1)
 
-if (len(sys.argv) == 3):
+if (len(sys.argv) == 3):  # Will be 3 if missing filter values
     print "Usage: python looker_embed_generator.py \
         <<embed url>> [<<filter-name>> <<filter-value>>]"
     sys.exit(1)
 
-if (len(sys.argv) == 4):
+if (len(sys.argv) == 4):  # Filter-name and filter-value
     filtered = True
     filter_name = sys.argv[2]
     filter_value = parse_filter_value(sys.argv[3])
 
 embedurl = '/embed/' + sys.argv[1]
 
+# If the filtered flag is set, add the filter-name
+# and filter-value to the embed url
 if filtered:
     embedurl += "?filter_config=%7B\"" + filter_name + \
       "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + \

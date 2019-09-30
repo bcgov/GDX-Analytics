@@ -26,12 +26,17 @@ The Java version accepts all optional attribute and filter parameters as follows
 java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]
 ```
 
-The Python version currently takes only the `embed_url` as a required argument:
+The Python version will accept the `embed_url` as a required argument:
 
 ```
 python looker_embed_generator.py <<embed url>>
 ```
 
+It can also be passed a dashboard filter-name and filter-value:
+
+```
+python looker_embed_generator.py <<embed url>> <<filter-name>> <<filter-value>>
+```
 
 ## Getting Help
 

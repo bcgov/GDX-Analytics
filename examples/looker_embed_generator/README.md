@@ -32,7 +32,7 @@ The Python version will accept the `embed_url` as a required argument:
 python looker_embed_generator.py <<embed url>>
 ```
 
-It can also be passed a dashboard filter-name and filter-value:
+The Python version can also be passed a dashboard filter-name and filter-value:
 
 ```
 python looker_embed_generator.py <<embed url>> <<filter-name>> <<filter-value>>

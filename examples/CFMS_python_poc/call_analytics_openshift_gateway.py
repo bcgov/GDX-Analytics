@@ -15,8 +15,8 @@
 #               : $ python call_analytics.py <<hostname>> <<hostport>>
 #               :
 #               : For example:
-#               : $ python call_analytics.py caps.pathfinder.bcgov
-#               : $ python call_analytics.py localhost 8080
+#               : $ python call_analytics_openshift_gateway.py caps.pathfinder.bcgov
+#               : $ python call_analytics_openshift_gateway.py localhost 8443
 #
 # References    : https://github.com/bcgov/GDX-Analytics-OpenShift-Snowplow-Gateway-Service
 

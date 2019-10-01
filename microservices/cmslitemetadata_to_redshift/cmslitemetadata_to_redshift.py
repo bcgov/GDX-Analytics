@@ -268,7 +268,7 @@ for object_summary in objects_to_process:
         for thisfield in data['dateformat']:
             df[thisfield['field']] = pd.to_datetime(df[thisfield['field']]).apply(lambda x: x.strftime(thisfield['format'])if not pd.isnull(x) else '')
 
-    # We loop over the columns listedin the JSON configuration file.
+    # We loop over the columns listed in the JSON configuration file.
     # There are three sets of values that should match to consider:
     # - columns_lookup
     # - dbtables_dictionaries

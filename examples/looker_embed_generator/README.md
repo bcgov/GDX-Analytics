@@ -14,6 +14,8 @@ Currently this project is still in development.
 
 These are command line applications. `LOOKERKEY` must be set for this session.
 
+### Running the Java version
+
 Parameters:
 - `env`: the target Looker environment, e.g.: `prod` or `test`
 - `embed_url`: the target look or dashboard, e.g.: `looks/98`
@@ -26,16 +28,20 @@ The Java version accepts all optional attribute and filter parameters as follows
 java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]
 ```
 
-The Python version will accept the `embed_url` as a required argument:
+### Running the Python version
 
+Parameters:
+- `embed_url`: the target look or dashboard, e.g.: `looks/98`
+- `json_filter`: an optional dashboard filter by filter-names and filter-values as a JSON object of the form `'{"filter-name":"filter-value"}'`, e.g.: `'{"City":"Metropolis"}'`
+
+The Python version will accept the `embed_url` as a required argument:
 ```
 python looker_embed_generator.py <<embed url>>
 ```
 
 The Python version can also be passed dashboard filter-names and filter-values using a JSON string:
-
 ```
-python looker_embed_generator.py <<embed url>> '{"filter-name":"filter-value"}'
+python looker_embed_generator.py <<embed url>> <<json_filter>>
 ```
 
 ## Getting Help
@@ -44,7 +50,7 @@ Contact the GDX Analytics team for a valid LOOKERKEY value and usage help.
 
 ## Contributors
 
-The GDX Analytics team will be the main contributors to this project currently. They will also maintain the code. 
+The GDX Analytics team will be the main contributors to this project currently. They will also maintain the code.
 
 ## License
 
@@ -60,4 +66,3 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
-

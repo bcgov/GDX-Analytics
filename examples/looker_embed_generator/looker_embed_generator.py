@@ -50,42 +50,44 @@ def parse_filter_value(filter_value):
     return parsed_filter_value
 
 
-# Set up variables for filters
-filter_value = ''
-filter_name = ''
+# Set up flag for filters
 filtered = False
 
 # Set configuration
 if (len(sys.argv) < 2):  # Will be 1 if no arguments, 2 if one argument
     print "Usage: python looker_embed_generator.py \
-        <<embed url>> [<<filter-name>> <<filter-value>>]"
+        <<embed url>> {\"filtername\": \"filtervalue\"}"
     sys.exit(1)
 
-if (len(sys.argv) == 3):  # Will be 3 if missing filter values
-    print "Usage: python looker_embed_generator.py \
-        <<embed url>> [<<filter-name>> <<filter-value>>]"
-    sys.exit(1)
-
-if (len(sys.argv) == 4):  # Filter-name and filter-value
+if (len(sys.argv) == 3):  # Will be 3 if passing in a json object of filters
     filtered = True
-    filter_name = sys.argv[2]
-    filter_value = parse_filter_value(sys.argv[3])
+    filters = json.loads(sys.argv[2])
 
-embedurl = '/embed/' + sys.argv[1]
+
+embed_url = '/embed/' + sys.argv[1]
 
 # If the filtered flag is set, add the filter-name
 # and filter-value to the embed url
 if filtered:
-    embedurl += "?filter_config=%7B\"" + filter_name + \
-      "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + \
-      filter_value + "\"%7D,%7B%7D%5D,\"id\":456%7D%5D%7D"
+    embed_url += "?filter_config=%7B"
+    filter_string = ''
+    index = 1
+    for filter_name in filters:
+        filter_value = parse_filter_value(filters[filter_name])
+        filter_string += "\\\"" + filter_name + \
+        "\\\":%5B%7B\\\"type\\\":\\\"%3D\\\",\\\"values\\\":%5B%7B\\\"constant\\\":\\\"" + \
+        filter_value + "\\\"%7D,%7B%7D%5D,\\\"id\\\":456%7D%5D"
+        if index < len(filters):
+            filter_string += ","
+        index += 1
+    embed_url = embed_url + filter_string + "%7D"
 
 lookerkey = os.getenv('LOOKERKEY')
 if (lookerkey is None):  # confirm that the environment variable is set
     print "LOOKERKEY environment variable not set"
     sys.exit(1)
 
-lookerurl = '52.60.65.121:9999'  # set to the URL where Looker is hosted
+lookerurl = 'dev.analytics.gov.bc.ca'  # set to the URL where Looker is hosted
 
 class Looker:
     def __init__(self, host, secret):
@@ -194,7 +196,7 @@ def test():
     # Set TTL for embed code. 60*15 = 15 minutes
     timeout = 60 * 15
 
-    url = URL(looker, user, timeout, embedurl + ('&' if filtered else '?') +
+    url = URL(looker, user, timeout, embed_url + ('&' if filtered else '?') +
               'embed_domain=http://127.0.0.1:5000', force_logout_login=True)
 
     return "https://" + url.to_string()

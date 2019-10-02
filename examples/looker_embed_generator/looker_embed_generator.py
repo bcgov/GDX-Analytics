@@ -7,20 +7,20 @@
 # Requirements  : You must set the following environment variable
 #               : to establish credentials for the embed user
 #
-#               : export export LOOKERKEY=<<Looker embed key>>
+#               : export LOOKERKEY=<<Looker embed key>>
 #
 # Usage         : To create an embed string without a filter:
 #               : python looker_embed_generator.py <<embed url>>
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
 #               :
-#               : To create an embed string with a filter:
+#               : To create an embed string with filter(s):
 #               :
 #               : python looker_embed_generator.py <<embed url>>
-#               :   [<<filter name>> <<filter value>>]
+#               :   '{"filter-name": "filter-value"}'
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
-#               :   Theme "Birth, Death, Adoption, Marriage and Divorce"
+#               :   '{"City":"Metropolis"}'
 #               :
 #               : NOTE: The embed must be accessible to the
 #               : Embed Shared Group.
@@ -42,9 +42,9 @@ import hmac
 import sys  # to read command line parameters
 
 
-# Adds double slashes before commas and then URI encodes.
+# Add double slashes before commas and then URI encode.
 # The double slashes are required due to how looker parses
-# filter parameters.
+# filter parameters in the embed_url string.
 def parse_filter_value(filter_value):
     parsed_filter_value = urllib.quote(filter_value.replace(',', r'\\,'))
     return parsed_filter_value
@@ -66,17 +66,18 @@ if (len(sys.argv) == 3):  # Will be 3 if passing in a json object of filters
 
 embed_url = '/embed/' + sys.argv[1]
 
-# If the filtered flag is set, add the filter-name
-# and filter-value to the embed url
+# If the filtered flag is set, break out the filter names and values
+# from the JSON string passed in via cms line, and add these to the
+# embed_url string.
 if filtered:
     embed_url += "?filter_config=%7B"
     filter_string = ''
     index = 1
     for filter_name in filters:
         filter_value = parse_filter_value(filters[filter_name])
-        filter_string += "\\\"" + filter_name + \
-        "\\\":%5B%7B\\\"type\\\":\\\"%3D\\\",\\\"values\\\":%5B%7B\\\"constant\\\":\\\"" + \
-        filter_value + "\\\"%7D,%7B%7D%5D,\\\"id\\\":456%7D%5D"
+        filter_string += "\"" + filter_name + \
+            "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + \
+            filter_value + "\"%7D,%7B%7D%5D,\"id\":456%7D%5D"
         if index < len(filters):
             filter_string += ","
         index += 1
@@ -88,6 +89,7 @@ if (lookerkey is None):  # confirm that the environment variable is set
     sys.exit(1)
 
 lookerurl = 'dev.analytics.gov.bc.ca'  # set to the URL where Looker is hosted
+
 
 class Looker:
     def __init__(self, host, secret):

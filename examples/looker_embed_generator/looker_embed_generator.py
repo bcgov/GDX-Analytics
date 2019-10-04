@@ -50,6 +50,40 @@ def parse_filter_value(filter_value):
     return parsed_filter_value
 
 
+# This function loops over the filters passed into the script and
+# generates the filters section of the embed url string.
+def encode_embed_filters(filters):
+    embed_url_string = "?filter_config=%7B"
+    filter_string = ''
+    index = 1
+    for filter_name in filters:
+        filter_string += "\"" + filter_name + "\":%5B"
+        filter_string += build_filter_string(filters[filter_name])
+        if index < len(filters):
+            filter_string += ","
+        index += 1
+    return embed_url_string + filter_string + "%7D"
+
+
+# This function loops over each filter value and generates the
+# the strings for individual filter values
+def build_filter_string(filter_values):
+    filter_string = ""
+    index = 1
+    for filter_value in filter_values:
+        match_type = filter_value["matchtype"]
+        value = parse_filter_value(filter_value["value"])
+        filter_string += "%7B\"type\":\"" + match_type + \
+            "\",\"values\":%5B%7B\"constant\":\"" + \
+            value + "\"%7D,%7B%7D%5D%7D"
+        if index < len(filter_values):
+            filter_string += ","
+        elif index == len(filter_values):
+            filter_string += "%5D"
+        index += 1
+    return filter_string
+
+
 # Set up flag for filters
 filtered = False
 
@@ -70,20 +104,10 @@ embed_url = '/embed/' + sys.argv[1]
 # from the JSON string passed in via cms line, and add these to the
 # embed_url string.
 if filtered:
-    embed_url += "?filter_config=%7B"
-    filter_string = ''
-    index = 1
-    for filter_name in filters:
-        filter_value = parse_filter_value(filters[filter_name])
-        filter_string += "\"" + filter_name + \
-            "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + \
-            filter_value + "\"%7D,%7B%7D%5D,\"id\":456%7D%5D"
-        if index < len(filters):
-            filter_string += ","
-        index += 1
-    embed_url = embed_url + filter_string + "%7D"
+    embed_url += encode_embed_filters(filters)
 
 lookerkey = os.getenv('LOOKERKEY')
+
 if (lookerkey is None):  # confirm that the environment variable is set
     print "LOOKERKEY environment variable not set"
     sys.exit(1)

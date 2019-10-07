@@ -2,10 +2,10 @@
     "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
     "source": "client",
     "destination": "processed",
-    "directory": "cmslite_gdx",
+    "directory": "test_brendan",
     "doc": "gov_assets.*",
-    "dbtable": "cmslite.asset_downloads",
-    "column_count": 10,
+    "dbtable": "cmslite.asset_downloads_scratch",
+    "column_count": 16,
     "columns": [
       "ip",
       "id",
@@ -16,7 +16,13 @@
       "return_size",
       "referrer",
       "user_agent_http_request_header",
-      "proxy"
+      "proxy",
+      "os_family",
+      "os_version",
+      "browser_family",
+      "browser_version",
+      "referrer_urlhost",
+      "referrer_medium"
     ],
     "column_string_limit":{
       "user_agent_http_request_header": 4095
@@ -64,5 +70,9 @@
         "replace": "%7C"
       },
       "linefeed": "\r\n"
+    },
+    "ua_parse": {},
+    "referrer_parse":{
+      "curr_url": "https://www2.gov.bc.ca"
     }
 }

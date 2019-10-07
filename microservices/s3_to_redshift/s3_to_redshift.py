@@ -27,6 +27,9 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
+from ua_parser import user_agent_parser
+from referer_parser import Referer
+
 
 # set up logging
 logger = logging.getLogger(__name__)
@@ -184,6 +187,7 @@ for object_summary in objects_to_process:
 
     # Create an object to hold the data while parsing
     csv_string = ''
+    
     # Perform regex pattern replacements according to config, if defined
     if 'global_regex' in data:
         linefeed = ''
@@ -194,6 +198,43 @@ for object_summary in objects_to_process:
         body_stringified = body.read()
         # perform regex replacements by line
         for line in body_stringified.splitlines():
+
+            user_agent = re.match('^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$' ,line).group(9)
+            referrer_url = re.match('^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$' ,line).group(8)
+            parsed_ua =  user_agent_parser.Parse(user_agent)
+            parsed_referrer_url = Referer(referrer_url,data['referrer_parse']['curr_url'])
+
+            # Parse OS family and version
+            ua_string = '|' + parsed_ua['os']['family']
+            if parsed_ua['os']['major'] != None:
+                ua_string += '|' + parsed_ua['os']['major']
+            if parsed_ua['os']['minor'] != None:
+                ua_string += '.' + parsed_ua['os']['minor']
+            if parsed_ua['os']['patch'] != None:
+                ua_string += '.' + parsed_ua['os']['patch']
+
+            # Parse Browser family and version
+            ua_string += '|' + parsed_ua['user_agent']['family']
+            if parsed_ua['user_agent']['major'] != None:
+                ua_string += '|' + parsed_ua['user_agent']['major']
+            else:
+                ua_string += '|'
+            if parsed_ua['user_agent']['minor'] != None:
+                ua_string += '.' + parsed_ua['user_agent']['minor']
+            if parsed_ua['user_agent']['patch'] != None:
+                ua_string += '.' + parsed_ua['user_agent']['patch']
+
+            # Parse referrer urlhost and medium
+            referrer_string = ''
+            if parsed_referrer_url.referer != None:
+                referrer_string += '|' + parsed_referrer_url.referer
+            else:
+                referrer_string += '|'
+            if parsed_referrer_url.medium != None:
+                referrer_string += '|' + parsed_referrer_url.medium
+            else:
+                referrer_string += '|'
+
             if(data['global_regex']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
             for exp in data['global_regex']['regexs']:
@@ -205,12 +246,15 @@ for object_summary in objects_to_process:
                         linefeed = data['global_regex']['linefeed']
                     else:
                         linefeed = '\r\n'
+                    parsed_line += ua_string + referrer_string
                     parsed_list.append(parsed_line)
         csv_string = linefeed.join(parsed_list)
         logger.info(object_summary.key + " parsed successfully")
+
     # no regex replacements to make
-    else:
+    if ('global_regex' not in data) & ('ua_parse' in data) & ('referrer_parse' in data):
         csv_string = body.read()
+
 
     # Check that the file decodes as UTF-8. If it fails move to bad and end
     try:
@@ -239,7 +283,7 @@ for object_summary in objects_to_process:
         df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
                          dtype=dtype_dic, usecols=range(column_count))
     except Exception as e:
-        logger.exception('exption reading {0}'.format(object_summary.key))
+        logger.exception('exception reading {0}'.format(object_summary.key))
         if (str(e) == "No columns to parse from file"):
             logger.warning('File is empty, keying to goodfile \
                            and proceeding.')
@@ -248,8 +292,8 @@ for object_summary in objects_to_process:
             logger.warning('File not empty, keying to badfile \
                            and proceeding.')
             outfile = badfile
-        client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-\
-                           microservices", CopySource="sp-ca-bc-gov-\
+        client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", 
+                           CopySource="sp-ca-bc-gov-\
                            131565110619-12-microservices/"
                            + object_summary.key, Key=outfile)
         continue

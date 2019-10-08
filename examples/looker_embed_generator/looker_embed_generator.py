@@ -16,11 +16,68 @@
 #               :
 #               : To create an embed string with filter(s):
 #               :
+#               : 1 Filter and 1 Value
+#               :
 #               : python looker_embed_generator.py <<embed url>>
-#               :   '{"filter-name": "filter-value"}'
+#               :   '{"filter-name": ["matchtype": "matchtype-value", 
+#               :                     "values":"filter-value"]}'
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
-#               :   '{"City":"Metropolis"}'
+#               :   '{"City":["matchtype":"=", "values":"Metropolis"]}'
+#               :
+#               : or:
+#               : 
+#               : 1 Filter and 2 or more Values
+#               :
+#               : python looker_embed_generator.py <<embed url>>
+#               :   '{"filter-name": ["matchtype": {"matchtype-value","values":"filter-value"},
+#               :                                  {"matchtype-value","values":"filter-value"}]}'
+#               :
+#               : eg: python looker_embed_generator.py dashboards/18
+#               :   '{"City":[{"matchtype":"=", "values":"Duncan - British Columbia"},
+#               :             {"matchtype":"starts", "values":"Nanaimo - British Columbia"}]'
+#               :
+#               : or:
+#               : 
+#               : 2 Filter and 1 Value
+#               :
+#               : python looker_embed_generator.py <<embed url>>
+#               :   '{"filter-name": ["matchtype": {"matchtype-value","values":"filter-value"}],
+#               :    "filter-name": ["matchtype": {"matchtype-value","values":"filter-value"}]}'
+#               :
+#               : eg: python looker_embed_generator.py dashboards/snowplow_web_block::bc_gov_analytics_dashboard_1 
+#               :   '{"City":[{"matchtype":"=","values":"Victoria - British Columbia"}, 
+#               :     "City":[{"matchtype":"contains","values":"Vancouver - British Columbia"}]}'
+#               :
+#               : or:
+#               : 
+#               : 1 Filter and comma separated values
+#               :
+#               : python looker_embed_generator.py <<embed url>>
+#               :   '{"filter-name": ["matchtype": "matchtype-value", 
+#               :                     "values":"filter-value"]}'
+#               :
+#               : :python looker_embed_generator.py dashboards/18
+#               :   '{"Theme": ["matchtype": "=", 
+#               :               "values":"\"Birth, Adoption, Death, Marriage & Divorce\",\"Employment, Business & Economic Development\""]}'
+#               :
+#               :
+#               : List of valid match types:
+#               :
+#               : Is equal to: '='
+#               : Contains: 'contains'
+#               : Does not contain: '!contains'
+#               : Starts with: 'starts'
+#               : Is empty: 'empty'
+#               : Is null: 'null'
+#               : Is not equal to: '!='
+#               : Does not contain: '!contains'
+#               : Does not start with: '!starts'
+#               : Does not end with: '!ends'
+#               : Is not empty: '!empty'
+#               : Is not null: '!null'
+#               : Matches a user attribute: 'user_attribute'
+#               :
 #               :
 #               : NOTE: The embed must be accessible to the
 #               : Embed Shared Group.
@@ -46,7 +103,7 @@ import sys  # to read command line parameters
 # The double slashes are required due to how looker parses
 # filter parameters in the embed_url string.
 def parse_filter_value(filter_value):
-    parsed_filter_value = urllib.quote(filter_value.replace(',', r'\\,'))
+    parsed_filter_value = urllib.quote(filter_value.replace(', ', r'\\, ').replace('\"',''))
     return parsed_filter_value
 
 
@@ -72,7 +129,8 @@ def build_filter_string(filter_values):
     index = 1
     for filter_value in filter_values:
         match_type = filter_value["matchtype"]
-        value = parse_filter_value(filter_value["value"])
+        value = parse_filter_value(filter_value["values"])
+        #value = filter_value["values"]
         filter_string += "%7B\"type\":\"" + match_type + \
             "\",\"values\":%5B%7B\"constant\":\"" + \
             value + "\"%7D,%7B%7D%5D%7D"
@@ -96,7 +154,6 @@ if (len(sys.argv) < 2):  # Will be 1 if no arguments, 2 if one argument
 if (len(sys.argv) == 3):  # Will be 3 if passing in a json object of filters
     filtered = True
     filters = json.loads(sys.argv[2])
-
 
 embed_url = '/embed/' + sys.argv[1]
 
@@ -223,7 +280,7 @@ def test():
     timeout = 60 * 15
 
     url = URL(looker, user, timeout, embed_url + ('&' if filtered else '?') +
-              'embed_domain=http://127.0.0.1:5000', force_logout_login=True)
+              'embed_domain=http://localhost:8888', force_logout_login=True)
 
     return "https://" + url.to_string()
 

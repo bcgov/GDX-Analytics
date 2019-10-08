@@ -1,0 +1,19 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema to capture the component name of a step in MyFS",
+	"self": {
+		"vendor": "ca.bc.gov.myfs",
+		"name": "component_name",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"component_name": {
+			"type": ["string"],
+			"maxLength": 255
+		}
+	},
+        "required": ["component_name"],
+	"additionalProperties": false
+}

@@ -73,7 +73,7 @@ FROM google.locations AS gl
 JOIN servicebc.datedimension AS dd
 ON gl.date::date = dd.datekey::date
 LEFT JOIN servicebc.office_info AS oi
-ON gl.location_id = oi.google_location_id
+ON gl.location_id = oi.google_location_id;
 ALTER TABLE google_mybusiness_servicebc_derived OWNER TO microservice;
 GRANT SELECT ON google_mybusiness_servicebc_derived TO looker;
 COMMIT;

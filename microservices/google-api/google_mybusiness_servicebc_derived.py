@@ -50,7 +50,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 
 query = '''
 BEGIN;
-SET SEARCH PATH TO google;
+SET SEARCH_PATH TO google;
 DROP TABLE IF EXISTS google_mybusiness_servicebc_derived;
 CREATE TABLE google_mybusiness_servicebc_derived AS
 SELECT

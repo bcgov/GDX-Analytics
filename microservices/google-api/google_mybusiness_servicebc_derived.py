@@ -55,6 +55,10 @@ DROP TABLE IF EXISTS google_mybusiness_servicebc_derived;
 CREATE TABLE google_mybusiness_servicebc_derived AS
 SELECT
   gl.*,
+  oi.site AS office_site,
+  oi.officesize AS office_size,
+  oi.area AS area_number,
+  oi.id AS office_id,
   dd.isweekend::BOOLEAN,
   dd.isholiday::BOOLEAN,
   dd.lastdayofpsapayperiod::date,
@@ -67,7 +71,9 @@ SELECT
   dd.weekdayname
 FROM google.locations AS gl
 JOIN servicebc.datedimension AS dd
-ON gl.date::date = dd.datekey::date;
+ON gl.date::date = dd.datekey::date
+LEFT JOIN servicebc.office_info AS oi
+ON gl.location_id = oi.google_location_id
 ALTER TABLE google_mybusiness_servicebc_derived OWNER TO microservice;
 GRANT SELECT ON google_mybusiness_servicebc_derived TO looker;
 COMMIT;

@@ -208,17 +208,19 @@ for object_summary in objects_to_process:
             ua_string = '|' + parsed_ua['os']['family']
             if parsed_ua['os']['major'] != None:
                 ua_string += '|' + parsed_ua['os']['major']
-            if parsed_ua['os']['minor'] != None:
-                ua_string += '.' + parsed_ua['os']['minor']
-            if parsed_ua['os']['patch'] != None:
-                ua_string += '.' + parsed_ua['os']['patch']
+                if parsed_ua['os']['minor'] != None:
+                    ua_string += '.' + parsed_ua['os']['minor']
+                if parsed_ua['os']['patch'] != None:
+                    ua_string += '.' + parsed_ua['os']['patch']
+            else:
+                ua_string += '|'
 
             # Parse Browser family and version
             ua_string += '|' + parsed_ua['user_agent']['family']
             if parsed_ua['user_agent']['major'] != None:
                 ua_string += '|' + parsed_ua['user_agent']['major']
             else:
-                ua_string += '|'
+                ua_string += '|' + 'NULL'
             if parsed_ua['user_agent']['minor'] != None:
                 ua_string += '.' + parsed_ua['user_agent']['minor']
             if parsed_ua['user_agent']['patch'] != None:

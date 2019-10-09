@@ -187,65 +187,64 @@ for object_summary in objects_to_process:
 
     # Create an object to hold the data while parsing
     csv_string = ''
-    
-    # Perform regex pattern replacements according to config, if defined
-    if 'global_regex' in data:
+
+    # Perform apache access log parsing according to config, if defined
+    if 'access_log_parse' in data:
         linefeed = ''
         parsed_list = []
-        if(data['global_regex']['string_repl']):
-            inline_pattern = data['global_regex']['string_repl']['pattern']
-            inline_replace = data['global_regex']['string_repl']['replace']
+        if(data['access_log_parse']['string_repl']):
+            inline_pattern = data['access_log_parse']['string_repl']['pattern']
+            inline_replace = data['access_log_parse']['string_repl']['replace']
         body_stringified = body.read()
         # perform regex replacements by line
         for line in body_stringified.splitlines():
-
-            user_agent = re.match('^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$' ,line).group(9)
-            referrer_url = re.match('^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$' ,line).group(8)
-            parsed_ua =  user_agent_parser.Parse(user_agent)
-            parsed_referrer_url = Referer(referrer_url,data['referrer_parse']['curr_url'])
-
-            # Parse OS family and version
-            ua_string = '|' + parsed_ua['os']['family']
-            if parsed_ua['os']['major'] != None:
-                ua_string += '|' + parsed_ua['os']['major']
-                if parsed_ua['os']['minor'] != None:
-                    ua_string += '.' + parsed_ua['os']['minor']
-                if parsed_ua['os']['patch'] != None:
-                    ua_string += '.' + parsed_ua['os']['patch']
-            else:
-                ua_string += '|'
-
-            # Parse Browser family and version
-            ua_string += '|' + parsed_ua['user_agent']['family']
-            if parsed_ua['user_agent']['major'] != None:
-                ua_string += '|' + parsed_ua['user_agent']['major']
-            else:
-                ua_string += '|' + 'NULL'
-            if parsed_ua['user_agent']['minor'] != None:
-                ua_string += '.' + parsed_ua['user_agent']['minor']
-            if parsed_ua['user_agent']['patch'] != None:
-                ua_string += '.' + parsed_ua['user_agent']['patch']
-
-            # Parse referrer urlhost and medium
-            referrer_string = ''
-            if parsed_referrer_url.referer != None:
-                referrer_string += '|' + parsed_referrer_url.referer
-            else:
-                referrer_string += '|'
-            if parsed_referrer_url.medium != None:
-                referrer_string += '|' + parsed_referrer_url.medium
-            else:
-                referrer_string += '|'
-
-            if(data['global_regex']['string_repl']):
+            if(data['access_log_parse']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
-            for exp in data['global_regex']['regexs']:
+            for exp in data['access_log_parse']['regexs']:
                 parsed_line, num_subs = re.subn(
                     exp['pattern'], exp['replace'], line)
                 if num_subs:
+                    user_agent = re.match(exp['pattern'] ,line).group(9)
+                    referrer_url = re.match(exp['pattern'] ,line).group(8)
+                    parsed_ua =  user_agent_parser.Parse(user_agent)
+                    parsed_referrer_url = Referer(referrer_url,data['access_log_parse']['referrer_parse']['curr_url'])
+
+                    # Parse OS family and version
+                    ua_string = '|' + parsed_ua['os']['family']
+                    if parsed_ua['os']['major'] != None:
+                        ua_string += '|' + parsed_ua['os']['major']
+                        if parsed_ua['os']['minor'] != None:
+                            ua_string += '.' + parsed_ua['os']['minor']
+                        if parsed_ua['os']['patch'] != None:
+                            ua_string += '.' + parsed_ua['os']['patch']
+                    else:
+                        ua_string += '|'
+
+                    # Parse Browser family and version
+                    ua_string += '|' + parsed_ua['user_agent']['family']
+                    if parsed_ua['user_agent']['major'] != None:
+                        ua_string += '|' + parsed_ua['user_agent']['major']
+                    else:
+                        ua_string += '|' + 'NULL'
+                    if parsed_ua['user_agent']['minor'] != None:
+                        ua_string += '.' + parsed_ua['user_agent']['minor']
+                    if parsed_ua['user_agent']['patch'] != None:
+                        ua_string += '.' + parsed_ua['user_agent']['patch']
+
+                    # Parse referrer urlhost and medium
+                    referrer_string = ''
+                    if parsed_referrer_url.referer != None:
+                        referrer_string += '|' + parsed_referrer_url.referer
+                    else:
+                        referrer_string += '|'
+                    if parsed_referrer_url.medium != None:
+                        referrer_string += '|' + parsed_referrer_url.medium
+                    else:
+                        referrer_string += '|'
+
                     # use linefeed if defined in config, or default "/r/n"
-                    if(data['global_regex']['linefeed']):
-                        linefeed = data['global_regex']['linefeed']
+                    if(data['access_log_parse']['linefeed']):
+                        linefeed = data['access_log_parse']['linefeed']
                     else:
                         linefeed = '\r\n'
                     parsed_line += ua_string + referrer_string
@@ -253,10 +252,9 @@ for object_summary in objects_to_process:
         csv_string = linefeed.join(parsed_list)
         logger.info(object_summary.key + " parsed successfully")
 
-    # no regex replacements to make
-    if ('global_regex' not in data) & ('ua_parse' in data) & ('referrer_parse' in data):
+    # This is not an apache access log
+    if 'access_log_parse' not in data:
         csv_string = body.read()
-
 
     # Check that the file decodes as UTF-8. If it fails move to bad and end
     try:

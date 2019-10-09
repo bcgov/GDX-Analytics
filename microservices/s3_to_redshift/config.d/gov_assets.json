@@ -54,7 +54,7 @@
         "new": ""
       }
     ],
-    "global_regex": {
+    "access_log_parse": {
       "regexs": [
         {
           "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$",
@@ -69,10 +69,10 @@
         "pattern": "|",
         "replace": "%7C"
       },
-      "linefeed": "\r\n"
-    },
-    "ua_parse": {},
-    "referrer_parse":{
-      "curr_url": "https://www2.gov.bc.ca"
+      "linefeed": "\r\n",
+      "ua_parse": {},
+      "referrer_parse":{
+        "curr_url": "https://www2.gov.bc.ca"
+      }
     }
 }

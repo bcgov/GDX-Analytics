@@ -6,9 +6,9 @@ select getdate();
 --create STL_QUERY_HISTORY if not exists
 create table IF NOT EXISTS STL_QUERY_HISTORY (like STL_QUERY including defaults);
 
---delete data older than 6 months
+--delete data older than 7 months
 delete STL_QUERY_HISTORY
-  where starttime < dateadd(month, -6, CURRENT_DATE);
+  where starttime < dateadd(month, -7, CURRENT_DATE);
 
 --insert yesterday's data
 insert into STL_QUERY_HISTORY (

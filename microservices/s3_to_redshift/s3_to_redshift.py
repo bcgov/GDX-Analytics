@@ -204,40 +204,43 @@ for object_summary in objects_to_process:
                 parsed_line, num_subs = re.subn(
                     exp['pattern'], exp['replace'], line)
                 if num_subs:
-                    user_agent = re.match(exp['pattern'] ,line).group(9)
-                    referrer_url = re.match(exp['pattern'] ,line).group(8)
-                    parsed_ua =  user_agent_parser.Parse(user_agent)
-                    parsed_referrer_url = Referer(referrer_url,data['access_log_parse']['referrer_parse']['curr_url'])
+                    user_agent = re.match(exp['pattern'], line).group(9)
+                    referrer_url = re.match(exp['pattern'], line).group(8)
+                    parsed_ua = user_agent_parser.Parse(user_agent)
+                    parsed_referrer_url = Referer(referrer_url,
+                                                  data['access_log_parse']
+                                                  ['referrer_parse']
+                                                  ['curr_url'])
 
                     # Parse OS family and version
                     ua_string = '|' + parsed_ua['os']['family']
-                    if parsed_ua['os']['major'] != None:
+                    if parsed_ua['os']['major'] is not None:
                         ua_string += '|' + parsed_ua['os']['major']
-                        if parsed_ua['os']['minor'] != None:
+                        if parsed_ua['os']['minor'] is not None:
                             ua_string += '.' + parsed_ua['os']['minor']
-                        if parsed_ua['os']['patch'] != None:
+                        if parsed_ua['os']['patch'] is not None:
                             ua_string += '.' + parsed_ua['os']['patch']
                     else:
                         ua_string += '|'
 
                     # Parse Browser family and version
                     ua_string += '|' + parsed_ua['user_agent']['family']
-                    if parsed_ua['user_agent']['major'] != None:
+                    if parsed_ua['user_agent']['major'] is not None:
                         ua_string += '|' + parsed_ua['user_agent']['major']
                     else:
                         ua_string += '|' + 'NULL'
-                    if parsed_ua['user_agent']['minor'] != None:
+                    if parsed_ua['user_agent']['minor'] is not None:
                         ua_string += '.' + parsed_ua['user_agent']['minor']
-                    if parsed_ua['user_agent']['patch'] != None:
+                    if parsed_ua['user_agent']['patch'] is not None:
                         ua_string += '.' + parsed_ua['user_agent']['patch']
 
                     # Parse referrer urlhost and medium
                     referrer_string = ''
-                    if parsed_referrer_url.referer != None:
+                    if parsed_referrer_url.referer is not None:
                         referrer_string += '|' + parsed_referrer_url.referer
                     else:
                         referrer_string += '|'
-                    if parsed_referrer_url.medium != None:
+                    if parsed_referrer_url.medium is not None:
                         referrer_string += '|' + parsed_referrer_url.medium
                     else:
                         referrer_string += '|'
@@ -292,7 +295,7 @@ for object_summary in objects_to_process:
             logger.warning('File not empty, keying to badfile \
                            and proceeding.')
             outfile = badfile
-        client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices", 
+        client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices",
                            CopySource="sp-ca-bc-gov-\
                            131565110619-12-microservices/"
                            + object_summary.key, Key=outfile)

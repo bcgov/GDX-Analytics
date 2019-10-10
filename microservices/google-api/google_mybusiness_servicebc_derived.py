@@ -87,9 +87,9 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception((
-                "Failed to execute the transaction ",
-                "to prepare the google_mybusiness_servicebc_derived PDT"))
+                'Error: failed to execute the transaction '
+                'to prepare the google_mybusiness_servicebc_derived PDT'))
         else:
             logger.info((
-                "Successfully executed the transaction ",
-                "to prepare the google_mybusiness_servicebc_derived PDT"))
+                'Success: executed the transaction '
+                'to prepare the google_mybusiness_servicebc_derived PDT'))

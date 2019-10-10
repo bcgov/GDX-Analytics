@@ -39,13 +39,10 @@ formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-host = 'snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.\
-c8s7belbz4fo.ca-central-1.redshift.amazonaws.com'
-
 conn_string = """
 dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 """.format(dbname='snowplow',
-           host=host,
+           host='redshift.analytics.gov.bc.ca',
            port='5439',
            user=os.environ['pguser'],
            password=os.environ['pgpass'])

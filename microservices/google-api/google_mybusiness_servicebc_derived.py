@@ -90,6 +90,6 @@ with psycopg2.connect(conn_string) as conn:
                 "Failed to execute the transaction ",
                 "to prepare the google_mybusiness_servicebc_derived PDT"))
         else:
-            logger.info(
-                ("Successfully executed the transaction ",
-                 "to prepare the google_mybusiness_servicebc_derived PDT"))
+            logger.info((
+                "Successfully executed the transaction ",
+                "to prepare the google_mybusiness_servicebc_derived PDT"))

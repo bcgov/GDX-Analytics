@@ -1,16 +1,18 @@
 ###################################################################
 # Script Name   : google_mybusiness_servicebc_derived.py
 #
-# Description   : Implements a table called google_mybusiness_servicebc_derived
-#               : joining google.locations and servicebc.office_info
+# Description   : Creates google_mybusiness_servicebc_derived, which is a
+#               : persistent derived table (PDT) joining google.locations
+#               : with servicebc.office_info, and servicebc.datedimension
 #
 # Requirements  : You must set the following environment variable
 #               : to establish credentials for the pgpass user microservice
 #
-#               : export pgpass=<<DB_PASSWD>>
+#               : export pguser=<<database_username>>
+#               : export pgpass=<<database_password>>
 #
 #
-# Usage         : python google_mybusiness_servicebc_derived.py configfile.json
+# Usage         : python google_mybusiness_servicebc_derived.py
 #
 import os
 import psycopg2
@@ -83,7 +85,11 @@ with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:
             curs.execute(query)
-        except psycopg2.Error as e:
-            logger.exception("Failed to execute query")
+        except psycopg2.Error:
+            logger.exception((
+                "Failed to execute the transaction ",
+                "to prepare the google_mybusiness_servicebc_derived PDT"))
         else:
-            logger.info("Executed query successfully")
+            logger.info(
+                ("Successfully executed the transaction ",
+                 "to prepare the google_mybusiness_servicebc_derived PDT"))

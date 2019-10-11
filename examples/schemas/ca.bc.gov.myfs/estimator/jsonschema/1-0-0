@@ -27,6 +27,6 @@
 			}
 		}
 	},
-        "required": ["button","estimates"],
+        "required": ["button","estimates","total"],
 	"additionalProperties": false
 }

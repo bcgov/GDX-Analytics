@@ -14,9 +14,13 @@
 #               : then call the script from the command line:
 #               : $ python call_analytics.py <<hostname>> <<hostport>>
 #               :
-#               : For example :
-#            $ python call_analytics_openshift_gateway.py caps.pathfinder.bcgov
-#            $ python call_analytics_openshift_gateway.py localhost 8443
+# Examples      : This usage will call the default localhost on port 8443:
+#               : $ python call_analytics_openshift_gateway.py
+#               : This usage will call caps.pathfinder.bcgov on 8443 with debug
+#               : level logging:
+#         $ python call_analytics_openshift_gateway.py caps.pathfinder.bcgov -d
+#               : This usage will call localhost on port 443 using https
+#            $ python call_analytics_openshift_gateway.py localhost 443 -s
 #
 # References    :
 #     https://github.com/bcgov/GDX-Analytics-OpenShift-Snowplow-Gateway-Service
@@ -40,8 +44,7 @@ parser.add_argument('hostport', nargs='?', help='CAPS Analytics host port.',
                     default='8443')
 parser.add_argument('-d', '--debug', help='Debug level logging.',
                     action="store_true")
-parser.add_argument('-s', '--tls',
-                    help='Transmit data using transport layer security.',
+parser.add_argument('-s', '--https', help='Transmit data on https',
                     action="store_true")
 args = parser.parse_args()
 

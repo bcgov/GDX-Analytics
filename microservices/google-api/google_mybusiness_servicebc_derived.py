@@ -1,16 +1,18 @@
 ###################################################################
 # Script Name   : google_mybusiness_servicebc_derived.py
 #
-# Description   : Implements a table called google_mybusiness_servicebc_derived
-#               : joining google.locations and servicebc.office_info
+# Description   : Creates google_mybusiness_servicebc_derived, which is a
+#               : persistent derived table (PDT) joining google.locations
+#               : with servicebc.office_info, and servicebc.datedimension
 #
 # Requirements  : You must set the following environment variable
 #               : to establish credentials for the pgpass user microservice
 #
-#               : export pgpass=<<DB_PASSWD>>
+#               : export pguser=<<database_username>>
+#               : export pgpass=<<database_password>>
 #
 #
-# Usage         : python google_mybusiness_servicebc_derived.py configfile.json
+# Usage         : python google_mybusiness_servicebc_derived.py
 #
 import os
 import psycopg2
@@ -37,13 +39,10 @@ formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-host = 'snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.\
-c8s7belbz4fo.ca-central-1.redshift.amazonaws.com'
-
 conn_string = """
 dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 """.format(dbname='snowplow',
-           host=host,
+           host='redshift.analytics.gov.bc.ca',
            port='5439',
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
@@ -83,7 +82,11 @@ with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:
             curs.execute(query)
-        except psycopg2.Error as e:
-            logger.exception("Failed to execute query")
+        except psycopg2.Error:
+            logger.exception((
+                'Error: failed to execute the transaction '
+                'to prepare the google_mybusiness_servicebc_derived PDT'))
         else:
-            logger.info("Executed query successfully")
+            logger.info((
+                'Success: executed the transaction '
+                'to prepare the google_mybusiness_servicebc_derived PDT'))

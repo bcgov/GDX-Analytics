@@ -79,7 +79,7 @@ hostport = args.hostport
 # make the POST call that contains the event data
 def post_event(json_event):
     # Make the connection
-    if args.tls:
+    if args.https:
         conn = http.client.HTTPSConnection(
             hostname, context=ssl._create_unverified_context())
     else:

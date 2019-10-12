@@ -44,7 +44,7 @@ parser.add_argument('hostport', nargs='?', help='CAPS Analytics host port.',
                     default='8443')
 parser.add_argument('-d', '--debug', help='Debug level logging.',
                     action="store_true")
-parser.add_argument('-s', '--https', help='Transmit data on https',
+parser.add_argument('-i', '--insecure', help='Transmit insecurely over HTTP',
                     action="store_true")
 args = parser.parse_args()
 
@@ -79,11 +79,11 @@ hostport = args.hostport
 # make the POST call that contains the event data
 def post_event(json_event):
     # Make the connection
-    if args.https:
+    if args.insecure:
+        conn = http.client.HTTPConnection(hostname)
+    else:
         conn = http.client.HTTPSConnection(
             hostname, context=ssl._create_unverified_context())
-    else:
-        conn = http.client.HTTPConnection(hostname)
     if hostport:
         conn.port = hostport
 

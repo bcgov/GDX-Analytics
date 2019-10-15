@@ -20,7 +20,7 @@
 #               : level logging:
 #         $ python call_analytics_openshift_gateway.py caps.pathfinder.bcgov -d
 #               : This usage will call localhost on port 443 using https
-#            $ python call_analytics_openshift_gateway.py localhost 443 -s
+#            $ python call_analytics_openshift_gateway.py localhost 443 -i
 #
 # References    :
 #     https://github.com/bcgov/GDX-Analytics-OpenShift-Snowplow-Gateway-Service
@@ -78,14 +78,16 @@ hostport = args.hostport
 
 # make the POST call that contains the event data
 def post_event(json_event):
+    logger.debug("posting json:\n{}".format(json_event))
     # Make the connection
     if args.insecure:
+        logger.info("Preparing insecure connection http://{}".format(hostname))
         conn = http.client.HTTPConnection(hostname)
     else:
+        logger.info("Preparing secure connection https://{}".format(hostname))
         conn = http.client.HTTPSConnection(
             hostname, context=ssl._create_unverified_context())
-    if hostport:
-        conn.port = hostport
+    conn.port = hostport
 
     # Prepare the headers
     headers = {'Content-type': 'application/json'}
@@ -99,6 +101,7 @@ def post_event(json_event):
              "Your IP address may not be whitelisted to the listener."))
         sys.exit(1)
 
+    time.sleep(3)
     # Recieve the response
     try:
         response = conn.getresponse()

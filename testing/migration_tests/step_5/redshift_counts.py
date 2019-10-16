@@ -56,7 +56,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 """.format(dbname='snowplow',
            host='redshift.analytics.gov.bc.ca',
            port='5439',
-           user='migrationtest',
+           user=os.environ['pguser_migrationtest'],
            password=os.environ['pgpass_migrationtest'])
 
 profiles = data['profiles']

@@ -81,7 +81,14 @@ query = "DROP TABLE IF EXISTS aws_cost_and_usage.AWSBilling" + startmonth + "; D
 logger.debug(query)
 
 # prep database call to pull the batch file into redshift
-conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='microservice' password=" + os.environ['pgpass']
+conn_string = """
+dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
+""".format(dbname='snowplow',
+           host='redshift.analytics.gov.bc.ca',
+           port='5439',
+           user=os.environ['pguser'],
+           password=os.environ['pgpass'])
+
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:

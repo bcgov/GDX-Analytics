@@ -1,16 +1,16 @@
 ###############################################################################
 # Script Name    : redshift_counts.py
-# 
+#
 # Description    : Automates the RedShift queries for iteration testing step 5
 #                : loads the results into S3
-# 
+#
 # Requirements   : You must set the following environment variables
 #                : to establish credentials for the microservice user
-# 
+#
 #                : export AWS_ACCESS_KEY_ID=<<KEY>>
 #                : export AWS_SECRET_ACCESS_KEY=<<SECRET_KEY>>
 #                : export pgpass_migrationtest=<<DB_PASSWD>>
-# 
+#
 # Usage          : python redshift_counts.py <<config.json>>
 #
 # Configuration  : config file must be json and contain
@@ -18,7 +18,7 @@
 #                   "destination": "path/to/folder",
 #                   "schema" : "webtrends",
 #                   "profiles" : [ "dcsIDs-list" ]
-# 
+#
 
 import boto3 # s3 access
 import pandas as pd # data processing
@@ -43,7 +43,7 @@ def log(s):
 if (len(sys.argv) != 2 ): #will be 1 if no arguments, 2 if one argument
     print "Usage: python s3_to_redshift.py <<config.json>>"
     sys.exit(1)
-configfile = sys.argv[1] 
+configfile = sys.argv[1]
 if (os.path.isfile(configfile) == False): # confirm that the file exists
     print "Invalid file name " + configfile
     sys.exit(1)
@@ -51,7 +51,14 @@ with open(configfile) as f:
     data = json.load(f)
 
 # acquire properties from configuration file
-conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' port='5439' user='migrationtest' password=" + os.environ['pgpass_migrationtest']
+conn_string = """
+dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
+""".format(dbname='snowplow',
+           host='redshift.analytics.gov.bc.ca',
+           port='5439',
+           user=os.environ['pguser_migrationtest'],
+           password=os.environ['pgpass_migrationtest'])
+
 profiles = data['profiles']
 output_bucket = data['output_bucket']
 destination = data['destination']
@@ -94,7 +101,7 @@ queries = {
         TO_CHAR(DATE_TRUNC('month', {table}.date ), 'YYYY-MM') AS "{table}.date_month",
         COUNT(*) AS "{table}.count"
     FROM webtrends.{table}  AS {table}
-        
+
     WHERE
             ({table}.dcs_id = '{dcsid}')
     GROUP BY 1,DATE_TRUNC('month', {table}.date )
@@ -120,7 +127,7 @@ queries = {
 
     WHERE ({table}.dcs_id = '{dcsid}') AND ({table}.wt_dl = '24')
     GROUP BY 1,DATE_TRUNC('month', {table}.date )
-    ORDER BY 2 
+    ORDER BY 2
     """,
     '2C - Download Events':
     """
@@ -131,7 +138,7 @@ queries = {
 
     WHERE ({table}.dcs_id = '{dcsid}') AND ({table}.wt_dl = '20')
     GROUP BY 1,DATE_TRUNC('month', {table}.date )
-    ORDER BY 2 
+    ORDER BY 2
     """,
     '2D - Miscellaneous Events':
     """
@@ -142,7 +149,7 @@ queries = {
 
     WHERE ({table}.dcs_id = '{dcsid}') AND (({table}.wt_dl  NOT IN ('24', '0', '20') OR {table}.wt_dl IS NULL))
     GROUP BY 1,DATE_TRUNC('month', {table}.date )
-    ORDER BY 2 
+    ORDER BY 2
     """,
     '3A - Visitor Sessions in Redshift':
     """
@@ -151,10 +158,10 @@ queries = {
         COUNT(DISTINCT {table}.wt_vt_sid ) AS "{table}.session_count"
     FROM webtrends.{table}  AS {table}
 
-    WHERE 
+    WHERE
         ({table}.dcs_id = '{dcsid}')
     GROUP BY 1,DATE_TRUNC('month', {table}.date )
-    ORDER BY 2 
+    ORDER BY 2
     """
 }
 
@@ -180,7 +187,7 @@ with psycopg2.connect(conn_string) as conn:
                     log(e.pgerror)
                 else:
                     log("Execution {0} successful\n\n".format(header))
-                
+
                 try:
                     data = np.array(curs.fetchall())
                 except  psycopg2.ProgrammingError as e: # the query did not produce a result set

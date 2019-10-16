@@ -128,12 +128,13 @@ config_destination = config['destination']
 config_locationGroups = config['locationGroups']
 
 # set up the Redshift connection
-conn_string = (
-    "dbname='snowplow' "
-    "host='snowplow-ca-bc-gov-main-redshi-resredshiftcluster-"
-    "13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com"
-    "' port='5439' user='{user}' password={password}"
-    ).format(user=os.environ['pguser'], password=os.environ['pgpass'])
+conn_string = """
+dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
+""".format(dbname='snowplow',
+           host='redshift.analytics.gov.bc.ca',
+           port='5439',
+           user=os.environ['pguser'],
+           password=os.environ['pgpass'])
 
 # the copy command will be formatted when the query is ready to be excecuted
 copy_command = (

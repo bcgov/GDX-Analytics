@@ -101,7 +101,6 @@ def post_event(json_event):
              "Your IP address may not be whitelisted to the listener."))
         sys.exit(1)
 
-    time.sleep(3)
     # Recieve the response
     try:
         response = conn.getresponse()

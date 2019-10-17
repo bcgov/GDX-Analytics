@@ -357,8 +357,10 @@ for account in validated_accounts:
     # The stiched_responses now contains all location driving direction data
     # as a list of dictionaries keyed to 'locationDrivingDirectionMetrics'.
     # The next block will build a dataframe from this list for CSV ouput to S3
-    file = open("LocationDrivingDirectionMetrics.json", "w+")
-    json.dump(stitched_responses, file, indent=2)
+
+    # Write out a file containing the stiched response from the queries above
+    # file = open("LocationDrivingDirectionMetrics.json", "w+")
+    # json.dump(stitched_responses, file, indent=2)
 
     # location_region_rows will collect elements from the API response
     # JSON into a list of dicts, to normalize into a DataFrame later

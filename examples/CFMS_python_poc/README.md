@@ -34,10 +34,13 @@ $ python sn.py
 
 To run [call_analytics_openshift_gateway.py](./call_analytics_openshift_gateway.py):
 ```
-$ python call_analytics_openshift_gateway.py <<hostname>> [<<hostport>>]
+$ python call_analytics_openshift_gateway.py [<<hostname>>] [<<hostport>>] [--insecure | -i] [--debug | -d]
 ```
-- Likely values for the `<<hostname>>` argument are `caps.pathfinder.gov.bc.ca` (the production OpenShift route) or `0.0.0.0` (if testing locally).
-- Likely values for the `[<<hostport>>]` optional argument are `8080` (if testing locally).
+- Passing no additional command line arguments when running `call_analytics_openshift_gateway.py` will result in the default hostname of `localhost` and the default port of `8443`
+- The optional flag `--insecure` will transmit the POST request insecurely over `http`. Otherwise, the message will be packaged as an `https` request.
+- The optional flag `--debug` is sets the logs to be at the `debug` level instead of the default `info` level.
+- Likely values for the `[<<hostname>>]` argument are `caps.pathfinder.gov.bc.ca` (the production OpenShift route) or `localhost` or `0.0.0.0` (if testing locally).
+- Likely values for the `[<<hostport>>]` optional argument are `8443` (if testing locally) or `443` if calling the service running on OpenShift.
 - Note that the GDX Analytics OpenShift Snowplow Gateway Service is currently whitelisted to allow only BC Government IP ranges (including the IP ranges for OpenShift itself).
 
 ## Special files in this repository
@@ -66,7 +69,7 @@ To ensure that Python loads this CA, can set this environment variable:
 
 ## Getting Help
 
-Please contact dan.pollock@gov.bc.ca for questions related to this work. 
+Please contact dan.pollock@gov.bc.ca for questions related to this work.
 
 ## Contributors
 

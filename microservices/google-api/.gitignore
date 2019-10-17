@@ -1,0 +1,7 @@
+# Google My Business API OAuth Credentials and Stored authorization files
+credentials_mybusiness.json
+mybusiness.dat
+
+# Google Search Console API OAuth Credentials and Stored authorization files
+credentials.json
+credentials.dat

@@ -30,10 +30,10 @@ function getUrlParamArray(param, defaultValue) {
     var vars = [];
     var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
         if ( key === param ) {
+            value = decodeURIComponent(value);
             vars.push(value);
         }
     });
-    vars = decodeURIComponent(vars);
     return vars;
 }
 //<!-- Snowplow stop plowing -->

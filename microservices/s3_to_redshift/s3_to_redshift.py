@@ -82,6 +82,9 @@ dtype_dic = {}
 if 'dtype_dic_strings' in data:
     for fieldname in data['dtype_dic_strings']:
         dtype_dic[fieldname] = str
+if 'dtype_dic_bools' in data:
+    for fieldname in data['dtype_dic_bools']:
+        dytpe_dic[fieldname] = bool
 delim = data['delim']
 truncate = data['truncate']
 if 'drop_columns' in data:
@@ -96,9 +99,13 @@ my_bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
 bucket_name = my_bucket.name
 
 # Database connection string
-conn_string = "dbname='snowplow' host='snowplow-ca-bc-gov-main-redshi-resredsh\
-iftcluster-13nmjtt8tcok7.c8s7belbz4fo.ca-central-1.redshift.amazonaws.com' \
-port='5439' user='microservice' password=" + os.environ['pgpass']
+conn_string = """
+dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
+""".format(dbname='snowplow',
+           host='redshift.analytics.gov.bc.ca',
+           port='5439',
+           user=os.environ['pguser'],
+           password=os.environ['pgpass'])
 
 
 # Constructs the database copy query string

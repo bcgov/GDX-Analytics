@@ -33,6 +33,7 @@ function getUrlParamArray(param, defaultValue) {
             vars.push(value);
         }
     });
+    vars = decodeURIComponent(vars);
     return vars;
 }
 //<!-- Snowplow stop plowing -->

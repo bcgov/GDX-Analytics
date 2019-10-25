@@ -58,7 +58,7 @@ if (len(sys.argv) != 2):
 configfile = sys.argv[1]
 # confirm that the file exists
 if os.path.isfile(configfile) is False:
-    print("Invalid file name ".format(configfile))
+    print("Invalid file name {}".format(configfile))
     sys.exit(1)
 # open the confifile for reading
 with open(configfile) as f:

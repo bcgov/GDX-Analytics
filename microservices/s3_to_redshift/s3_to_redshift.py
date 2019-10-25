@@ -84,7 +84,7 @@ if 'dtype_dic_strings' in data:
         dtype_dic[fieldname] = str
 if 'dtype_dic_bools' in data:
     for fieldname in data['dtype_dic_bools']:
-        dytpe_dic[fieldname] = bool
+        dtype_dic[fieldname] = bool
 delim = data['delim']
 truncate = data['truncate']
 if 'drop_columns' in data:

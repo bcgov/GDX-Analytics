@@ -53,12 +53,12 @@ logger.addHandler(handler)
 
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):
-    print "Usage: python s3_to_redshift.py config.json"
+    print('Usage: python s3_to_redshift.py config.json')
     sys.exit(1)
 configfile = sys.argv[1]
 # confirm that the file exists
 if os.path.isfile(configfile) is False:
-    print "Invalid file name " + configfile
+    print("Invalid file name {}".format(configfile))
     sys.exit(1)
 # open the confifile for reading
 with open(configfile) as f:
@@ -82,6 +82,9 @@ dtype_dic = {}
 if 'dtype_dic_strings' in data:
     for fieldname in data['dtype_dic_strings']:
         dtype_dic[fieldname] = str
+if 'dtype_dic_bools' in data:
+    for fieldname in data['dtype_dic_bools']:
+        dtype_dic[fieldname] = bool
 delim = data['delim']
 truncate = data['truncate']
 if 'drop_columns' in data:
@@ -398,5 +401,5 @@ COMMIT;
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
             CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
             + object_summary.key, Key=outfile)
-    except boto3.exceptions.ClientError as e:
+    except boto3.exceptions.ClientError:
         logger.exception("S3 transfer failed")

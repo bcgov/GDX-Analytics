@@ -47,7 +47,8 @@ The JSON configuration is required as a second argument when running the `s3_to_
 - `"column_count"`: The number of columns the processed dataframe should contain.
 - `"columns"`: A list containing the column names of the input file.
 - `"column_string_limit"`: A dictionary where keys are names of string type column to truncate, and values are integers indicating the length to truncate to.  
-- `"dtype_dic_strings"`: A dictionary where keys are the names of columns in the input data, and the keys are strings defining the datatype of that column.
+- `"dtype_dic_strings"`: A list where keys are the names of columns in the input data whose data will be formatted as strings.
+= `"dtype_dic_bools"`: A list where keys are the names of columns in the input data whose data will be formatted as boolean values.
 - `"delim"`: specify the character that deliminates data in the input `csv`.
 - `"truncate"`: boolean (`true` or `false`) that determines if the Redshift table will be truncated before inserting data, or instead if the table will be extended with the inserted data.
 - `"dateformat"` a list of dictionaries containing keys: `field` and `format`
@@ -88,6 +89,7 @@ The structure of the config file should resemble the following:
     }
   ],
   "dtype_dic_strings": [String],
+  "dtype_dic_bools": [String],
   "delim": String,
   "nested_delim": String,
   "truncate": boolean

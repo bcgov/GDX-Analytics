@@ -1,0 +1,38 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "cfms_sbc",
+  "doc": "ESB_Data-.*",
+  "dbtable": "servicebc.call_centre",
+  "column_count": 14,
+  "columns": [
+    "id",
+    "skillgroup",
+    "contactreason",
+    "contactreasondetail",
+    "datekey",
+    "interval",
+    "answeredwithinservicelevel",
+    "callputonhold",
+    "handletime",
+    "waittime",
+    "wraptime",
+    "talktime",
+    "holdtime",
+    "incomingphonenumber"
+  ],
+  "dtype_dic_strings": [
+    "id",
+    "answeredwithinservicelevel",
+    "callputonhold"
+  ],
+  "dateformat": [
+    {
+      "field": "datekey",
+      "format": "%Y%m%d"
+    }
+  ],
+  "delim": "|",
+  "truncate": true
+}

@@ -42,6 +42,8 @@ parser.add_argument('hostname', nargs='?', help='CAPS Analytics host URL.',
                     default='localhost')
 parser.add_argument('hostport', nargs='?', help='CAPS Analytics host port.',
                     default='8443')
+parser.add_argument('endpoint', nargs='?', help='Snowplow endpoint.',
+                    default='test')
 parser.add_argument('-d', '--debug', help='Debug level logging.',
                     action="store_true")
 parser.add_argument('-i', '--insecure', help='Transmit insecurely over HTTP',
@@ -74,6 +76,7 @@ signal.signal(signal.SIGINT, signal_handler)
 # GDX Analytics as a Service address information
 hostname = args.hostname
 hostport = args.hostport
+endpoint = args.endpoint
 
 
 # make the POST call that contains the event data
@@ -165,7 +168,7 @@ def get_agent(agent_id, role, quick_txn, schema):
 
 # Prepare the event requirements
 configuration = {
-    'env': 'test',  # test or prod
+    'env': '{}'.format(endpoint),  # test or prod
     'namespace': 'GDX-OpenShift-Test',
     'app_id': 'GDX-OpenShift-Test'}
 

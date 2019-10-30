@@ -36,7 +36,7 @@ To run [call_analytics_openshift_gateway.py](./call_analytics_openshift_gateway.
 ```
 $ python call_analytics_openshift_gateway.py [<<hostname>>] [<<hostport>>] [<<snowplow_endpoint>>] [--insecure | -i] [--debug | -d]
 ```
-- Passing no additional command line arguments when running `call_analytics_openshift_gateway.py` will result in the default hostname of `localhost`, the default port of `8443`, and the default endpoint as `prod`.
+- Passing no additional command line arguments when running `call_analytics_openshift_gateway.py` will result in the default hostname of `localhost`, the default port of `8443`, and the default endpoint as `test`.
 - the `<<snowplow_endpoint>>` options are `test` or `prod`. This is the string that populates the value for the `'env'` key in the POST body request JSON payload.
 - The optional flag `--insecure` will transmit the POST request insecurely over `http`. Otherwise, the message will be packaged as an `https` request.
 - The optional flag `--debug` is sets the logs to be at the `debug` level instead of the default `info` level.

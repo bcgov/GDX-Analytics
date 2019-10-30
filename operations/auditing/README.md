@@ -1,5 +1,5 @@
 # Site Query Auditing Report Generator
-The script *createAuditReport.py* in this folder generates auditing report about queries performed by Looker dashboard users, excluding administrators, against a given web site in the format of CSV containing following columns:
+The script *createAuditReport.py* in this folder generates an auditing report about queries performed by Looker dashboard users, excluding administrators, against a given web site in the format of CSV containing following columns:
 
 * Date & Time
 * Looker User Id
@@ -19,7 +19,7 @@ The script *createAuditReport.py* in this folder generates auditing report about
   * Looker API3 keys
 
 ## Setup
-Download the git repo to host machine, change *pwd* to repo root folder, and run
+Download the git repo to host machine, change *`pwd`* to repo root folder, and run
 
 ```
 $ cd audting
@@ -67,10 +67,33 @@ Examples
 
 ```
 $ pipenv run python createAuditReport.py foo.com myLookerClientId myLookerClientSecret > report.csv
-Enter your looker client secret: 
+Enter your looker client secret:
 ```
 Generate report for site *foo.com* into file *report.csv* if PGHOST, PGUSER, PGPASSWORD and lookerUrlPrefix have been supplied via environment variables.
 ```
 $ pipenv run python createAuditReport.py -H redshift.host -u reshift_user -p reshift_user_password -l https://looker.local:19999/api/3.1 -s myLookerClientSecret foo.com myLookerClientId  > report.csv
 ```
 Generate report for site *foo.com* into file *report.csv*, supplying all required information via command arguments.
+
+## Getting Help
+
+These scripts are intented for internal use. Please contact the GDX Analytics Team for more information.
+
+## Contributors
+
+The GDX analytics team will be the main contributors to this project currently. They will also maintain the code as well.
+
+## License
+
+Copyright 2015 Province of British Columbia
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and limitations under the License.

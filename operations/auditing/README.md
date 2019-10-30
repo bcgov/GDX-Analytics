@@ -66,7 +66,7 @@ If any required information is neither supplied in env var nor cmd arg, you will
 Examples
 
 ```
-$ pipenv run python createAuditReport.py foo.com myLookerClientId myLookerClientSecret > report.csv
+$ pipenv run python createAuditReport.py foo.com myLookerClientId -s myLookerClientSecret > report.csv
 Enter your looker client secret:
 ```
 Generate report for site *foo.com* into file *report.csv* if PGHOST, PGUSER, PGPASSWORD and lookerUrlPrefix have been supplied via environment variables.

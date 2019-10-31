@@ -15,13 +15,13 @@ FROM stl_query_history;
 delete STL_QUERY_HISTORY
   where starttime < dateadd(month, -7, CURRENT_DATE);
 
---insert yesterday's data
+--insert new data
 insert into STL_QUERY_HISTORY (
   select * from stl_query 
   where
     querytxt ilike '-- Looker Query Context%' 
-    and starttime >= dateadd(day, -1, CURRENT_DATE)
-    and starttime < current_date
+    and starttime >= dateadd(month, -7, CURRENT_DATE)
+    and query not in (select query from STL_QUERY_HISTORY)
 );
 
 select getdate();

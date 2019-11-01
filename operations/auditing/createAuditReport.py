@@ -93,7 +93,8 @@ order by
         for rec in curs:
             lookerUserIdNameMap[rec[1]] = {}
         # query looker users
-        h = httplib2.Http(ca_certs='./ca.crt')
+        h = httplib2.Http(
+            ca_certs=os.path.dirname(os.path.realpath(__file__)) + '/ca.crt')
         resp, content = h.request(
             lookerUrlPrefix + '/login',
             "POST",

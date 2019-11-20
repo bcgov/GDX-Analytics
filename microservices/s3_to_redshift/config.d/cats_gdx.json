@@ -2,9 +2,9 @@
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "source": "client",
   "destination": "processed",
-  "directory": "cats_gdx",
+  "directory": "cats_gdx_copy_gdxdsd_2342",
   "doc": "access.log.*",
-  "dbtable": "servicebc.cats_gdx",
+  "dbtable": "servicebc.cats_gdx_gdxdsd_2342",
   "column_count": 10,
   "columns": [
     "ip",
@@ -33,7 +33,7 @@
   "dateformat": [
     {
       "field": "govdate",
-      "format": "[%d/%b/%Y:%H:%M:%S -0700]"
+      "format": "[%d/%b/%Y:%H:%M:%S %z]"
     }
   ]
 }

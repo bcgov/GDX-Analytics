@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS servicebc.cats_gdx_gdxdsd_2342
+CREATE TABLE IF NOT EXISTS servicebc.cats_gdx
 (
   "ip" VARCHAR(255) ENCODE ZSTD NOT NULL,
   "user" VARCHAR(255) ENCODE ZSTD,

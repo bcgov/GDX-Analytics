@@ -2,9 +2,9 @@
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "source": "client",
   "destination": "processed",
-  "directory": "cats_gdx_copy_gdxdsd_2342",
+  "directory": "cats_gdx",
   "doc": "access.log.*",
-  "dbtable": "servicebc.cats_gdx_gdxdsd_2342",
+  "dbtable": "servicebc.cats_gdx",
   "column_count": 10,
   "columns": [
     "ip",

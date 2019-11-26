@@ -1,0 +1,9 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "directory": "pmrp",
+  "source": "client",
+  "destination": "processed",
+  "dbtable": "servicebc.cats_gdx",
+  "dml": "example.sql",
+  "sfts_path": "/SBC/Shared/Secured/SS_BI/SS_GDX_IN"
+}

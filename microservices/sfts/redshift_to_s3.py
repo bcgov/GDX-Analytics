@@ -9,8 +9,6 @@
 #
 #               : export pguser=<<database_username>>
 #               : export pgpass=<<database_password>>
-#               : export sfts_user=<<sfts_service_account_username>>
-#               : export sfts_pass=<<sfts_service_account_password>>
 #
 # Usage         : python generate_prmp_csv.py config.json
 #
@@ -57,14 +55,12 @@ config = flags.conf
 with open(config) as f:
     config = json.load(f)
 
-dbtable = config['dbtable']
+object_prefix = config['object_prefix']
 bucket = config['bucket']
 s3_prefix = config['source'] + '/' + config['directory']
 dml_file = config['dml']
 
 # Get required environment variables
-# sfts_user = os.environ['sfts_user']
-# sfts_pass = os.environ['sfts_pass']
 pguser = os.environ['pguser']
 pgpass = os.environ['pgpass']
 
@@ -87,7 +83,7 @@ request_query = open('dml/{}'.format(dml_file), 'r').read()
 # ref: https://docs.aws.amazon.com/redshift/latest/dg/r_UNLOAD.html
 query = '''
 UNLOAD ('{request_query}')
-TO 's3://{bucket}/{s3_prefix}/{dbtable}_{nowtime}_part'
+TO 's3://{bucket}/{s3_prefix}/{object_prefix}_{nowtime}_part'
 credentials 'aws_access_key_id={aws_access_key_id};\
 aws_secret_access_key={aws_secret_access_key}'
 PARALLEL OFF
@@ -95,7 +91,7 @@ PARALLEL OFF
     request_query=request_query,
     bucket=bucket,
     s3_prefix=s3_prefix,
-    dbtable=dbtable,
+    object_prefix=object_prefix,
     nowtime=nowtime,
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
@@ -117,5 +113,5 @@ with psycopg2.connect(conn_string) as conn:
                     dml_file=dml_file,
                     bucket=bucket,
                     s3_prefix=s3_prefix,
-                    dbtable=dbtable,
+                    object_prefix=object_prefix,
                     nowtime=nowtime)))

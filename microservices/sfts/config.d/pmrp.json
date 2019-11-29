@@ -3,7 +3,7 @@
   "source": "client",
   "directory": "pmrp_gdx",
   "destination": "processed",
-  "object_prefix": "example",
-  "dml": "example.sql",
+  "object_prefix": "pmrp",
+  "dml": "pmrp.sql",
   "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN"
 }

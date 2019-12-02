@@ -14,6 +14,10 @@ The CMS Lite Metadata microservice emerged from a specialized use case of the S3
 
 The Google API microservices are a collection of scripts to automate the loading of data collected through various Google APIs such as the [Google My Business API](https://developers.google.com/my-business/) for Location and Driving Direction insights; and the [Google Search Console API](https://developers.google.com/webmaster-tools/) for Search result analytics. Upon accessing the requested data, the Google API microservices build an output `csv` file containing that data, and stores it into S3. From there, the loading of data from S3 to Redshift follows very closely to the flow described in the S3 to Redshift microservice.
 
+## [Secure File Transfer System microservice](./sfts)
+
+The [`/sfts`](./sfts) folder contains the Secure File Transfer System microservice. This was configured first to support Performance Management and Reporting Program (PMRP) data exchange. This microservice is triggered to run after the successful transfer of PMRP date into Redshift. The microservice first generates an object in S3 from the output of a Redshift transaction modelling PMRP data with other GDX Analytics data, and then transfers that object from S3 to an upload location on BCGov's Secure File Transfer Service. The microservice is two scripts; one to generate the objets in S3 based on Redshift queries (`redshift_to_s3.py`) and one to transfer previously un-transferred files from S3 to SFTS (`s3_to_sfts.py`).
+
 ## Project Status
 
 The microservices in this project are still under development.

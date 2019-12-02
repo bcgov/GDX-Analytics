@@ -1,0 +1,9 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "directory": "pmrp_gdx",
+  "destination": "processed",
+  "object_prefix": "example",
+  "dml": "example.sql",
+  "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN"
+}

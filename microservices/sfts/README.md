@@ -26,7 +26,7 @@ The Redshift to S3 microservice requires:
 The configuration file format is described in more detail below. Usage is like:
 
 ```
-python redshift_to_s3.py config.json
+python redshift_to_s3.py -c config.d/config.json
 ```
 
 ### `s3_to_sfts.py`
@@ -41,15 +41,22 @@ The S3 to SFTS microservice requires:
 
   - `$xfer_path`
 
-    the path to the folder containing the MOVEit XFer Client Tools. The XFer Client Tools can be downloaded from the link labelled "Client Tools Zip (EZ, Freely, Xfer)" at  https://community.ipswitch.com/s/article/Direct-Download-Links-for-Transfer-and-Automation-2018). For example:
-  ```
-  export xfer_path=/path/to/xfer/jar/files/
-  ```
-  the folder _must_ contain `jna.jar` and `xfer.jar`
+    the path to the folder containing the MOVEit XFer Client Tools. The XFer Client Tools can be downloaded from the link labelled "Client Tools Zip (EZ, Freely, Xfer)" at  https://community.ipswitch.com/s/article/Direct-Download-Links-for-Transfer-and-Automation-2018).
+
+    For example:
+    ```
+    export xfer_path=/path/to/xfer/jar/files/
+    ```
+    the folder _must_ contain `jna.jar` and `xfer.jar`
 
   - `$sfts_user`
 
     the service account user configured for access to the Secure File Transfer system, and with write access to SFTS path defined by the value for `sfts_path` in the json configuration file.
+
+    ```
+    export sfts_user=username  ## do not include an IDIR/ prefix in the username
+    ```
+
   - `$sfts_pass`
 
     the password associated with the `$sfts_user` service account.
@@ -57,7 +64,7 @@ The S3 to SFTS microservice requires:
 The configuration file format is described in more detail below. Usage is like:
 
 ```
-python s3_to_sfts.py config.json
+python s3_to_sfts.py -c config.d/config.json
 ```
 
 ## Configuration
@@ -123,11 +130,11 @@ This project is ongoing.
 
 ## Getting Help
 
-Please Contact the GDX Service desk for any analytics service help. For inquiries about automating generated file exchange with GDX-Analytics over the BCGov SFTS service, or for general inquiries about starting a new analytics account for Government, please contact The GDX Analytics team.
+For any questions regarding this project, please contact the GDX Analytics Team.
 
 ## Contributors
 
-The GDX analytics team will be the main contributors to this project currently and will maintain the code.
+The GDX Analytics Team will be the main contributors to this project currently. They will maintain the code as well.
 
 ## License
 

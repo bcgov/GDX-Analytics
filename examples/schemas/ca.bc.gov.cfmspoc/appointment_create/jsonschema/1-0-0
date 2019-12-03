@@ -1,0 +1,44 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for creation of a new appointment.",
+	"self": {
+		"vendor": "ca.bc.gov.cfmspoc",
+		"name": "appointment_create",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"appointment_id": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 9223372036854775807
+		},
+		"appointment_start_timestamp": {
+			"type": "string",
+			"maxLength": 20
+		},
+		"appointment_end_timestamp": {
+			"type": "string",
+			"maxLength": 20
+		},
+		"program_id": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"parent_id": {
+			"type": ["string", "null"],
+			"maxLength": 255
+		},
+		"program_name": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"transaction_name": {
+			"type": "string",
+			"maxLength": 255
+		}
+	},
+	"required": ["appointment_id","appointment_start_timestamp","appointment_end_timestamp","program_id", "program_name", "transaction_name"],
+	"additionalProperties": false
+}

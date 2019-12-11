@@ -301,13 +301,15 @@ for account in validated_accounts:
 
             end_date = date_api_upper_limit
         if end_date > date_api_upper_limit:
-            logger.warning("The end_date is more recent than 2 days ago.")
+            logger.warning("The end_date for location {} is more recent than 2\
+                            days ago.".format(location_name))
 
         end_time = end_date + 'T00:00:00Z'
 
         # if start and end times are same, then there's no new data
         if start_time == end_time:
-            logger.info("Redshift already contains the latest avaialble data.")
+            logger.info("Redshift already contains the latest avaialble data\
+                        for location {}.".format(location_name))
             continue
 
         logger.debug("Querying range from {0} to {1}"

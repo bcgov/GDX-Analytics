@@ -5,7 +5,7 @@
   "directory": "cfms_sbc",
   "doc": "datedimension.*.csv",
   "dbtable": "servicebc.datedimension",
-  "column_count": 40,
+  "column_count": 41,
   "columns": [
 	"DATEKEY",
 	"DT",
@@ -46,7 +46,8 @@
 	"LASTDAYOFPSAPAYPERIOD",
 	"FIRSTDAYOFPSAPAYPERIOD",
 	"FIRSTDAYOFWEEK",
-	"LASTDAYOFWEEK"
+	"LASTDAYOFWEEK",
+        "IsSDPRChequeReleaseDate"
   ],
   "dateformat": [
 { "field": "DATEKEY", "format": "%Y%m%d" }, 
@@ -66,7 +67,7 @@
   ],
 
   "dtype_dic_strings": ["MMYYYY"],
-  "delim": ",",
+  "delim": "|",
   "truncate": true
 }
 

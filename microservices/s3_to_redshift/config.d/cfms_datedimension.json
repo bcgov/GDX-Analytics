@@ -67,7 +67,7 @@
   ],
 
   "dtype_dic_strings": ["MMYYYY"],
-  "delim": ",",
+  "delim": "|",
   "truncate": true
 }
 

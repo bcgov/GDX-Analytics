@@ -9,10 +9,9 @@ verify_ssl = true
 boto3 = "*"
 pandas = "*"
 botocore = "*"
-psycopg2 = "*"
 ua-parser = "*"
-gc-ua-parser = "*"
 referer-parser = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.7"

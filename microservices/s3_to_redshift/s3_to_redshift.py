@@ -282,8 +282,8 @@ for object_summary in objects_to_process:
                 Bucket="sp-ca-bc-gov-131565110619-12-microservices",
                 CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
                 + object_summary.key, Key=badfile)
-        except Exception:
-            logger.exception("S3 transfer failed.")
+        except Exception as e:
+            logger.exception("S3 transfer failed.\n{0}".format(e.message))
         continue
 
     # Check for an empty file. If it's empty, accept it as good and skip

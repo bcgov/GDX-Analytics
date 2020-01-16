@@ -86,7 +86,7 @@ Store configuration files in in [config.d/](./config.d/).
 
 A single well formed configuration file is sufficient to pass all required values to either script (`redshift_to_s3` and `s3_to_sfts`). While some parameters are used exclusively by one script or the other, enough parameters are shared between both scripts that a single configuration file is recommended. This will reduce the likelihood of input errors, reduce maintenance burden, and encapsulates into a single configuration the overall function for which these two scripts executed in sequence were originally intended for.
 
-The JSON configuration is required as a second argument when running the `s3_to_redshift.py` script.
+The JSON configuration is required as an argument proceeding the `-c` flag when running the `s3_to_redshift.py` and the `s3_to_sfts.py` scripts.
 
 The structure of the config file should resemble the following:
 

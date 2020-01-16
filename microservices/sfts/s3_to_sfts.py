@@ -13,7 +13,7 @@
 #               : export sfts_pass=<<sfts_service_account_password>>
 #               : export xfer_path=<</path/to/xfer/jar/files/>>
 #
-# Usage         : python s3_to_sfts.py config.json
+# Usage         : python s3_to_sfts.py -c config.d/config.json
 #
 # XFer          : Download the XFer jar files as "Client Tools Zip" from:
 # https://community.ipswitch.com/s/article/Direct-Download-Links-for-Transfer-and-Automation-2018
@@ -72,6 +72,7 @@ prefix = source + "/" + directory + "/"
 destination = config['destination']
 object_prefix = config['object_prefix']
 sfts_path = config['sfts_path']
+extension = config['extension']
 
 # Get required environment variables
 sfts_user = os.environ['sfts_user']
@@ -88,7 +89,7 @@ bucket_name = my_bucket.name
 def download_object(o):
     dl_name = o.replace(prefix, '')
     try:
-        my_bucket.download_file(o, './tmp/{}'.format(dl_name))
+        my_bucket.download_file(o, './tmp/{0}{1}'.format(dl_name, extension))
     except ClientError as e:
         if e.response['Error']['Code'] == "404":
             logger.error("The object does not exist.")
@@ -124,8 +125,8 @@ def is_processed(object_summary):
 # objects_to_process will contain zero or one objects if truncate = True
 # objects_to_process will contain zero or more objects if truncate = False
 filename_regex = (
-    '^{object_prefix}_[0-9]{{4}}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])'
-    'T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-6][0-9]_part[0-9]{{3}}$'
+    '^{object_prefix}_[0-9]{{4}}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])'
+    'T(2[0-3]|[01][0-9])[0-5][0-9][0-6][0-9]_part[0-9]{{3}}$'
     .format(object_prefix=object_prefix))
 objects_to_process = []
 for object_summary in my_bucket.objects.filter(Prefix=prefix):
@@ -160,7 +161,7 @@ sf_full_path = os.path.realpath(sf.name)
 sf.write('cd {}\n'.format(sfts_path))
 # write all file names downloaded in "A" in the objects_to_process list
 for object in objects_to_process:
-    transfer_file = './tmp/{}'.format(object.key.replace(prefix, ''))
+    transfer_file = './tmp/{0}{1}'.format(object.key.replace(prefix, ''), extension)
     sf.write('put {}\n'.format(transfer_file))
 sf.write('quit\n')
 sf.close()

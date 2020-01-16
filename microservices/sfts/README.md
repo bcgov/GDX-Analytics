@@ -96,7 +96,9 @@ The structure of the config file should resemble the following:
   "destination": String,
   "object_prefix": String,
   "dml": String,
-  "sfts_path": String
+  "header": Boolean,
+  "sfts_path": String,
+  "extension": String
 }
 ```
 
@@ -108,7 +110,9 @@ The keys in the config file are defined as:
 - `"destination"`: the first prefix of processed objects, as in `s3://<bucket>/<destination>/<good|bad|batch>`.
 - `"object_prefix"`: The final prefix of the object; treat this as a prefix on the filename itself.
 - `"dml"`: The filename under the `./dml`(./dml/) directory in this repository that contains the SQL statement to run as an UNLOAD command.
+- `"header"`: Setting this to true will write a first row of column header values; setting as false will omit that row.
 - `"sfts_path"`: The folder path in SFTS where the objects retrieved from S3 will be uploaded to.
+- `"extension"`: A postfix to the file name. As an extension, it must include the '`.`' character before the extension type, such as: '`.csv`'.
 
 ### DML File
 

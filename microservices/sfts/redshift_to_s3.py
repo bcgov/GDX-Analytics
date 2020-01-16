@@ -10,7 +10,7 @@
 #               : export pguser=<<database_username>>
 #               : export pgpass=<<database_password>>
 #
-# Usage         : python generate_prmp_csv.py config.json
+# Usage         : python redshift_to_s3.py -c config.d/config.json
 #
 import os
 import psycopg2
@@ -59,6 +59,7 @@ object_prefix = config['object_prefix']
 bucket = config['bucket']
 s3_prefix = config['source'] + '/' + config['directory']
 dml_file = config['dml']
+header = config['header']
 
 # Get required environment variables
 pguser = os.environ['pguser']
@@ -73,7 +74,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=pguser,
            password=pgpass)
 
-nowtime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+nowtime = datetime.now().strftime('%Y%m%dT%H%M%S')
 
 # the _substantive_ query, one that users expect to see as output in S3.
 # TODO: MAKE AS CONFIG
@@ -86,12 +87,14 @@ UNLOAD ('{request_query}')
 TO 's3://{bucket}/{s3_prefix}/{object_prefix}_{nowtime}_part'
 credentials 'aws_access_key_id={aws_access_key_id};\
 aws_secret_access_key={aws_secret_access_key}'
+{header}
 PARALLEL OFF
 '''.format(
     request_query=request_query,
     bucket=bucket,
     s3_prefix=s3_prefix,
     object_prefix=object_prefix,
+    header='HEADER' if header else '',
     nowtime=nowtime,
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])

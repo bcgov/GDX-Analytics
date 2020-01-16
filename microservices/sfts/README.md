@@ -114,7 +114,7 @@ The keys in the config file are defined as follows. All parameters are required 
 - `"dml"`: The filename under the [`./dml`](./dml/) directory in this repository that contains the SQL statement to run as an UNLOAD command.
 - `"header"`: Setting this to true will write a first row of column header values; setting as false will omit that row.
 - `"sfts_path"`: The folder path in SFTS where the objects retrieved from S3 will be uploaded to.
-- `"extension"`: A postfix to the file name. As an extension, it must include the "`.`" character before the extension type, such as: `".csv"`. If no extension is needed then the value should be an empty string, like `""`.
+- `"extension"`: A postfix to the file name. As an extension, it must include the "`.`" character before the extension type, such as: `".csv"`. If no extension is needed then the value should be an empty string, like `""`. The extension is applied to the file created by `s3_to_redshift.py` at the time of downloading the source object from S3 to the local filesystem where the script is running. The extension is never applied to the source object key on S3 (that key is defined by the Redshift UNLOAD function used in `redshift_to_s3`, which does not support custom object key extensions).
 
 ### DML File
 

@@ -4,10 +4,10 @@ This folder contains scripts and configuration files (within the [config.d](./co
 
 ## `s3_to_redshift.py`
 
-The S3 to Redshift microservice requires a `json` configuration file passed as a second command line argument to run. The configuration file format is described in more detail below. Usage is like:
+The S3 to Redshift microservice is invoked through pipenv and requires a `json` configuration file passed as a second command line argument to run. The configuration file format is described in more detail below. Usage is like:
 
 ```
-python s3_to_redshift.py configfile.json
+pipenv run python s3_to_redshift.py config.d/configfile.json
 ```
 
 ### Overview

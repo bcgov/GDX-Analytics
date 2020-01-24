@@ -5,12 +5,10 @@
   "directory": "cfms_sbc",
   "doc": "ServicesCodesWithKeys-.*.csv",
   "dbtable": "servicebc.service_info",
-  "column_count": 6,
+  "column_count": 4,
   "columns": [
-	"OldKey",
 	"SvcCode",
 	"Service",
-	"OldPgmKey",
 	"PgmCode",
 	"Program"
   ],

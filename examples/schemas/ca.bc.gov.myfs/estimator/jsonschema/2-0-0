@@ -1,0 +1,37 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for passing Nav bar information in MyFS",
+	"self": {
+		"vendor": "ca.bc.gov.myfs",
+		"name": "estimator",
+		"format": "jsonschema",
+		"version": "2-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"button": {
+			"type": "string",
+			"enum": ["estimate","register"]
+		},
+		"count": {
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},                        
+		"total": {
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1000000
+		},                        
+		"estimates": {
+                        "type": "array",
+                        "items": {
+                                "type": "number",
+				"minimum": 0,
+				"maximum": 1000000
+			}
+		}
+	},
+        "required": ["button","count","estimates","total"],
+	"additionalProperties": false
+}

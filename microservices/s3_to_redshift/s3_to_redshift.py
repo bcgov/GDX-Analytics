@@ -20,7 +20,6 @@ from botocore.exceptions import ClientError
 import pandas as pd  # data processing
 import re  # regular expressions
 from io import StringIO
-from io import BytesIO
 import os  # to read environment variables
 import psycopg2  # to connect to Redshift
 import json  # to read json config files
@@ -336,7 +335,7 @@ for object_summary in objects_to_process:
 
     # Put the full data set into a buffer and write it
     # to a "|" delimited file in the batch directory
-    csv_buffer = BytesIO()
+    csv_buffer = StringIO()
     df.to_csv(csv_buffer, header=True, index=False, sep="|")
     resource.Bucket(bucket).put_object(Key=batchfile,
                                        Body=csv_buffer.getvalue())

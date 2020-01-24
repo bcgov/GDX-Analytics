@@ -58,6 +58,7 @@ SELECT
   oi.officesize AS office_size,
   oi.area AS area_number,
   oi.id AS office_id,
+  oi.current_area as current_area,
   dd.isweekend::BOOLEAN,
   dd.isholiday::BOOLEAN,
   dd.lastdayofpsapayperiod::date,

@@ -2,7 +2,7 @@
 # Script Name   : s3_to_redshift_gov_assets_derived.py
 #
 # Description   : Creates asset_downloads_derived, which is a
-#               : persistent derived table (PDT) 
+#               : persistent derived table (PDT)
 #
 # Requirements  : You must set the following environment variable
 #               : to establish credentials for the pgpass user microservice
@@ -52,7 +52,9 @@ query = '''
     SET SEARCH PATH TO cmslite;
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
-    SELECT 'https://www2.gov.bc.ca' || replace(replace(assets.request_string,'GET ',''), ' HTTP/1.0','') AS asset_path,
+    SELECT 'https://www2.gov.bc.ca' ||
+        replace(replace(assets.request_string,'GET ',''), ' HTTP/1.0','')
+        AS asset_path,
     assets.date_timestamp,
     assets.ip AS ip_address,
     assets.proxy,
@@ -60,18 +62,44 @@ query = '''
     assets.return_size,
     assets.status_code,
     assets.user_agent_http_request_header,
-    CASE WHEN assets.ip LIKE '184.69.13.%' OR assets.ip LIKE '184.71.25.%' THEN TRUE ELSE FALSE END
+    CASE WHEN assets.ip LIKE '184.69.13.%'
+        OR assets.ip LIKE '184.71.25.%'
+        THEN TRUE ELSE FALSE END
         AS is_efficiencybc_dev,
-    CASE WHEN assets.ip LIKE '142.22.%' OR assets.ip LIKE '142.23.%' OR assets.ip LIKE '142.24.%' OR assets.ip LIKE '142.25.%' OR assets.ip LIKE '142.26.%' OR assets.ip LIKE '142.27.%' OR assets.ip LIKE '142.28.%' OR assets.ip LIKE '142.29.%' OR assets.ip LIKE '142.30.%' OR assets.ip LIKE '142.31.%' OR  assets.ip LIKE '142.32.%' OR assets.ip LIKE '142.33.%' OR assets.ip LIKE '142.34.%' OR assets.ip LIKE '142.35.%' OR assets.ip LIKE '142.36.%'  THEN TRUE ELSE FALSE END
+    CASE WHEN assets.ip LIKE '142.22.%'
+        OR assets.ip LIKE '142.23.%'
+        OR assets.ip LIKE '142.24.%'
+        OR assets.ip LIKE '142.25.%'
+        OR assets.ip LIKE '142.26.%'
+        OR assets.ip LIKE '142.27.%'
+        OR assets.ip LIKE '142.28.%'
+        OR assets.ip LIKE '142.29.%'
+        OR assets.ip LIKE '142.30.%'
+        OR assets.ip LIKE '142.31.%'
+        OR assets.ip LIKE '142.32.%'
+        OR assets.ip LIKE '142.33.%'
+        OR assets.ip LIKE '142.34.%'
+        OR assets.ip LIKE '142.35.%'
+        OR assets.ip LIKE '142.36.%'
+        THEN TRUE ELSE FALSE END
         AS is_government,
-    CASE WHEN assets.user_agent_http_request_header LIKE '%Mobile%' THEN TRUE ELSE FALSE END
+    CASE WHEN assets.user_agent_http_request_header LIKE '%Mobile%'
+        THEN TRUE ELSE FALSE END
         AS is_mobile,
     CASE
-        WHEN assets.user_agent_http_request_header LIKE '%Mobile%' THEN 'Mobile'
-        WHEN assets.user_agent_http_request_header LIKE '%Tablet%' THEN 'Tablet'
-        WHEN assets.user_agent_http_request_header ILIKE '%neo-x%' THEN 'Digital media receiver'
-        WHEN assets.user_agent_http_request_header ILIKE '%playstation%' OR  assets.user_agent_http_request_header ILIKE '%nintendo%' OR  assets.user_agent_http_request_header ILIKE '%xbox%' THEN 'Game Console'
-        WHEN assets.user_agent_http_request_header LIKE '%Macintosh%'  OR assets.user_agent_http_request_header LIKE '%Windows NT%' THEN 'Computer'
+        WHEN assets.user_agent_http_request_header
+            LIKE '%Mobile%' THEN 'Mobile'
+        WHEN assets.user_agent_http_request_header
+            LIKE '%Tablet%' THEN 'Tablet'
+        WHEN assets.user_agent_http_request_header
+            ILIKE '%neo-x%' THEN 'Digital media receiver'
+        WHEN assets.user_agent_http_request_header ILIKE '%playstation%'
+            OR  assets.user_agent_http_request_header ILIKE '%nintendo%'
+            OR  assets.user_agent_http_request_header ILIKE '%xbox%'
+            THEN 'Game Console'
+        WHEN assets.user_agent_http_request_header LIKE '%Macintosh%'
+            OR assets.user_agent_http_request_header LIKE '%Windows NT%'
+            THEN 'Computer'
     ELSE 'Unknown' END
         AS device,
     assets.os_family,

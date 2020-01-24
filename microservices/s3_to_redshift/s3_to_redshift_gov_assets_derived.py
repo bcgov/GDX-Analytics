@@ -80,7 +80,7 @@ query = '''
     assets.browser_version,
     assets.referrer_urlhost,
     assets.referrer_medium
-    FROM cmslite.asset_downloads_scratch AS assets;
+    FROM cmslite.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;

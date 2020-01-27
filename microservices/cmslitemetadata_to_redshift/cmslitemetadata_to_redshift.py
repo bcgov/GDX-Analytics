@@ -397,21 +397,22 @@ query = """
             cm.title,
             cm.hr_url,
             CASE
-                WHEN cm.parent_node_id = 'CA4CBBBB070F043ACF7FB35FE3FD1081' and cm.page_type = 'BC Gov Theme' THEN cm.node_id
-                WHEN cm.ancestor_nodes = '||' THEN cm.parent_node_id
+                WHEN cm_parent.page_type IN ('BC Gov Home','Intranet Home') AND cm.page_type IN ('BC Gov Theme','Intranet Theme') THEN cm.node_id
+                WHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN ('BC Gov Theme','Intranet Theme') THEN cm.parent_node_id
                 ELSE TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) -- take the second entry. The first is always blank as the string has '|' on each end
             END AS theme_id,
             CASE
-                WHEN cm.parent_node_id = 'CA4CBBBB070F043ACF7FB35FE3FD1081' THEN NULL -- this page IS a theme, not a sub-theme
-                WHEN cm.ancestor_nodes = '||' AND cm.page_type = 'BC Gov Theme' THEN cm.node_id -- this page is a sub-theme
-                WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' AND cm_parent.page_type = 'BC Gov Theme' THEN cm.parent_node_id -- the page's parent is a sub-theme
+                WHEN cm_parent.page_type IN ('BC Gov Home','Intranet Home') THEN NULL -- this page IS a home page or a theme, not a sub-theme
+                WHEN cm.ancestor_nodes = '||' AND cm.page_type IN ('BC Gov Theme','Intranet Theme') THEN cm.node_id -- this page is a sub-theme
+                WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' AND cm_parent.page_type IN ('BC Gov Theme','Intranet Theme') THEN cm.parent_node_id -- the page's parent is a sub-theme
                 WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) <> '' THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) -- take the third entry. The first is always blank as the string has '|' on each end and the second is the theme
                 ELSE NULL
             END AS subtheme_id,
             CASE
-                WHEN cm.parent_node_id = 'CA4CBBBB070F043ACF7FB35FE3FD1081' THEN NULL -- this page IS a theme, not a sub-theme
-                WHEN cm.ancestor_nodes = '||' AND cm.page_type = 'BC Gov Theme' THEN NULL -- this page is a sub-theme
-                WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' AND cm_parent.page_type = 'BC Gov Theme' AND cm.page_type = 'Topic' THEN cm.node_id -- the page's parent is a sub-theme and it is a topic page
+                WHEN cm_parent.page_type IN ('BC Gov Home','Intranet Home') THEN NULL -- this page IS a home or a theme
+                WHEN cm.ancestor_nodes = '||' AND cm.page_type IN ('BC Gov Theme','Intranet Theme') THEN NULL -- this page is a sub-theme
+                WHEN cm.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' OR cm_parent.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' THEN 'FD6DB5BA2A5248038EEF54D9F9F37C4D' -- built in override to make all ServiceBC pages one topic
+                WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' AND cm_parent.page_type IN ('BC Gov Theme','Intranet Theme') AND cm.page_type = 'Topic' THEN cm.node_id -- the page's parent is a sub-theme and it is a topic page
                 WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) = '' AND cm_parent.page_type = 'Topic' THEN cm.parent_node_id -- the page's parent is a topic
                 WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) <> '' THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) -- take the fourth entry. The first is always blank as the string has '|' on each end and the second is the theme, third is sub-theme
                 ELSE NULL

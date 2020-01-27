@@ -49,7 +49,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 
 query = '''
     BEGIN;
-    SET SEARCH PATH TO cmslite;
+    SET SEARCH_PATH TO cmslite;
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
     SELECT 'https://www2.gov.bc.ca' ||

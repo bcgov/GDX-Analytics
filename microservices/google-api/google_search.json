@@ -28,6 +28,9 @@
     {
       "name":"https://curriculum.gov.bc.ca/",
       "start_date_default":"2018-04-04"
+    },
+    {
+      "name":"https://healthgateway.gov.bc.ca/"
     }
   ]
 }

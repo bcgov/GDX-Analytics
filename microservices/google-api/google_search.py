@@ -279,7 +279,7 @@ for site_item in sites:
                             logger.error("Failing with HTTP error after 10 retries with query time easening.")
                             sys.exit()
                         wait_time = wait_time * 2
-                        logger.warning("retryring {0} with wait time {1}"
+                        logger.warning("retrying site " +  site_name +": {0} with wait time {1}"
                                        .format(retry, wait_time))
                         retry = retry + 1
                         sleep(wait_time)

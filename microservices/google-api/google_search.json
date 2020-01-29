@@ -33,10 +33,12 @@
       "name":"https://healthgateway.gov.bc.ca/"
     },
     {
-      "name":"https://engage.gov.bc.ca/"
+      "name":"https://engage.gov.bc.ca/",
+      "start_date_default":"2018-09-16"
     },
     {
-      "name":"https://bcforhighschool.gov.bc.ca/"
+      "name":"https://bcforhighschool.gov.bc.ca/",
+      "start_date_default":"2019-09-05"
     },
     {
       "name":"https://rightforyou.workbc.ca/"

@@ -1,5 +1,5 @@
 ###################################################################
-# Script Name   : s3_to_redshift_gov_assets_derived.py
+# Script Name   : build_derived_gov_assets.py
 #
 # Description   : Creates asset_downloads_derived, which is a
 #               : persistent derived table (PDT)
@@ -12,6 +12,10 @@
 #
 #
 # Usage         : python s3_to_redshift_gov_assets_derived.py
+#
+#               : This microservice can be run after s3_to_redshift.py has
+#               : run using the gov_assets.json config file and updated the
+#               : cmslite.asset_downloads table.
 #
 
 import os

@@ -21,7 +21,7 @@
       "os_version",
       "browser_family",
       "browser_version",
-      "referrer_urlhost",
+      "referrer_source",
       "referrer_medium"
     ],
     "column_string_limit":{

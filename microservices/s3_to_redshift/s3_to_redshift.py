@@ -204,21 +204,29 @@ for object_summary in objects_to_process:
         body_stringified = body.read()
         # perform regex replacements by line
         for line in body_stringified.splitlines():
+            # Replace pipe char with encoded version, %7C
             if(data['access_log_parse']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
+            # Check if there are 9 or 10 columns in access log entry,
+            # and use the corresponding regex in the config
             for exp in data['access_log_parse']['regexs']:
                 parsed_line, num_subs = re.subn(
                     exp['pattern'], exp['replace'], line)
+                # If a match for the replacement pattern is found,
+                # construct the parsed line
                 if num_subs:
+                    # Extract user_agent and referrer_url from log entry
                     user_agent = re.match(exp['pattern'], line).group(9)
                     referrer_url = re.match(exp['pattern'], line).group(8)
+
+                    # Parse user_agent and referrer strings into lists
                     parsed_ua = user_agent_parser.Parse(user_agent)
                     parsed_referrer_url = Referer(referrer_url,
                                                   data['access_log_parse']
                                                   ['referrer_parse']
                                                   ['curr_url'])
 
-                    # Parse OS family and version
+                    # Add OS family and version to user agent string
                     ua_string = '|' + parsed_ua['os']['family']
                     if parsed_ua['os']['major'] is not None:
                         ua_string += '|' + parsed_ua['os']['major']
@@ -229,7 +237,7 @@ for object_summary in objects_to_process:
                     else:
                         ua_string += '|'
 
-                    # Parse Browser family and version
+                    # Add Browser family and version to user agent string
                     ua_string += '|' + parsed_ua['user_agent']['family']
                     if parsed_ua['user_agent']['major'] is not None:
                         ua_string += '|' + parsed_ua['user_agent']['major']
@@ -240,7 +248,7 @@ for object_summary in objects_to_process:
                     if parsed_ua['user_agent']['patch'] is not None:
                         ua_string += '.' + parsed_ua['user_agent']['patch']
 
-                    # Parse referrer urlhost and medium
+                    # Add referrer term and medium to referrer string
                     referrer_string = ''
                     if parsed_referrer_url.referer is not None:
                         referrer_string += '|' + parsed_referrer_url.referer
@@ -251,13 +259,20 @@ for object_summary in objects_to_process:
                     else:
                         referrer_string += '|'
 
-                    # use linefeed if defined in config, or default "/r/n"
+                    # Determine the end of line char:
+                    # Use linefeed if defined in config, or default "/r/n"
                     if(data['access_log_parse']['linefeed']):
                         linefeed = data['access_log_parse']['linefeed']
                     else:
                         linefeed = '\r\n'
+
+                    # Form the now parsed log entry line
                     parsed_line += ua_string + referrer_string
+
+                    # Add the parsed log entry line to the list
                     parsed_list.append(parsed_line)
+
+        # Concatenate all the parsed lines together with the end of line char
         csv_string = linefeed.join(parsed_list)
         logger.info(object_summary.key + " parsed successfully")
 

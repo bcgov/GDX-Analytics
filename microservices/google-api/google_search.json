@@ -28,6 +28,22 @@
     {
       "name":"https://curriculum.gov.bc.ca/",
       "start_date_default":"2018-04-04"
+    },
+    {
+      "name":"https://healthgateway.gov.bc.ca/",
+      "start_date_default":"2020-01-20"
+    },
+    {
+      "name":"sc-domain:engage.gov.bc.ca",
+      "start_date_default":"2018-09-16"
+    },
+    {
+      "name":"https://bcforhighschool.gov.bc.ca/",
+      "start_date_default":"2019-09-05"
+    },
+    {
+      "name":"https://rightforyou.workbc.ca/",
+      "start_date_default":"2020-01-20"
     }
   ]
 }

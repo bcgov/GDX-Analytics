@@ -58,7 +58,7 @@ query = '''
     CREATE TABLE asset_downloads_derived AS
     SELECT 'https://www2.gov.bc.ca' ||
         replace(replace(assets.request_string,'GET ',''), ' HTTP/1.0','')
-        AS asset_path,
+        AS asset_url,
     assets.date_timestamp,
     assets.ip AS ip_address,
     assets.proxy,
@@ -110,8 +110,14 @@ query = '''
     assets.os_version,
     assets.browser_family,
     assets.browser_version,
-    assets.referrer_urlhost,
-    assets.referrer_medium
+    REGEXP_SUBSTR(assets.referrer, '[^/]+\\.[^/:]+') AS referrer_urlhost,
+    assets.referrer_medium,
+    CASE 
+        WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/') 
+        THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/') 
+        ELSE '' END
+        AS referrer_urlpath,
+    SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) AS referrer_urlquery
     FROM cmslite.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;

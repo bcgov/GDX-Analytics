@@ -281,25 +281,26 @@ for object_summary in objects_to_process:
         csv_string = body.read()
 
     # Check that the file decodes as UTF-8. If it fails move to bad and end
-    try:
-        csv_string = csv_string.decode('utf-8')
-    except UnicodeDecodeError as e:
-        e_object = e.object.splitlines()
-        logger.exception(
-            ''.join((
-                "Decoding UTF-8 failed for file {0}\n"
-                .format(object_summary.key),
-                "The input file stopped parsing after line {0}:\n{1}\n"
-                .format(len(e_object), e_object[-1]),
-                "Keying to badfile and skipping.\n")))
+    if not isinstance(csv_string, str):
         try:
-            client.copy_object(
-                Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-                + object_summary.key, Key=badfile)
-        except Exception as e:
-            logger.exception("S3 transfer failed.\n{0}".format(e.message))
-        continue
+            csv_string = csv_string.decode('utf-8')
+        except UnicodeDecodeError as e:
+            e_object = e.object.splitlines()
+            logger.exception(
+                ''.join((
+                    "Decoding UTF-8 failed for file {0}\n"
+                    .format(object_summary.key),
+                    "The input file stopped parsing after line {0}:\n{1}\n"
+                    .format(len(e_object), e_object[-1]),
+                    "Keying to badfile and skipping.\n")))
+            try:
+                client.copy_object(
+                    Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+                    CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
+                    + object_summary.key, Key=badfile)
+            except Exception as e:
+                logger.exception("S3 transfer failed.\n{0}".format(e.message))
+            continue
 
     # Check for an empty file. If it's empty, accept it as good and skip
     # to the next object to process

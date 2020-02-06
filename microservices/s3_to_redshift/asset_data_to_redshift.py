@@ -201,7 +201,7 @@ for object_summary in objects_to_process:
         if(data['access_log_parse']['string_repl']):
             inline_pattern = data['access_log_parse']['string_repl']['pattern']
             inline_replace = data['access_log_parse']['string_repl']['replace']
-        body_stringified = body.read()
+        body_stringified = body.read().decode('utf-8')
         # perform regex replacements by line
         for line in body_stringified.splitlines():
             # Replace pipe char with encoded version, %7C

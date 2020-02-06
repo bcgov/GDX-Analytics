@@ -1,8 +1,8 @@
 ###################################################################
-# Script Name   : s3_to_redshift.py
+# Script Name   : asset_data_to_redshift.py
 #
-# Description   : Microservice script to load a csv file from s3
-#               : and load it into Redshift
+# Description   : Microservice script to load a apache access log 
+#               : files from s3 and load it into Redshift
 #
 # Requirements  : You must set the following environment variables
 #               : to establish credentials for the microservice user
@@ -12,7 +12,7 @@
 #               : export pgpass=<<DB_PASSWD>>
 #
 #
-# Usage         : python s3_to_redshift.py configfile.json
+# Usage         : python asset_data_to_redshift.py configfile.json
 #
 
 import boto3  # s3 access
@@ -41,7 +41,7 @@ formatter = logging.Formatter("%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# create file handler for logs at the DEBUG level in /logs/s3_to_redshift.log
+# create file handler for logs at the DEBUG level in /logs/asset_data_to_redshift.log
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
                               encoding=None, delay="true")
@@ -52,7 +52,7 @@ logger.addHandler(handler)
 
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):
-    print('Usage: python s3_to_redshift.py config.json')
+    print('Usage: python asset_data_to_redshift.py config.json')
     sys.exit(1)
 configfile = sys.argv[1]
 # confirm that the file exists
@@ -204,21 +204,29 @@ for object_summary in objects_to_process:
         body_stringified = body.read()
         # perform regex replacements by line
         for line in body_stringified.splitlines():
+            # Replace pipe char with encoded version, %7C
             if(data['access_log_parse']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
+            # Check if there are 9 or 10 columns in access log entry,
+            # and use the corresponding regex in the config
             for exp in data['access_log_parse']['regexs']:
                 parsed_line, num_subs = re.subn(
                     exp['pattern'], exp['replace'], line)
+                # If a match for the replacement pattern is found,
+                # construct the parsed line
                 if num_subs:
+                    # Extract user_agent and referrer_url from log entry
                     user_agent = re.match(exp['pattern'], line).group(9)
                     referrer_url = re.match(exp['pattern'], line).group(8)
+
+                    # Parse user_agent and referrer strings into lists
                     parsed_ua = user_agent_parser.Parse(user_agent)
                     parsed_referrer_url = Referer(referrer_url,
                                                   data['access_log_parse']
                                                   ['referrer_parse']
                                                   ['curr_url'])
 
-                    # Parse OS family and version
+                    # Add OS family and version to user agent string
                     ua_string = '|' + parsed_ua['os']['family']
                     if parsed_ua['os']['major'] is not None:
                         ua_string += '|' + parsed_ua['os']['major']
@@ -229,7 +237,7 @@ for object_summary in objects_to_process:
                     else:
                         ua_string += '|'
 
-                    # Parse Browser family and version
+                    # Add Browser family and version to user agent string
                     ua_string += '|' + parsed_ua['user_agent']['family']
                     if parsed_ua['user_agent']['major'] is not None:
                         ua_string += '|' + parsed_ua['user_agent']['major']
@@ -240,7 +248,7 @@ for object_summary in objects_to_process:
                     if parsed_ua['user_agent']['patch'] is not None:
                         ua_string += '.' + parsed_ua['user_agent']['patch']
 
-                    # Parse referrer urlhost and medium
+                    # Add referrer term and medium to referrer string
                     referrer_string = ''
                     if parsed_referrer_url.referer is not None:
                         referrer_string += '|' + parsed_referrer_url.referer
@@ -251,13 +259,20 @@ for object_summary in objects_to_process:
                     else:
                         referrer_string += '|'
 
-                    # use linefeed if defined in config, or default "/r/n"
+                    # Determine the end of line char:
+                    # Use linefeed if defined in config, or default "/r/n"
                     if(data['access_log_parse']['linefeed']):
                         linefeed = data['access_log_parse']['linefeed']
                     else:
                         linefeed = '\r\n'
+
+                    # Form the now parsed log entry line
                     parsed_line += ua_string + referrer_string
+
+                    # Add the parsed log entry line to the list
                     parsed_list.append(parsed_line)
+
+        # Concatenate all the parsed lines together with the end of line char
         csv_string = linefeed.join(parsed_list)
         logger.info(object_summary.key + " parsed successfully")
 
@@ -266,25 +281,26 @@ for object_summary in objects_to_process:
         csv_string = body.read()
 
     # Check that the file decodes as UTF-8. If it fails move to bad and end
-    try:
-        csv_string = csv_string.decode('utf-8')
-    except UnicodeDecodeError as e:
-        e_object = e.object.splitlines()
-        logger.exception(
-            ''.join((
-                "Decoding UTF-8 failed for file {0}\n"
-                .format(object_summary.key),
-                "The input file stopped parsing after line {0}:\n{1}\n"
-                .format(len(e_object), e_object[-1]),
-                "Keying to badfile and skipping.\n")))
+    if not isinstance(csv_string, str):
         try:
-            client.copy_object(
-                Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-                + object_summary.key, Key=badfile)
-        except Exception as e:
-            logger.exception("S3 transfer failed.\n{0}".format(e.message))
-        continue
+            csv_string = csv_string.decode('utf-8')
+        except UnicodeDecodeError as e:
+            e_object = e.object.splitlines()
+            logger.exception(
+                ''.join((
+                    "Decoding UTF-8 failed for file {0}\n"
+                    .format(object_summary.key),
+                    "The input file stopped parsing after line {0}:\n{1}\n"
+                    .format(len(e_object), e_object[-1]),
+                    "Keying to badfile and skipping.\n")))
+            try:
+                client.copy_object(
+                    Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+                    CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
+                    + object_summary.key, Key=badfile)
+            except Exception as e:
+                logger.exception("S3 transfer failed.\n{0}".format(e.message))
+            continue
 
     # Check for an empty file. If it's empty, accept it as good and skip
     # to the next object to process

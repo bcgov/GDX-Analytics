@@ -11,10 +11,10 @@
 #               : export pgpass=<<database_password>>
 #
 #
-# Usage         : python s3_to_redshift_gov_assets_derived.py
+# Usage         : python build_derived_gov_assets.py
 #
-#               : This microservice can be run after s3_to_redshift.py has
-#               : run using the gov_assets.json config file and updated the
+#               : This microservice can be run after asset_data_to_redshift.py
+#               : has run using the gov_assets.json config file and updated the
 #               : cmslite.asset_downloads table.
 #
 
@@ -112,12 +112,13 @@ query = '''
     assets.browser_version,
     REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
-    CASE 
-        WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/') 
-        THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/') 
+    CASE
+        WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/')
+        THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/')
         ELSE '' END
         AS referrer_urlpath,
-    SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) AS referrer_urlquery
+    SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
+        AS referrer_urlquery
     FROM cmslite.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;

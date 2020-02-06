@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : asset_data_to_redshift.py
 #
-# Description   : Microservice script to load a apache access log 
+# Description   : Microservice script to load a apache access log
 #               : files from s3 and load it into Redshift
 #
 # Requirements  : You must set the following environment variables
@@ -41,7 +41,8 @@ formatter = logging.Formatter("%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# create file handler for logs at the DEBUG level in /logs/asset_data_to_redshift.log
+# create file handler for logs at the DEBUG level in
+# /logs/asset_data_to_redshift.log
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
                               encoding=None, delay="true")

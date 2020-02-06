@@ -110,7 +110,7 @@ query = '''
     assets.os_version,
     assets.browser_family,
     assets.browser_version,
-    REGEXP_SUBSTR(assets.referrer, '[^/]+\\.[^/:]+') AS referrer_urlhost,
+    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
     CASE 
         WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/') 

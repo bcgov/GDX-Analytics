@@ -26,15 +26,16 @@ if (len(sys.argv) != 2):
     sys.exit(1)
 bucket_name = sys.argv[1]
 
+source = 'brendan_test'
 filename = 'se_pathways.csv'
 dbtable = 'esb.se_pathways'
 aws_key = os.environ['AWS_ACCESS_KEY_ID']
 aws_secret_key = os.environ['AWS_SECRET_ACCESS_KEY']
 
 # Constructs the database copy query string
-query = """ COPY {0}\nFROM 's3://{1}/{2}'\n\
-    CREDENTIALS 'aws_access_key_id={3};aws_secret_access_key={4}' CSV;\n
-    """.format(dbtable, bucket_name, filename, aws_key, aws_secret_key)
+query = """ COPY {0}\nFROM 's3://{1}/{2}/{3}'\n\
+    CREDENTIALS 'aws_access_key_id={4};aws_secret_access_key={5}' CSV;\n
+    """.format(dbtable, bucket_name, source, filename, aws_key, aws_secret_key)
 
 # Database connection string
 conn_string = """

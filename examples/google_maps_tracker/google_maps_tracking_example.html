@@ -36,10 +36,12 @@
     });
 
     function mapTracker(lat,lng) {
+        console.log(lat, lng);
         window.snowplow('trackSelfDescribingEvent', {
-            schema: "'iglu:ca.bc.gov.googlemaps/marker_click/jsonschema/1-0-0'",
+            schema: "iglu:ca.bc.gov.googlemaps/marker_click/jsonschema/1-0-0",
             data: {
-                position: {lat,lng}
+                geo_latitude: lat.toString(),
+                geo_longitude: lng.toString()
             }
         });
     }

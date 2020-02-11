@@ -13,6 +13,7 @@
         "order",
         "title"
     ],
+    "dtype_dic_strings": ["order"],
     "delim": ",",
     "truncate": true
 }

@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS esb.se_pathways
   "title" VARCHAR(255) ENCODE ZSTD
 );
 
-GRANT SELECT ON servicebc.call_centre TO "looker";
+GRANT SELECT ON esb.se_pathways TO "looker";

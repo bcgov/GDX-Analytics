@@ -5,7 +5,7 @@
     "directory": "solutionexplorer_esb",
     "doc": "se_pathways.csv",
     "dbtable": "esb.se_pathways",
-    "column_count": "5",
+    "column_count": 5,
     "columns": [
         "id",
         "type",
@@ -13,7 +13,6 @@
         "order",
         "title"
     ],
-    "dtype_dic_strings": ["order"],
     "delim": ",",
     "truncate": true
 }

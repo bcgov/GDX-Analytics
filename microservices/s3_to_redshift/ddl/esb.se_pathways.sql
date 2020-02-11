@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS esb.se_pathways
 'pathway' VARCHAR(255) ENCODE ZSTD,
 'order' INT ENCODE ZSTD,
 'title' VARCHAR(255) ENCODE ZSTD
-)
+);
 
 GRANT SELECT ON servicebc.call_centre TO "looker";

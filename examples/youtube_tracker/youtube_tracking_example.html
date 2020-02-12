@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Snowplow Youtube Example</title>
+    <script src="https://www2.gov.bc.ca/StaticWebResources/static/shared/scripts/jquery/jquery-1.11.1.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+  </head>
+  <body>
+    <header>
+      <h3>Snowplow Youtube Example</h3>
+    </header>
+    <iframe id="youtube_player" width="560" height="315" src="https://www.youtube.com/embed/G9NL-ED0xdQ?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+    <script type="text/javascript">
+        ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
+        p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
+        };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
+        n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","https://sp-js.apps.gov.bc.ca/aubjyAzCUz7dJwqdbH3cMi45LjI.js","snowplow"));
+        var collector = 'spm.gov.bc.ca';
+        window.snowplow('newTracker','rt',collector, {
+            appId: "Snowplow_Youtube",
+            platform: 'web',
+            post: true,
+            forceSecureTracker: true,
+            contexts: {
+                webPage: true,
+                performanceTiming: true
+            }
+        });
+
+        // Gets called when the youtube player changes state, and sends
+        // and triggers a snowplow event with player status info.
+        function onPlayerStateChange(event) {
+            var player_info = {
+                status: '', 
+                video_id: event.target.getVideoData().video_id,
+                video_src: event.target.getVideoUrl(),
+                title: event.target.getVideoData().title,
+                author: event.target.getVideoData().author
+            };
+            switch(event.data) {
+                case YT.PlayerState.PLAYING:
+                    player_info.status = 'Playing';
+                    track_youtube_player(player_info);
+                    break;
+                case YT.PlayerState.PAUSED:
+                    player_info.status = 'Paused';
+                    track_youtube_player(player_info);
+                    break;
+                case YT.PlayerState.ENDED:
+                    player_info.status = 'Ended';
+                    track_youtube_player(player_info);
+                    break;
+                default:
+            return;
+            }
+        }
+
+        // Creates new youtube player object when the API loads.
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube_player', {
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // THis gets called when the youtube player is ready.
+        function onPlayerReady(event) {
+            var player_info = {
+                status: 'Ready', 
+                video_id: 'Not Available', // Video ID not available opn ready state
+                video_src: event.target.getVideoUrl(),
+                title: event.target.getVideoData().title,
+                author: event.target.getVideoData().author
+            };
+            track_youtube_player(player_info);
+        }
+
+        // Sends snowplow event with youtube player state.
+        function track_youtube_player(player_info) {
+            window.snowplow('trackSelfDescribingEvent', {
+                schema: "iglu:ca.bc.gov.youtube/youtube_playerstate/jsonschema/1-0-0",
+                data: {
+                    status: player_info.status,
+                    video_src: player_info.video_src,
+                    video_id: player_info.video_id,
+                    title: player_info.title,
+                    author: player_info.author
+                }
+            });
+        }
+        
+    </script>
+    </body>
+</html>

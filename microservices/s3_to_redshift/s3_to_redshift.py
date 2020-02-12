@@ -21,13 +21,13 @@ import pandas as pd  # data processing
 import re  # regular expressions
 from io import StringIO
 import os  # to read environment variables
-import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
 from ua_parser import user_agent_parser
 from referer_parser import Referer
+from lib.redshift import RedShift
 
 
 # set up logging
@@ -377,22 +377,14 @@ COMMIT;
         query = scratch_start + scratch_copy + scratch_cleanup
         logquery = scratch_start + scratch_copy_log + scratch_cleanup
 
-    # Execute the transaction against Redshift using the psycopg2 library
+    # Execute the transaction against Redshift using local lib redshift module
     logger.debug(logquery)
-    with psycopg2.connect(conn_string) as conn:
-        with conn.cursor() as curs:
-            try:
-                curs.execute(query)
-            # if the DB call fails, print error and place file in /bad
-            except psycopg2.Error as e:
-                logger.error("Loading {0} to RedShift failed\n{1}"
-                             .format(batchfile, e.pgerror))
-                outfile = badfile
-            # if the DB call succeed, place file in /good
-            else:
-                logger.info("Loaded {0} to RedShift successfully"
-                            .format(batchfile))
-                outfile = goodfile
+    spdb = RedShift.snowplow()
+    if spdb.query(query):
+        outfile = goodfile
+    else:
+        outfile = badfile
+    spdb.close_connection()
 
     # copy the object to the S3 outfile (processed/good/ or processed/bad/)
     try:

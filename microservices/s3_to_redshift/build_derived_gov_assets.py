@@ -117,7 +117,10 @@ query = '''
         THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/')
         ELSE '' END
         AS referrer_urlpath,
-    SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
+    CASE
+        WHEN POSITION ('?' IN referrer) > 0 
+        THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) 
+        ELSE '' END
         AS referrer_urlquery
     FROM cmslite.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;

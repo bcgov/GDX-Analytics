@@ -24,31 +24,12 @@ import os  # to read environment variables
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
-import logging
 from ua_parser import user_agent_parser
 from referer_parser import Referer
 from lib.redshift import RedShift
+import lib.logs as log
 
-
-# set up logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# create stdout handler for logs at the INFO level
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# create file handler for logs at the DEBUG level in /logs/s3_to_redshift.log
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
-                              encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+log.setup_logging()
 
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):

@@ -47,6 +47,10 @@
             ],
             "version": "==0.9.4"
         },
+        "microservices": {
+            "editable": true,
+            "path": "./.."
+        },
         "numpy": {
             "hashes": [
                 "sha256:1786a08236f2c92ae0e70423c45e1e62788ed33028f94ca99c4df03f5be6b3c6",

@@ -1,0 +1,23 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Demo Schema for Marker Clicks",
+	"self": {
+		"vendor": "ca.bc.gov.googlemaps",
+		"name": "marker_click",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"geo_latitude": {
+			"type": ["string"],
+			"maxLength": 255
+		},
+		"geo_longitude": {
+			"type": ["string"],
+			"maxLength": 255
+		}
+	},
+        "required": ["geo_latitude", "geo_longitude"],
+	"additionalProperties": false
+}

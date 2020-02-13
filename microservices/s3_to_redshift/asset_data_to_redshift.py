@@ -26,8 +26,13 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
+
 from ua_parser import user_agent_parser
+# ua_parser documentation: https://github.com/ua-parser/uap-python
+
 from referer_parser import Referer
+# referer_parser documentation: 
+# https://github.com/snowplow-referer-parser/referer-parser
 
 
 # set up logging

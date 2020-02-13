@@ -66,6 +66,7 @@ query = '''
     assets.return_size,
     assets.status_code,
     assets.user_agent_http_request_header,
+    assets.request_string,
     CASE WHEN assets.ip LIKE '184.69.13.%'
         OR assets.ip LIKE '184.71.25.%'
         THEN TRUE ELSE FALSE END
@@ -110,6 +111,8 @@ query = '''
     assets.os_version,
     assets.browser_family,
     assets.browser_version,
+    -- Redshift requires the two extra escaping slashes for the backslash in 
+    -- the regex for referrer_urlhost.
     REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
     CASE

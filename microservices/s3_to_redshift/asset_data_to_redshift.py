@@ -214,14 +214,19 @@ for object_summary in objects_to_process:
             if(data['access_log_parse']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
             # Check if there are 9 or 10 columns in access log entry,
-            # and use the corresponding regex in the config
+            # and use the corresponding regex in the config.
+            # This is necessary because some log entries do not 
+            # have the tenth column for proxy port number.
             for exp in data['access_log_parse']['regexs']:
                 parsed_line, num_subs = re.subn(
                     exp['pattern'], exp['replace'], line)
                 # If a match for the replacement pattern is found,
                 # construct the parsed line
                 if num_subs:
-                    # Extract user_agent and referrer_url from log entry
+                    # Extract user_agent and referrer_url from log entry.
+                    # The field names referenced here are only for
+                    # use with the third party libraries. The field
+                    # names for the table are set in the config.
                     user_agent = re.match(exp['pattern'], line).group(9)
                     referrer_url = re.match(exp['pattern'], line).group(8)
 

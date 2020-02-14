@@ -27,9 +27,11 @@ import os.path  # file handling
 from ua_parser import user_agent_parser
 from referer_parser import Referer
 from lib.redshift import RedShift
+import logging
 import lib.logs as log
 
-log.setup_logging()
+logger = logging.getLogger(__name__)
+log.setup_logging(logger)
 
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):
@@ -360,10 +362,15 @@ COMMIT;
 
     # Execute the transaction against Redshift using local lib redshift module
     logger.debug(logquery)
-    spdb = RedShift.snowplow()
-    if spdb.query(query):
-        outfile = goodfile
-    else:
+    spdb = RedShift.snowplow(batchfile)
+    try:
+        if spdb.query(query):
+            outfile = goodfile
+        else:
+            logger.error("Loading {0} to RedShift failed\n{1}"
+                             .format(batchfile, e.pgerror))
+            outfile = badfile
+    except:
         outfile = badfile
     spdb.close_connection()
 
@@ -375,3 +382,5 @@ COMMIT;
             + object_summary.key, Key=outfile)
     except boto3.exceptions.ClientError:
         logger.exception("S3 transfer failed")
+
+    logger.debug("finished")

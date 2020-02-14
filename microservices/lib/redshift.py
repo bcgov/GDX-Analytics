@@ -8,7 +8,6 @@ import psycopg2
 HOST = 'redshift.analytics.gov.bc.ca'
 PORT = 5439
 
-
 class RedShift:
     'Common microservice operations for RedShift'
 
@@ -17,17 +16,23 @@ class RedShift:
         # The basic parameters for the data source name value parsed by psyopg2
         # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
         connection_string = (
-            f"bname='{self.dbname}' "
+            f"dbname='{self.dbname}' "
             f"host='{self.host}' "
             f"port='{self.port}' "
             f"user='{self.user}' "
             f"password={self.password}")
 
-        return psycopg2.connect(dsn=connection_string)
+        try:
+            conn = psycopg2.connect(dsn=connection_string)
+            self.logger.debug('opened connection')
+        except:
+            self.logging.exception('psycopg2 threw an exception')
+        return conn
 
     def close_connection(self):
         'closes the connection'
         self.connection.close()
+        self.logger.debug('closed connection')
 
     def query(self, query):
         'Performs a query'
@@ -35,16 +40,21 @@ class RedShift:
             with conn.cursor() as curs:
                 try:
                     curs.execute(query)
-                except psycopg2.Error:
-                    logging.exception()
+                except psycopg2.Error as e:
+                    logger.error("Loading {0} to RedShift failed\n{1}"
+                             .format(batchfile, e.pgerror))
                     return False
                 else:
-                    logging.debug(f"This query was excecuted without error:"
-                                  f"{query}")
+                    logger.info("Loaded {0} to RedShift successfully"
+                                    .format(batchfile))
                     return True
 
-    def __init__(self, name=None, user=None, password=None):
+    def __init__(self, batchfile, name=None, user=None, password=None):
         'The constructor opens a RedShift connection based on the arguments'
+        self.logger = logging.getLogger(__name__)
+
+        self.batchfile = batchfile
+
         self.dbname = name
         self.host = HOST
         self.port = PORT
@@ -54,6 +64,6 @@ class RedShift:
         self.connection = self.open_connection()
 
     @classmethod
-    def snowplow(cls):
+    def snowplow(cls, batchfile):
         'A factory constructor for the GDX Analytics Snowplow database'
-        return cls('snowplow', os.environ['pguser'], os.environ['pgpass'])
+        return cls(batchfile, 'snowplow', os.environ['pguser'], os.environ['pgpass'])

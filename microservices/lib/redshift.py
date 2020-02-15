@@ -42,11 +42,11 @@ class RedShift:
                     curs.execute(query)
                 except psycopg2.Error as e:
                     logger.error("Loading {0} to RedShift failed\n{1}"
-                             .format(batchfile, e.pgerror))
+                             .format(self.batchfile, e.pgerror))
                     return False
                 else:
                     logger.info("Loaded {0} to RedShift successfully"
-                                    .format(batchfile))
+                                    .format(self.batchfile))
                     return True
 
     def __init__(self, batchfile, name=None, user=None, password=None):

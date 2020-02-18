@@ -394,6 +394,7 @@ query = """
     INSERT INTO {dbschema}.themes
     WITH ids AS (
         SELECT cm.node_id,
+            cm.parent_node_id,
             cm.title,
             cm.hr_url,
             CASE
@@ -435,7 +436,7 @@ query = """
             LEFT JOIN {dbschema}.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
             LEFT JOIN {dbschema}.metadata AS cm_topic ON cm_topic.node_id = topic_id
         )
-        SELECT node_id, title, hr_url, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
+        SELECT node_id, parent_node_id, title, hr_url, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
     """.format(dbschema=dbschema)
 
 # Execute the query and log the outcome

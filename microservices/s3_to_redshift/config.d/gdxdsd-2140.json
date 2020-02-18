@@ -1,0 +1,39 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "gdxdsd-2140",
+  "doc": "gdxdsd-2140",
+  "dbtable": "servicebc.gdxdsd_2140",
+  "column_count": 10,
+  "columns": [
+    "ip",
+    "user",
+    "group",
+    "govdate",
+    "get_string",
+    "response",
+    "size",
+    "refer",
+    "port",
+    "proxy"
+  ],
+  "column_string_limit": {
+    "refer": 4095,
+    "get_string": 4095,
+    "group": 255,
+    "user": 255,
+    "ip": 255
+  },
+  "dtype_dic_strings": [
+    "size"
+  ],
+  "delim": "|",
+  "truncate": true,
+  "dateformat": [
+    {
+      "field": "govdate",
+      "format": "[%d/%b/%Y:%H:%M:%S %z]"
+    }
+  ]
+}

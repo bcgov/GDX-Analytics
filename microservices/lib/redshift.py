@@ -24,7 +24,7 @@ class RedShift:
 
         try:
             conn = psycopg2.connect(dsn=connection_string)
-            self.logger.debug('opened connection')
+            self.logging.debug('opened connection')
         except:
             self.logging.exception('psycopg2 threw an exception')
         return conn
@@ -32,7 +32,7 @@ class RedShift:
     def close_connection(self):
         'closes the connection'
         self.connection.close()
-        self.logger.debug('closed connection')
+        self.logging.debug('closed connection')
 
     def query(self, query):
         'Performs a query'
@@ -41,17 +41,16 @@ class RedShift:
                 try:
                     curs.execute(query)
                 except psycopg2.Error as e:
-                    logger.error("Loading {0} to RedShift failed\n{1}"
+                    logging.error("Loading {0} to RedShift failed\n{1}"
                              .format(self.batchfile, e.pgerror))
                     return False
                 else:
-                    logger.info("Loaded {0} to RedShift successfully"
+                    logging.info("Loaded {0} to RedShift successfully"
                                     .format(self.batchfile))
                     return True
 
     def __init__(self, batchfile, name=None, user=None, password=None):
         'The constructor opens a RedShift connection based on the arguments'
-        self.logger = logging.getLogger(__name__)
 
         self.batchfile = batchfile
 

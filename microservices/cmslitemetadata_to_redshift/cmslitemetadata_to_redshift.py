@@ -436,7 +436,7 @@ query = """
             LEFT JOIN {dbschema}.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
             LEFT JOIN {dbschema}.metadata AS cm_topic ON cm_topic.node_id = topic_id
         )
-        SELECT node_id, parent_node_id, title, hr_url, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
+        SELECT node_id, title, hr_url, parent_node_id, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
     """.format(dbschema=dbschema)
 
 # Execute the query and log the outcome

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS cmslite.themes (
 	"title"		VARCHAR(2047),
 	"hr_url"	VARCHAR(2047),
 	"parent_node_id" VARCHAR(255),
+	"parent_title"	VARCHAR(2047),
 	"theme_id"	VARCHAR(255),
 	"subtheme_id"	VARCHAR(255),
 	"topic_id"	VARCHAR(255),

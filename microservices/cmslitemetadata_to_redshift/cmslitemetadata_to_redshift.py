@@ -394,9 +394,10 @@ query = """
     INSERT INTO {dbschema}.themes
     WITH ids AS (
         SELECT cm.node_id,
-            cm.parent_node_id,
             cm.title,
             cm.hr_url,
+            cm.parent_node_id,
+            cm_parent.title AS parent_title,
             CASE
                 WHEN cm.node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081','A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL -- page is a home page either web or intranet home
                 WHEN cm.parent_node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081','A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN ('BC Gov Theme','Intranet Home') THEN cm.node_id -- page is a theme -- NOTE we call intranet "homes" as Themes
@@ -436,7 +437,7 @@ query = """
             LEFT JOIN {dbschema}.metadata AS cm_sub_theme ON cm_sub_theme.node_id = subtheme_id
             LEFT JOIN {dbschema}.metadata AS cm_topic ON cm_topic.node_id = topic_id
         )
-        SELECT node_id, title, hr_url, parent_node_id, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
+        SELECT node_id, title, hr_url, parent_node_id, parent_title, theme_id, subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE index = 1 ;
     """.format(dbschema=dbschema)
 
 # Execute the query and log the outcome

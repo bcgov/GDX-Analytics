@@ -24,15 +24,15 @@ class RedShift:
 
         try:
             conn = psycopg2.connect(dsn=connection_string)
-            self.logging.debug('opened connection')
+            logging.debug('opened connection')
         except:
-            self.logging.exception('psycopg2 threw an exception')
+            logging.exception('psycopg2 threw an exception')
         return conn
 
     def close_connection(self):
         'closes the connection'
         self.connection.close()
-        self.logging.debug('closed connection')
+        logging.debug('closed connection')
 
     def query(self, query):
         'Performs a query'

@@ -67,6 +67,10 @@ query = '''
     assets.status_code,
     assets.user_agent_http_request_header,
     assets.request_string,
+    'www2.gov.bc.ca' as asset_host,
+    CASE WHEN 'referrer_urlhost' NOT LIKE 'www2.gov.bc.ca'
+        THEN TRUE ELSE FALSE END
+        AS 'offsite_download'
     CASE WHEN assets.ip LIKE '184.69.13.%'
         OR assets.ip LIKE '184.71.25.%'
         THEN TRUE ELSE FALSE END

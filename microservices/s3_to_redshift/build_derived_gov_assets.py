@@ -59,7 +59,7 @@ query = '''
     SELECT 'https://www2.gov.bc.ca' ||
         replace(replace(assets.request_string,'GET ',''), ' HTTP/1.0','')
         AS asset_url,
-    assets.date_timestamp,
+    assets.date_timestamp::TIMESTAMP,
     assets.ip AS ip_address,
     assets.proxy,
     assets.referrer,
@@ -68,7 +68,7 @@ query = '''
     assets.user_agent_http_request_header,
     assets.request_string,
     'www2.gov.bc.ca' as asset_host,
-    CASE WHEN 'referrer_urlhost' NOT LIKE 'www2.gov.bc.ca'
+    CASE WHEN 'referrer_urlhost' LIKE 'www2.gov.bc.ca'
         THEN TRUE ELSE FALSE END
         AS 'offsite_download'
     CASE WHEN assets.ip LIKE '184.69.13.%'

@@ -70,13 +70,13 @@ query = '''
     'www2.gov.bc.ca' as asset_host,
     'CMSLite' as asset_source,
     CASE
-        WHEN asset.referrer is NULL THEN TRUE
+        WHEN assets.referrer is NULL THEN TRUE
         ELSE FALSE
-        END AS direct_download
+        END AS direct_download,
     CASE
         WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> 'www2.gov.bc.ca' THEN TRUE
         ELSE FALSE
-        END AS offsite_download
+        END AS offsite_download,
     CASE
         WHEN assets.ip LIKE '184.69.13.%'
         OR assets.ip LIKE '184.71.25.%' THEN TRUE

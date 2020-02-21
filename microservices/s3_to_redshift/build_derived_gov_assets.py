@@ -129,7 +129,7 @@ query = '''
         ELSE ''
         END AS referrer_urlpath,
     CASE
-        WHEN POSITION ('?' IN referrer) > 0 
+        WHEN POSITION ('?' IN referrer) > 0
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) 
         ELSE ''
         END AS referrer_urlquery

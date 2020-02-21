@@ -71,8 +71,8 @@ query = '''
     'CMSLite' as asset_source,
     CASE
         WHEN asset.referrer is NULL THEN TRUE
-        ELSE FALSE END
-        AS direct_download,
+        ELSE FALSE
+        END AS direct_download
     CASE
         WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> 'www2.gov.bc.ca' THEN TRUE
         ELSE FALSE

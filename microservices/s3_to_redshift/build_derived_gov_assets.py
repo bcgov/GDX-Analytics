@@ -68,15 +68,15 @@ query = '''
     assets.user_agent_http_request_header,
     assets.request_string,
     'www2.gov.bc.ca' as asset_host,
-    REGEXP_SUBSTR(assets.asset_url, '[^/]+$') as asset_file,
     'CMSLite' as asset_source,
-     -- Redshift requires the two extra escaping slashes for the backslash in
-    -- the regex for referrer_urlhost.
-    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     CASE
-        WHEN referrer_urlhost <> 'www2.gov.bc.ca' THEN TRUE
+        WHEN asset.referrer is NULL THEN TRUE
+        ELSE FALSE END
+        AS 'direct_download',
+    CASE
+        WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> 'www2.gov.bc.ca' THEN TRUE
         ELSE FALSE
-        END AS offsite_download,
+        END AS offsite_download
     CASE
         WHEN assets.ip LIKE '184.69.13.%'
         OR assets.ip LIKE '184.71.25.%' THEN TRUE
@@ -123,6 +123,9 @@ query = '''
     assets.os_version,
     assets.browser_family,
     assets.browser_version,
+    -- Redshift requires the two extra escaping slashes for the backslash in
+    -- the regex for referrer_urlhost.
+    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
     CASE
         WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/')

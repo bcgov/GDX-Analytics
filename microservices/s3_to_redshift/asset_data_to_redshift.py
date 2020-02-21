@@ -213,10 +213,12 @@ for object_summary in objects_to_process:
             # Replace pipe char with encoded version, %7C
             if(data['access_log_parse']['string_repl']):
                 line = line.replace(inline_pattern, inline_replace)
-            # Check if there are 9 or 10 columns in access log entry,
-            # and use the corresponding regex in the config.
-            # This is necessary because some log entries do not 
+            # The config contains regex's that correspond to the
+            # number of columns in the log entry.
+            # This is necessary because some log entries do not
             # have the tenth column for proxy port number.
+            # Check if there are 9 or 10 columns in access log entry by
+            # attempting to apply these regex's until finding one that parses.
             for exp in data['access_log_parse']['regexs']:
                 parsed_line, num_subs = re.subn(
                     exp['pattern'], exp['replace'], line)

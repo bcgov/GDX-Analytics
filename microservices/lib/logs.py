@@ -45,3 +45,7 @@ def setup(dir='logs', minLevel=logging.INFO):
     stream_formatter = logging.Formatter(CONS_FORMAT)
     stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)
+
+    logging.getLogger("botocore").setLevel(logging.WARNING)
+    logging.getLogger("boto3").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)

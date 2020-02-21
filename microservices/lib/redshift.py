@@ -24,15 +24,15 @@ class RedShift:
 
         try:
             conn = psycopg2.connect(dsn=connection_string)
-            logging.debug('opened connection')
+            self.logger.debug(f'opened connection to {self.dbname}')
         except:
-            logging.exception('psycopg2 threw an exception')
+            self.logger.exception('psycopg2 threw an exception')
         return conn
 
     def close_connection(self):
         'closes the connection'
         self.connection.close()
-        logging.debug('closed connection')
+        self.logger.debug('closed connection')
 
     def query(self, query):
         'Performs a query'
@@ -41,16 +41,19 @@ class RedShift:
                 try:
                     curs.execute(query)
                 except psycopg2.Error as e:
-                    logging.error("Loading {0} to RedShift failed\n{1}"
-                             .format(self.batchfile, e.pgerror))
+                    self.logger.error(
+                        f"Loading {self.batchfile} to RedShift failed"
+                        f"{e.pgerror}")
                     return False
                 else:
-                    logging.info("Loaded {0} to RedShift successfully"
-                                    .format(self.batchfile))
+                    self.logger.info(
+                        f"Loaded {self.batchfile} to RedShift successfully")
                     return True
 
     def __init__(self, batchfile, name=None, user=None, password=None):
         'The constructor opens a RedShift connection based on the arguments'
+
+        self.logger = logging.getLogger(__name__)
 
         self.batchfile = batchfile
 
@@ -61,8 +64,11 @@ class RedShift:
         self.password = password
 
         self.connection = self.open_connection()
+        self.logger.debug('connection to redshift initialized')
+
 
     @classmethod
     def snowplow(cls, batchfile):
         'A factory constructor for the GDX Analytics Snowplow database'
-        return cls(batchfile, 'snowplow', os.environ['pguser'], os.environ['pgpass'])
+        return cls(
+            batchfile, 'snowplow', os.environ['pguser'], os.environ['pgpass'])

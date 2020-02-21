@@ -28,10 +28,10 @@ from ua_parser import user_agent_parser
 from referer_parser import Referer
 from lib.redshift import RedShift
 import logging
-import lib.logs as log
+import lib.logs as GDXLogging
 
 logger = logging.getLogger(__name__)
-log.setup_logging(logger)
+GDXLogging.setup()
 
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):

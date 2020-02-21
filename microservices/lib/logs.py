@@ -1,30 +1,47 @@
+# ref: https://github.com/acschaefer/duallog
+
+import datetime
 import inspect
 import logging
 import os
-import os.path
 
-def setup_logging(logger):
-    'set up logging'
+# Define the default logging message formats.
+FILE_FORMAT = '%(levelname)s:%(name)s:%(asctime)s:%(message)s'
+CONS_FORMAT = '%(message)s'
 
+def setup(dir='logs', minLevel=logging.INFO):
+    """ Set up dual logging to console and to logfile.
+    """
+
+    # Create the root logger.
+    logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    # create stdout handler for logs at the INFO level
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    # create file handler for logs at the DEBUG level under the `logs/` path;
-    # the log filename will share the callers filename with .log instead of .py
+    # Create the log filename based on caller filename
     frame = inspect.stack()[1]
     module = inspect.getmodule(frame[0])
-    log_filename = module.__file__.replace('.py', '.log')
-    handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
-                                  encoding=None, delay="true")
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    file_name = module.__file__.replace('.py', '.log')
 
-    return logger
+    # Validate the given directory.
+    dir = os.path.normpath(dir)
+
+    # Create a folder for the logfiles.
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    # Construct the name of the logfile.
+    file_path = os.path.join(dir, file_name)
+
+    # Set up logging to the logfile.
+    file_handler = logging.FileHandler(file_path)
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter(FILE_FORMAT)
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
+
+    # Set up logging to the console.
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(minLevel)
+    stream_formatter = logging.Formatter(CONS_FORMAT)
+    stream_handler.setFormatter(stream_formatter)
+    logger.addHandler(stream_handler)

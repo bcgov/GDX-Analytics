@@ -68,13 +68,16 @@ query = '''
     assets.user_agent_http_request_header,
     assets.request_string,
     'www2.gov.bc.ca' as asset_host,
-    CASE WHEN 'referrer_urlhost' LIKE 'www2.gov.bc.ca'
-        THEN TRUE ELSE FALSE END
-        AS offsite_download,
-    CASE WHEN assets.ip LIKE '184.69.13.%'
-        OR assets.ip LIKE '184.71.25.%'
-        THEN TRUE ELSE FALSE END
-        AS is_efficiencybc_dev,
+    'CMSLite' as asset_source,
+    CASE
+        WHEN referrer_urlhost <> 'www2.gov.bc.ca' THEN TRUE
+        ELSE FALSE
+        END AS offsite_download,
+    CASE
+        WHEN assets.ip LIKE '184.69.13.%'
+        OR assets.ip LIKE '184.71.25.%' THEN TRUE
+        ELSE FALSE
+        END AS is_efficiencybc_dev,
     CASE WHEN assets.ip LIKE '142.22.%'
         OR assets.ip LIKE '142.23.%'
         OR assets.ip LIKE '142.24.%'
@@ -90,11 +93,12 @@ query = '''
         OR assets.ip LIKE '142.34.%'
         OR assets.ip LIKE '142.35.%'
         OR assets.ip LIKE '142.36.%'
-        THEN TRUE ELSE FALSE END
-        AS is_government,
-    CASE WHEN assets.user_agent_http_request_header LIKE '%Mobile%'
-        THEN TRUE ELSE FALSE END
-        AS is_mobile,
+        THEN TRUE
+        ELSE FALSE
+        END AS is_government,
+    CASE WHEN assets.user_agent_http_request_header LIKE '%Mobile%' THEN TRUE
+        ELSE FALSE
+        END AS is_mobile,
     CASE
         WHEN assets.user_agent_http_request_header
             LIKE '%Mobile%' THEN 'Mobile'
@@ -109,26 +113,26 @@ query = '''
         WHEN assets.user_agent_http_request_header LIKE '%Macintosh%'
             OR assets.user_agent_http_request_header LIKE '%Windows NT%'
             THEN 'Computer'
-    ELSE 'Unknown' END
-        AS device,
+        ELSE 'Unknown'
+        END AS device,
     assets.os_family,
     assets.os_version,
     assets.browser_family,
     assets.browser_version,
-    -- Redshift requires the two extra escaping slashes for the backslash in 
+    -- Redshift requires the two extra escaping slashes for the backslash in
     -- the regex for referrer_urlhost.
     REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
     CASE
         WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/')
         THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/')
-        ELSE '' END
-        AS referrer_urlpath,
+        ELSE ''
+        END AS referrer_urlpath,
     CASE
         WHEN POSITION ('?' IN referrer) > 0 
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) 
-        ELSE '' END
-        AS referrer_urlquery
+        ELSE ''
+        END AS referrer_urlquery
     FROM cmslite.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;

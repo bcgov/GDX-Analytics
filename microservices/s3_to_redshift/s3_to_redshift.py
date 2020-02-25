@@ -28,10 +28,10 @@ from ua_parser import user_agent_parser
 from referer_parser import Referer
 from lib.redshift import RedShift
 import logging
-import lib.logs as GDXLogging
+import lib.logs as log
 
 logger = logging.getLogger(__name__)
-GDXLogging.setup()
+log.setup()
 
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):
@@ -117,16 +117,16 @@ def is_processed(object_summary):
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
-        logger.debug("{0} was processed as good already.".format(filename))
+        logger.debug(f'{filename} was processed as good already.')
         return True
     try:
         client.head_object(Bucket=bucket, Key=badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
-        logger.debug("{0} was processed as bad already.".format(filename))
+        logger.debug(f'{filename} was processed as bad already.')
         return True
-    logger.debug("{0} has not been processed.".format(filename))
+    logger.debug(f'{filename} has not been processed.')
     return False
 
 

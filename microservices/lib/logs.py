@@ -1,6 +1,5 @@
 # ref: https://github.com/acschaefer/duallog
 
-import datetime
 import inspect
 import logging
 import os
@@ -8,6 +7,7 @@ import os
 # Define the default logging message formats.
 FILE_FORMAT = '%(levelname)s:%(name)s:%(asctime)s:%(message)s'
 CONS_FORMAT = '%(message)s'
+
 
 def setup(dir='logs', minLevel=logging.INFO):
     """ Set up dual logging to console and to logfile.

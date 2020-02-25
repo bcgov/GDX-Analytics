@@ -21,7 +21,7 @@
       "os_version",
       "browser_family",
       "browser_version",
-      "referrer_urlhost",
+      "referrer_source",
       "referrer_medium"
     ],
     "column_string_limit":{
@@ -39,7 +39,7 @@
     "dateformat": [
       {
         "field": "date/timestamp",
-        "format": "%d/%b/%Y:%H:%M:%S -0700"
+        "format": "%d/%b/%Y:%H:%M:%S %z"
       }
     ],
     "replace": [

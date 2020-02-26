@@ -18,6 +18,7 @@
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import pandas.errors
 import re  # regular expressions
 from io import StringIO
 import os  # to read environment variables
@@ -266,7 +267,7 @@ for object_summary in objects_to_process:
                 CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
                 + object_summary.key, Key=badfile)
         except Exception as e:
-            logger.exception("S3 transfer failed.\n{0}".format(e.message))
+            logger.exception("S3 transfer failed. %s", str(e))
         continue
 
     # Check for an empty file. If it's empty, accept it as good and skip
@@ -274,19 +275,16 @@ for object_summary in objects_to_process:
     try:
         df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
                          dtype=dtype_dic, usecols=range(column_count))
-    except Exception as e:
-        logger.exception('exception reading {0}'.format(object_summary.key))
-        if (str(e) == "No columns to parse from file"):
-            logger.warning('File is empty, keying to goodfile \
-                           and proceeding.')
+    except pandas.errors.EmptyDataError as e:
+        logger.exception('exception reading %s', object_summary.key)
+        if str(e) == "No columns to parse from file":
+            logger.warning('File is empty, keying to goodfile and proceeding.')
             outfile = goodfile
         else:
-            logger.warning('File not empty, keying to badfile \
-                           and proceeding.')
+            logger.warning('File not empty, keying to badfile and proceeding.')
             outfile = badfile
         client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                           CopySource="sp-ca-bc-gov-\
-                           131565110619-12-microservices/"
+                           CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
                            + object_summary.key, Key=outfile)
         continue
 

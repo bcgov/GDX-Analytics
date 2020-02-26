@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 
+
 [packages]
 boto3 = "*"
 pandas = "*"
@@ -12,6 +13,7 @@ botocore = "*"
 ua-parser = "*"
 referer-parser = "*"
 psycopg2-binary = "*"
+microservices = {editable = true,path = "./.."}
 
 [requires]
 python_version = "3.7"

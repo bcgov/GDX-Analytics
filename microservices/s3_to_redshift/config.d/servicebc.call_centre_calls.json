@@ -1,0 +1,26 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "pmrp_sbc",
+  "doc": "CallCenter-calls_.*.csv",
+  "dbtable": "servicebc.call_centre_calls",
+  "column_count": 13,
+  "columns": [
+    "ID",
+    "Datekey",
+    "TimeKey",
+    "UWFAgentID",
+    "Instance",
+    "ContactReason",
+    "ContactReasonDetail",
+    "WrapTime",
+    "ActiveTime",
+    "PresentingTime",
+    "SuspendTime",
+    "SuspendCount",
+    "TSFFlag"
+  ],
+  "delim": "|",
+  "truncate": false
+}

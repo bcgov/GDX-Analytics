@@ -3,7 +3,7 @@
   "source": "client",
   "destination": "processed",
   "directory": "pmrp_sbc",
-  "doc": "CallCenter-escalation_.*.csv",
+  "doc": "CallCenter-esb_.*.csv",
   "dbtable": "servicebc.call_centre_esb_data",
   "column_count": 14,
   "columns": [

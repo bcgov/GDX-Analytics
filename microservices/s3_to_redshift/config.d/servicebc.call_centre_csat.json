@@ -23,6 +23,8 @@
     "S4CSAT",
     "S5CSAT"
   ],
+  "no_header": true,
+  "dtype_dic_ints": ["DateKey","TimeKey","PeripheralCallType"],
   "delim": "|",
   "truncate": false
 }

@@ -16,6 +16,8 @@
     "BusinessDaysAged",
     "ResolvedWithinReportingMonth"
   ],
+  "no_header": true,
+  "dtype_dic_ints": ["ReceivedDateKey","ReceivedTimeKey","CompletedDateKey","BusinessDaysAged"],
   "delim": "|",
   "truncate": false
 }

@@ -21,6 +21,8 @@
     "SuspendCount",
     "TSFFlag"
   ],
+  "no_header": true,
+  "dtype_dic_ints": ["TSFFlag"],
   "delim": "|",
   "truncate": false
 }

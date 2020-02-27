@@ -68,6 +68,13 @@ if 'dtype_dic_strings' in data:
 if 'dtype_dic_bools' in data:
     for fieldname in data['dtype_dic_bools']:
         dtype_dic[fieldname] = bool
+if 'dtype_dic_ints' in data:
+    for fieldname in data['dtype_dic_ints']:
+        dtype_dic[fieldname] = pd.Int64Dtype()
+if 'no_header' in data:
+    no_header = data['no_header']
+else:
+    no_header = False
 delim = data['delim']
 truncate = data['truncate']
 if 'drop_columns' in data:
@@ -273,8 +280,21 @@ for object_summary in objects_to_process:
     # Check for an empty file. If it's empty, accept it as good and skip
     # to the next object to process
     try:
-        df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
-                         dtype=dtype_dic, usecols=range(column_count))
+        if no_header:
+            df = pd.read_csv(
+                StringIO(csv_string),
+                sep=delim,
+                index_col=False,
+                dtype=dtype_dic,
+                usecols=range(column_count),
+                header=None)
+        else:
+            df = pd.read_csv(
+                StringIO(csv_string),
+                sep=delim,
+                index_col=False,
+                dtype=dtype_dic,
+                usecols=range(column_count))
     except pandas.errors.EmptyDataError as e:
         logger.exception('exception reading %s', object_summary.key)
         if str(e) == "No columns to parse from file":
@@ -313,6 +333,11 @@ for object_summary in objects_to_process:
             df[thisfield['field']] = \
                 pd.to_datetime(df[thisfield['field']],
                                format=thisfield['format'])
+
+    # ensure ints on columns defined as such
+    if 'dtype_dic_ints' in data:
+        for thisfield in data['dtype_dic_ints']:
+            df[thisfield] = df[thisfield].astype(pd.Int64Dtype())
 
     # Put the full data set into a buffer and write it
     # to a "|" delimited file in the batch directory
@@ -361,14 +386,9 @@ COMMIT;
     # Execute the transaction against Redshift using local lib redshift module
     logger.debug(logquery)
     spdb = RedShift.snowplow(batchfile)
-    try:
-        if spdb.query(query):
-            outfile = goodfile
-        else:
-            logger.error("Loading {0} to RedShift failed\n{1}"
-                             .format(batchfile, e.pgerror))
-            outfile = badfile
-    except:
+    if spdb.query(query):
+        outfile = goodfile
+    else:
         outfile = badfile
     spdb.close_connection()
 

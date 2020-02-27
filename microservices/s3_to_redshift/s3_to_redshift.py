@@ -18,6 +18,7 @@
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import pandas.errors
 import re  # regular expressions
 from io import StringIO
 import os  # to read environment variables
@@ -67,6 +68,13 @@ if 'dtype_dic_strings' in data:
 if 'dtype_dic_bools' in data:
     for fieldname in data['dtype_dic_bools']:
         dtype_dic[fieldname] = bool
+if 'dtype_dic_ints' in data:
+    for fieldname in data['dtype_dic_ints']:
+        dtype_dic[fieldname] = pd.Int64Dtype()
+if 'no_header' in data:
+    no_header = data['no_header']
+else:
+    no_header = False
 delim = data['delim']
 truncate = data['truncate']
 if 'drop_columns' in data:
@@ -117,16 +125,16 @@ def is_processed(object_summary):
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
-        logger.debug(f'{filename} was processed as good already.')
+        logger.debug('%s was processed as good already.', filename)
         return True
     try:
         client.head_object(Bucket=bucket, Key=badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
-        logger.debug(f'{filename} was processed as bad already.')
+        logger.debug('%s was processed as bad already.', filename)
         return True
-    logger.debug(f'{filename} has not been processed.')
+    logger.debug('%s has not been processed.', filename)
     return False
 
 
@@ -266,27 +274,37 @@ for object_summary in objects_to_process:
                 CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
                 + object_summary.key, Key=badfile)
         except Exception as e:
-            logger.exception("S3 transfer failed.\n{0}".format(e.message))
+            logger.exception("S3 transfer failed. %s", str(e))
         continue
 
     # Check for an empty file. If it's empty, accept it as good and skip
     # to the next object to process
     try:
-        df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
-                         dtype=dtype_dic, usecols=range(column_count))
-    except Exception as e:
-        logger.exception('exception reading {0}'.format(object_summary.key))
-        if (str(e) == "No columns to parse from file"):
-            logger.warning('File is empty, keying to goodfile \
-                           and proceeding.')
+        if no_header:
+            df = pd.read_csv(
+                StringIO(csv_string),
+                sep=delim,
+                index_col=False,
+                dtype=dtype_dic,
+                usecols=range(column_count),
+                header=None)
+        else:
+            df = pd.read_csv(
+                StringIO(csv_string),
+                sep=delim,
+                index_col=False,
+                dtype=dtype_dic,
+                usecols=range(column_count))
+    except pandas.errors.EmptyDataError as e:
+        logger.exception('exception reading %s', object_summary.key)
+        if str(e) == "No columns to parse from file":
+            logger.warning('File is empty, keying to goodfile and proceeding.')
             outfile = goodfile
         else:
-            logger.warning('File not empty, keying to badfile \
-                           and proceeding.')
+            logger.warning('File not empty, keying to badfile and proceeding.')
             outfile = badfile
         client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                           CopySource="sp-ca-bc-gov-\
-                           131565110619-12-microservices/"
+                           CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
                            + object_summary.key, Key=outfile)
         continue
 
@@ -315,6 +333,11 @@ for object_summary in objects_to_process:
             df[thisfield['field']] = \
                 pd.to_datetime(df[thisfield['field']],
                                format=thisfield['format'])
+
+    # ensure ints on columns defined as such
+    if 'dtype_dic_ints' in data:
+        for thisfield in data['dtype_dic_ints']:
+            df[thisfield] = df[thisfield].astype(pd.Int64Dtype())
 
     # Put the full data set into a buffer and write it
     # to a "|" delimited file in the batch directory
@@ -363,14 +386,9 @@ COMMIT;
     # Execute the transaction against Redshift using local lib redshift module
     logger.debug(logquery)
     spdb = RedShift.snowplow(batchfile)
-    try:
-        if spdb.query(query):
-            outfile = goodfile
-        else:
-            logger.error("Loading {0} to RedShift failed\n{1}"
-                             .format(batchfile, e.pgerror))
-            outfile = badfile
-    except:
+    if spdb.query(query):
+        outfile = goodfile
+    else:
         outfile = badfile
     spdb.close_connection()
 

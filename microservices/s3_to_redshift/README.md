@@ -62,8 +62,10 @@ The JSON configuration is required as a second argument when running the `s3_to_
 - `"column_count"`: The number of columns the processed dataframe should contain.
 - `"columns"`: A list containing the column names of the input file.
 - `"column_string_limit"`: A dictionary where keys are names of string type column to truncate, and values are integers indicating the length to truncate to.  
+- `"no_header"`: A boolean set to `true` if the input CSV file contains no header row. This is set to avoid pandas from inferring the first row as a header in case the header row is not part of the input file. Default is `false`.
 - `"dtype_dic_strings"`: A list where keys are the names of columns in the input data whose data will be formatted as strings.
-= `"dtype_dic_bools"`: A list where keys are the names of columns in the input data whose data will be formatted as boolean values.
+- `"dtype_dic_bools"`: A list where keys are the names of columns in the input data whose data will be formatted as boolean
+- `"dtype_dic_ints"`: A list where keys are the names of columns in the input data whose data will be formatted as nullable integer values.
 - `"delim"`: specify the character that deliminates data in the input `csv`.
 - `"truncate"`: boolean (`true` or `false`) that determines if the Redshift table will be truncated before inserting data, or instead if the table will be extended with the inserted data.
 - `"dateformat"` a list of dictionaries containing keys: `field` and `format`
@@ -103,11 +105,13 @@ The structure of the config file should resemble the following:
       "format": String
     }
   ],
+  "header": Boolean,
   "dtype_dic_strings": [String],
   "dtype_dic_bools": [String],
+  "dtype_dic_ints": [String],
   "delim": String,
   "nested_delim": String,
-  "truncate": boolean
+  "truncate": Boolean
 }
 ```
 

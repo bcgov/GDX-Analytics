@@ -125,16 +125,16 @@ def is_processed(object_summary):
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
-        logger.debug(f'{filename} was processed as good already.')
+        logger.debug('%s was processed as good already.', filename)
         return True
     try:
         client.head_object(Bucket=bucket, Key=badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
-        logger.debug(f'{filename} was processed as bad already.')
+        logger.debug('%s was processed as bad already.', filename)
         return True
-    logger.debug(f'{filename} has not been processed.')
+    logger.debug('%s has not been processed.', filename)
     return False
 
 

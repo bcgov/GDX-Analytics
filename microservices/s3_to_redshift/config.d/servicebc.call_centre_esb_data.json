@@ -1,0 +1,29 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "pmrp_sbc",
+  "doc": "esb_data-.*.csv",
+  "dbtable": "servicebc.call_centre_esb_data",
+  "column_count": 14,
+  "columns": [
+    "ID",
+    "SkillGroup",
+    "ContactReason",
+    "ContactReasonDetail",
+    "DateKey",
+    "Interval",
+    "AnsweredWithinServiceLevel",
+    "CallPutOnHold",
+    "HandleTime",
+    "WaitTime",
+    "WrapTime",
+    "TalkTime",
+    "HoldTime",
+    "IncomingPhoneNumber"
+  ],
+  "no_header": true,
+  "dtype_dic_ints": ["DateKey","CallPutOnHold"],
+  "delim": "|",
+  "truncate": false
+}

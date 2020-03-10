@@ -6,8 +6,8 @@
   "doc": "cmslite.csv.*",
   "dbschema": "cmslite",
   "dbtable": "metadata",
-  "columns": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title","site_key","site_id", "language_name", "language_code"],
-  "column_count": 25,
+  "columns": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title","site_key","site_id", "language_name","language_code","page_status","published_by","created_by","modified_by","node_level","locked_date","moved_date","exclude_from_ia","hide_from_navigation","exclude_from_search_engines","security_classification","security_label","publication_date","defined_security_groups","inherited_security_groups"],
+  "column_count": 40,
   "columns_metadata": [
     "node_id",
     "parent_node_id",
@@ -28,7 +28,22 @@
     "site_key",
     "site_id",
     "language_name",
-    "language_code"
+    "language_code",
+    "page_status",
+    "published_by",
+    "created_by",
+    "modified_by",
+    "node_level",
+    "locked_date",
+    "moved_date",
+    "exclude_from_ia",
+    "hide_from_navigation",
+    "exclude_from_search_engines",
+    "security_classification",
+    "security_label",
+    "publication_date",
+    "defined_security_groups",
+    "inherited_security_groups"
   ],
   "columns_lookup": [
     "content_types",
@@ -157,9 +172,21 @@
     {
       "field": "published_date",
       "format": "%Y-%m-%d %H:%M:%S"
+    },
+    {
+      "field": "locked_date",
+      "format": "%Y-%m-%d %H:%M:%S"
+    },
+    {
+      "field": "moved_date",
+      "format": "%Y-%m-%d %H:%M:%S"
+    },
+    {
+      "field": "publication_date",
+      "format": "%Y-%m-%d %H:%M:%S"
     }
   ],
-  "dtype_dic_strings": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title","site_key","site_id", "language_name", "language_code"],
+  "dtype_dic_strings": ["node_id","parent_node_id","ancestor_nodes","keywords","description","page_type","synonyms","dcterms_creator","modified_date","created_date","updated_date","published_date","content_types","mbcterms_subject_categories","dcterms_subjects","dcterms_languages","audiences","hr_url","title","nav_title","eng_nav_title","site_key","site_id", "language_name", "language_code","page_status","published_by","created_by","modified_by","node_level","locked_date","moved_date","exclude_from_ia","hide_from_navigation","exclude_from_search_engines","security_classification","security_label","publication_date","defined_security_groups","inherited_security_groups"],
   "delim": ",",
   "nested_delim": "|",
   "truncate": true

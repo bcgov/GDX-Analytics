@@ -97,8 +97,8 @@ def last_loaded(site_name):
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
     query = ("SELECT MAX(DATE) "
-             "FROM google.googlesearch "
-             "WHERE site = '{0}'").format(site_name)
+             "FROM {0} "
+             "WHERE site = '{1}'").format(dbtable, site_name)
     cursor.execute(query)
     # get the last loaded date
     last_loaded_date = (cursor.fetchall())[0][0]
@@ -341,14 +341,16 @@ for site_item in sites:
 
 # This query will INSERT data that is the result of a JOIN into
 # cmslite.google_pdt, a persistent dereived table which facilitating the LookML
+pdt_table = 'google_pdt'
+source_table = ''
 query = """
 -- perform this as a transaction.
 -- Either the whole query completes, or it leaves the old table intact
 BEGIN;
-DROP TABLE IF EXISTS cmslite.google_pdt_scratch;
-DROP TABLE IF EXISTS cmslite.google_pdt_old;
+DROP TABLE IF EXISTS cmslite.{pdt_table}_scratch;
+DROP TABLE IF EXISTS cmslite.{pdt_table}_old;
 
-CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
+CREATE TABLE IF NOT EXISTS cmslite.{pdt_table}_scratch (
         "site"          VARCHAR(255),
         "date"          date,
         "query"         VARCHAR(2048),
@@ -369,24 +371,28 @@ CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
         "subtheme"      VARCHAR(2047),
         "topic"         VARCHAR(2047)
 );
-ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
-GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
+ALTER TABLE cmslite.{pdt_table}_scratch OWNER TO microservice;
+GRANT SELECT ON cmslite.{pdt_table}_scratch TO looker;
 
-INSERT INTO cmslite.google_pdt_scratch
+INSERT INTO cmslite.{pdt_table}_scratch
       SELECT gs.*,
       COALESCE(node_id,'') AS node_id,
-      SPLIT_PART(site, '/',3) as page_urlhost,
+      SPLIT_PART(page, '/',3) as page_urlhost,
       title,
       theme_id, subtheme_id, topic_id, theme, subtheme, topic
-      FROM google.googlesearch AS gs
+      FROM {dbtable} AS gs
       -- fix for misreporting of redirected front page URL in Google search
-      LEFT JOIN cmslite.themes AS themes ON CASE WHEN page = 'https://www2.gov.bc.ca/' THEN 'https://www2.gov.bc.ca/gov/content/home' ELSE page END = themes.hr_url;
+      LEFT JOIN cmslite.themes AS themes ON
+        CASE WHEN page = 'https://www2.gov.bc.ca/'
+             THEN 'https://www2.gov.bc.ca/gov/content/home'
+             ELSE page
+        END = themes.hr_url;
 
-ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
-ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;
-DROP TABLE cmslite.google_pdt_old;
+ALTER TABLE cmslite.{pdt_table} RENAME TO {pdt_table}_old;
+ALTER TABLE cmslite.{pdt_table}_scratch RENAME TO {pdt_table}_pdt;
+DROP TABLE cmslite.{pdt_table}_old;
 COMMIT;
-"""
+""".format(pdt_table=pdt_table, dbtable=dbtable)
 
 # Execute the query and log the outcome
 logger.debug(query)

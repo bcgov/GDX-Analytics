@@ -375,7 +375,7 @@ GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
 INSERT INTO cmslite.google_pdt_scratch
       SELECT gs.*,
       COALESCE(node_id,'') AS node_id,
-      SPLIT_PART(site, '/',3) as page_urlhost,
+      SPLIT_PART(page, '/',3) as page_urlhost,
       title,
       theme_id, subtheme_id, topic_id, theme, subtheme, topic
       FROM google.googlesearch AS gs

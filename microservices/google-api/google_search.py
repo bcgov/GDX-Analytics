@@ -180,8 +180,8 @@ for site_item in sites:
 
         # set the file name that will be written to S3
         site_clean = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
-        outfile = "googlesearch-" + site_clean + "-" + str(start_dt) + "-" + str(end_dt) + ".csv"
-        object_key = 'client/google_gdx/{0}'.format(outfile)
+        outfile = "googlesearch-gdxdsd2518-" + site_clean + "-" + str(start_dt) + "-" + str(end_dt) + ".csv"
+        object_key = 'client/google_gdx_gdxdsd2518/{0}'.format(outfile)
 
         # calling the Google API. If credentials.dat is not yet generated
         # then brower based Google Account validation will be required
@@ -341,7 +341,7 @@ for site_item in sites:
 
 # This query will INSERT data that is the result of a JOIN into
 # cmslite.google_pdt, a persistent dereived table which facilitating the LookML
-pdt_table = 'google_pdt'
+pdt_table = 'google_pdt_gdxdsd2518'
 source_table = ''
 query = """
 -- perform this as a transaction.

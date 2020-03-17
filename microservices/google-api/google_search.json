@@ -1,17 +1,16 @@
 {
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
-  "dbtable": "google.googlesearch",
+  "dbtable": "google.googlesearch_gdxdsd2518",
   "sites": [
     {
-      "name": "https://www2.gov.bc.ca/"
+      "name": "sc-domain:engage.gov.bc.ca"
+    },
+    {
+      "name": "sc-domain:gov.bc.ca"
     },
     {
       "name": "https://efficiencybc.ca/",
       "start_date_default": "2019-03-02"
-    },
-    {
-      "name": "https://news.gov.bc.ca/",
-      "start_date_default": "2017-12-09"
     },
     {
        "name":"https://betterhomesbc.ca/",
@@ -20,26 +19,6 @@
     {
        "name":"https://betterbuildingsbc.ca/",
        "start_date_default":"2019-05-21"
-    },
-    {
-      "name":"https://studentsuccess.gov.bc.ca/",
-      "start_date_default":"2019-07-31"
-    },
-    {
-      "name":"https://curriculum.gov.bc.ca/",
-      "start_date_default":"2018-04-04"
-    },
-    {
-      "name":"https://healthgateway.gov.bc.ca/",
-      "start_date_default":"2020-01-20"
-    },
-    {
-      "name":"sc-domain:engage.gov.bc.ca",
-      "start_date_default":"2018-09-16"
-    },
-    {
-      "name":"https://bcforhighschool.gov.bc.ca/",
-      "start_date_default":"2019-09-05"
     },
     {
       "name":"https://rightforyou.workbc.ca/",

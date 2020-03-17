@@ -21,4 +21,17 @@ window.snowplow('trackPageView');
 if (window.location.pathname.split('/')[1] == 'search') {
   window.snowplow('trackSiteSearch',[window.location.pathname.split('/')[2]]);
   }
+if (window.location.pathname.split('/')[1] == 'search') {
+    window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2]])
+  }
+
+  function decode_search(terms) {
+    decoded = decodeURIComponent(terms);
+    
+    if ( decoded.indexOf("advanced")  >= 0 ) {
+       // This will find the bs= parameter and get the terms into an array. It also splits the "excat phrase" into separate terms.                                  
+      decoded = decoded.split(';')[5].slice(3).replace(/"/g,"").split(' ');
+    }
+    return decoded;
+  }
 //<!-- Snowplow stop plowing -->

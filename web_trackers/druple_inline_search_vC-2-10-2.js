@@ -26,7 +26,7 @@ if (window.location.pathname.split('/')[1] == 'search') {
     decoded = decodeURIComponent(terms);
     
     if ( decoded.indexOf("advanced")  >= 0 ) {
-       // This will find the bs= parameter and get the terms into an array. It also splits the "excat phrase" into separate terms.                                  
+       // This will find the bs= parameter and get the terms into an array. It also splits the "exact phrase" into separate terms.                                  
       decoded = decoded.split(';')[5].slice(3).replace(/"/g,"").split(' ');
     }
     return decoded;

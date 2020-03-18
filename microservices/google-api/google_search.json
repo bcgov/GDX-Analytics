@@ -43,6 +43,9 @@
     },
     {
       "name": "http://www.bccdc.ca/"
+    },
+    {
+      "name": "http://covid-19.bccdc.ca/"
     }
   ]
 }

@@ -50,6 +50,9 @@
     },
     {
       "name": "sc-domain:gov.bc.ca"
+    },
+    {
+      "name": "https://www.healthlinkbc.ca"
     }
   ]
 }

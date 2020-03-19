@@ -388,7 +388,7 @@ INSERT INTO cmslite.{pdt_table}_scratch
              ELSE page
         END = themes.hr_url;
 
-ALTER TABLE cmslite.{pdt_table} RENAME TO {pdt_table}_old;
+ALTER TABLE cmslite.{pdt_table}_pdt RENAME TO {pdt_table}_old;
 ALTER TABLE cmslite.{pdt_table}_scratch RENAME TO {pdt_table}_pdt;
 DROP TABLE cmslite.{pdt_table}_old;
 COMMIT;

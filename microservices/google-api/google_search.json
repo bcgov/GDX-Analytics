@@ -45,7 +45,8 @@
       "name": "http://www.bccdc.ca/"
     },
     {
-      "name": "http://covid-19.bccdc.ca/"
+      "name": "http://covid-19.bccdc.ca/",
+      "start_date_default":"2020-03-17"
     }
   ]
 }

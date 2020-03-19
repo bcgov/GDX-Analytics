@@ -3,9 +3,6 @@
   "dbtable": "google.googlesearch",
   "sites": [
     {
-      "name": "sc-domain:engage.gov.bc.ca"
-    },
-    {
       "name": "https://www2.gov.bc.ca/"
     },
     {

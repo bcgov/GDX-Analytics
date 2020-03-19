@@ -97,8 +97,8 @@ def last_loaded(site_name):
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
     query = ("SELECT MAX(DATE) "
-             "FROM {0} "
-             "WHERE site = '{1}'").format(dbtable, site_name)
+             "FROM google.googlesearch "
+             "WHERE site = '{0}'").format(site_name)
     cursor.execute(query)
     # get the last loaded date
     last_loaded_date = (cursor.fetchall())[0][0]
@@ -378,7 +378,7 @@ INSERT INTO cmslite.google_pdt_scratch
           SPLIT_PART(page, '/',3) as page_urlhost,
           title,
           theme_id, subtheme_id, topic_id, theme, subtheme, topic
-      FROM {dbtable} AS gs
+      FROM google.googlesearch AS gs
       -- fix for misreporting of redirected front page URL in Google search
       LEFT JOIN cmslite.themes AS themes ON
         CASE WHEN page = 'https://www2.gov.bc.ca/'
@@ -402,7 +402,7 @@ ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
 ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;
 DROP TABLE cmslite.google_pdt_old;
 COMMIT;
-""".format(dbtable=dbtable)
+"""
 
 # Execute the query and log the outcome
 logger.debug(query)

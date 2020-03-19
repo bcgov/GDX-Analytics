@@ -374,13 +374,29 @@ GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
 
 INSERT INTO cmslite.google_pdt_scratch
       SELECT gs.*,
-      COALESCE(node_id,'') AS node_id,
-      SPLIT_PART(page, '/',3) as page_urlhost,
-      title,
-      theme_id, subtheme_id, topic_id, theme, subtheme, topic
+          COALESCE(node_id,'') AS node_id,
+          SPLIT_PART(page, '/',3) as page_urlhost,
+          title,
+          theme_id, subtheme_id, topic_id, theme, subtheme, topic
       FROM google.googlesearch AS gs
       -- fix for misreporting of redirected front page URL in Google search
-      LEFT JOIN cmslite.themes AS themes ON CASE WHEN page = 'https://www2.gov.bc.ca/' THEN 'https://www2.gov.bc.ca/gov/content/home' ELSE page END = themes.hr_url;
+      LEFT JOIN cmslite.themes AS themes ON
+        CASE WHEN page = 'https://www2.gov.bc.ca/'
+            THEN 'https://www2.gov.bc.ca/gov/content/home'
+            ELSE page
+            END = themes.hr_url
+        WHERE site NOT IN ('sc-domain:gov.bc.ca', 'sc-domain:engage.gov.bc.ca')
+            OR site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
+                'healthgateway.gov.bc.ca',
+                'engage.gov.bc.ca',
+                'feedback.engage.gov.bc.ca',
+                'www2.gov.bc.ca',
+                'www.engage.gov.bc.ca',
+                'curriculum.gov.bc.ca',
+                'studentsuccess.gov.bc.ca',
+                'news.gov.bc.ca',
+                'bcforhighschool.gov.bc.ca')
+            OR site = 'sc-domain:engage.gov.bc.ca';
 
 ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
 ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;

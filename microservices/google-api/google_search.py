@@ -180,8 +180,8 @@ for site_item in sites:
 
         # set the file name that will be written to S3
         site_clean = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
-        outfile = "googlesearch-gdxdsd2518-" + site_clean + "-" + str(start_dt) + "-" + str(end_dt) + ".csv"
-        object_key = 'client/google_gdx_gdxdsd2518/{0}'.format(outfile)
+        outfile = "googlesearch-" + site_clean + "-" + str(start_dt) + "-" + str(end_dt) + ".csv"
+        object_key = 'client/google_gdx/{0}'.format(outfile)
 
         # calling the Google API. If credentials.dat is not yet generated
         # then brower based Google Account validation will be required
@@ -341,16 +341,14 @@ for site_item in sites:
 
 # This query will INSERT data that is the result of a JOIN into
 # cmslite.google_pdt, a persistent dereived table which facilitating the LookML
-pdt_table = 'google_pdt_gdxdsd2518'
-source_table = ''
 query = """
 -- perform this as a transaction.
 -- Either the whole query completes, or it leaves the old table intact
 BEGIN;
-DROP TABLE IF EXISTS cmslite.{pdt_table}_scratch;
-DROP TABLE IF EXISTS cmslite.{pdt_table}_old;
+DROP TABLE IF EXISTS cmslite.google_pdt_scratch;
+DROP TABLE IF EXISTS cmslite.google_pdt_old;
 
-CREATE TABLE IF NOT EXISTS cmslite.{pdt_table}_scratch (
+CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
         "site"          VARCHAR(255),
         "date"          date,
         "query"         VARCHAR(2048),
@@ -371,10 +369,10 @@ CREATE TABLE IF NOT EXISTS cmslite.{pdt_table}_scratch (
         "subtheme"      VARCHAR(2047),
         "topic"         VARCHAR(2047)
 );
-ALTER TABLE cmslite.{pdt_table}_scratch OWNER TO microservice;
-GRANT SELECT ON cmslite.{pdt_table}_scratch TO looker;
+ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
+GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
 
-INSERT INTO cmslite.{pdt_table}_scratch
+INSERT INTO cmslite.google_pdt_scratch
       SELECT gs.*,
           COALESCE(node_id,'') AS node_id,
           SPLIT_PART(page, '/',3) as page_urlhost,
@@ -400,11 +398,11 @@ INSERT INTO cmslite.{pdt_table}_scratch
                 'bcforhighschool.gov.bc.ca')
             OR site = 'sc-domain:engage.gov.bc.ca';
 
-ALTER TABLE cmslite.{pdt_table}_pdt RENAME TO {pdt_table}_old;
-ALTER TABLE cmslite.{pdt_table}_scratch RENAME TO {pdt_table}_pdt;
-DROP TABLE cmslite.{pdt_table}_old;
+ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
+ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;
+DROP TABLE cmslite.google_pdt_old;
 COMMIT;
-""".format(pdt_table=pdt_table, dbtable=dbtable)
+""".format(dbtable=dbtable)
 
 # Execute the query and log the outcome
 logger.debug(query)

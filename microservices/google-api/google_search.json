@@ -1,6 +1,6 @@
 {
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
-  "dbtable": "google.googlesearch_gdxdsd2518",
+  "dbtable": "google.googlesearch",
   "sites": [
     {
       "name": "sc-domain:engage.gov.bc.ca"

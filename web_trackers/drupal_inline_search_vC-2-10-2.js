@@ -22,16 +22,16 @@ if (window.location.pathname.split('/')[1] == 'search') {
     window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2])]);
   }
 
-  function decode_search(terms) {
-    decoded = decodeURIComponent(terms);
-    if (decoded.indexOf('advanced;q=')  >= 0) {
+  function decode_search(encoded_terms) {
+    terms = decodeURIComponent(encoded_terms);
+    if (terms.indexOf('advanced;q=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
-      decoded = decoded.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
+      terms = terms.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
       if (typeof window.location.pathname.split('/')[3] != 'undefined') {
-        decoded = decoded + " " + window.location.pathname.split('/')[3];
+        terms = terms + " " + window.location.pathname.split('/')[3];
       }
     }
-    decoded = decoded.split(" ");
-    return decoded;
+    terms = terms.split(" ");
+    return terms;
   }
 //<!-- Snowplow stop plowing -->

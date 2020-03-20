@@ -24,10 +24,10 @@ if (window.location.pathname.split('/')[1] == 'search') {
 
   function decode_search(terms) {
     decoded = decodeURIComponent(terms);
-    
-    if ( decoded.indexOf("advanced")  >= 0 ) {
-       // This will find the bs= parameter and get the terms into an array. It also splits the "exact phrase" into separate terms.                                  
-      decoded = decoded.split(';')[5].slice(3).replace(/"/g,"").split(' ');
+    if ( decoded.indexOf('advanced;q=')  >= 0 ) {
+      console.log(terms);
+       // This will find the search terms parameter and parses the terms into an array.                                  
+      decoded = decoded.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"").split(' ');
     }
     return decoded;
   }

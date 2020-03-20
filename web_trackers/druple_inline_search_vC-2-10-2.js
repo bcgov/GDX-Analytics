@@ -19,7 +19,7 @@ window.snowplow('enableLinkClickTracking');
 window.snowplow('trackPageView');
 
 if (window.location.pathname.split('/')[1] == 'search') {
-    window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2]])
+    window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2])]);
   }
 
   function decode_search(terms) {

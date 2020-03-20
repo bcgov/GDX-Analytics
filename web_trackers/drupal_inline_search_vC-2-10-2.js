@@ -27,6 +27,9 @@ if (window.location.pathname.split('/')[1] == 'search') {
     if (decoded.indexOf('advanced;q=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
       decoded = decoded.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"").split(" ");
+      if (typeof window.location.pathname.split('/')[3] != 'undefined') {
+        decoded.push(window.location.pathname.split('/')[3]);
+      }
     }
     return decoded;
   }

@@ -18,7 +18,7 @@ window.snowplow('enableActivityTracking', 30, 30); // Ping every 30 seconds afte
 window.snowplow('enableLinkClickTracking');
 window.snowplow('trackPageView');
 
-if (window.location.pathname.indexOf('search') >= 0) {
+if (window.location.pathname.split('/')[1] == 'search') {
     window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2])]);
   }
 

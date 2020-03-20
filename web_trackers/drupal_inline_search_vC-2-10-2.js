@@ -26,11 +26,12 @@ if (window.location.pathname.split('/')[1] == 'search') {
     decoded = decodeURIComponent(terms);
     if (decoded.indexOf('advanced;q=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
-      decoded = decoded.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"").split(" ");
+      decoded = decoded.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
       if (typeof window.location.pathname.split('/')[3] != 'undefined') {
         decoded.push(window.location.pathname.split('/')[3]);
       }
     }
+    decoded = decoded.split(" ");
     return decoded;
   }
 //<!-- Snowplow stop plowing -->

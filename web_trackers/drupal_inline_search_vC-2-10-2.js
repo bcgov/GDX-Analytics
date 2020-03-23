@@ -27,10 +27,11 @@ if (window.location.pathname.split('/')[1] == 'search') {
     if (terms.indexOf('bs=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
       terms = terms.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
-      if (typeof window.location.pathname.split('/')[3] != 'undefined') {
-        terms = terms + " " + window.location.pathname.split('/')[3];
-      }
     }
+    if (typeof window.location.pathname.split('/')[3] != 'undefined') {
+      terms = terms + " " + window.location.pathname.split('/')[3];
+    }
+    
     terms = terms.split(" ");
     return terms;
   }

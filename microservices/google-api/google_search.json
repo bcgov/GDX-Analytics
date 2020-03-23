@@ -52,6 +52,9 @@
       "name": "sc-domain:gov.bc.ca"
     },
     {
+      "name": "sc-domain:thrive.health"
+    },
+    {
       "name": "https://www.healthlinkbc.ca"
     }
   ]

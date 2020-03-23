@@ -24,7 +24,7 @@ if (window.location.pathname.split('/')[1] == 'search') {
 
   function decode_search(encoded_terms) {
     terms = decodeURIComponent(encoded_terms);
-    if (terms.indexOf('advanced;q=')  >= 0) {
+    if (terms.indexOf('bs=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
       terms = terms.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
       if (typeof window.location.pathname.split('/')[3] != 'undefined') {

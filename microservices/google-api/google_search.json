@@ -52,7 +52,8 @@
       "name": "sc-domain:gov.bc.ca"
     },
     {
-      "name": "sc-domain:thrive.health"
+      "name": "sc-domain:thrive.health",
+      "start_date_default": "2019-06-13"
     },
     {
       "name": "https://www.healthlinkbc.ca"

@@ -2,19 +2,41 @@
 
 This directory contains scripts, configs, and DDL files describing the Google API calling microservices implemented on the GDX-Analytics platform.
 
-### Google Search API Loader Microservice
+### Google Search Console API Loader Microservice
 
-The `google_search.py` script automates the loading of Google Search API data into S3 (as `.csv`) and Redshift (the `google.googlesearch` schema as defined by `google.googlesearch.sql`).
+The `google_search.py` script automates the loading of Google Search data into S3 (as `.csv`) and Redshift (the `google.googlesearch` schema as defined by `google.googlesearch.sql`) via the Google Search Console API.
 
-The accompanying `google_search.json` configuration file specifies the bucket, schema, the sites to query the Google Search API for, and optional start dates on those sites.
+The Google Search Console API documentation is here: https://developers.google.com/webmaster-tools/search-console-api-original. The latest data available from the Google Search API is from two days ago (relative to "_now_"). The Search Console API provides programmatic access to most of the functionality of Google Search Console.
 
-The microservice will begin loading Google data from the date specified in the configuration as `"start_date_default"`. If that is unspecified, it will attempt to load data from 18 months ago relative to the script runtime. If more recent data already exists; it will load data from the day after the last date that has already been loaded into Redshift.
+The Google Search Console is here: https://search.google.com/search-console. This console helps to visually identify which Properties you have verified owner access to and allows manual querying of slightly more recent data than the API provides programmatic access to (you can see data from 1 day ago, instead of from 2 days ago).
 
-It currently runs in batches of a maximum of 30 days at a time until 2 days ago (the latest available data from the Google Search API).
+To illustrate: on a Friday, the Search Console web interface would show search data on your property from a maximum range of search data from 18 months ago up until Thursday. However, the Search Console API would only be able to collect a maximum range of search data from 18 months ago up until Wednesday.
+
+The accompanying `google_search.json` configuration file specifies:
+ * the S3 bucket where the responses to API queries will be loaded into for storage;
+ * the database table where the files stored into S3 will later be loaded to;
+ * the Site URLs per property as defined in Search Console, such as "http://www.example.com/" (for a URL-prefix property) or "sc-domain:example.com" (for a Domain property); and
+ * optional query start dates per property.
+
+As mentioned, property types may be either _URL-prefixed_ or _Domain properties_. Domain properties delivery search query results for all subdomains and pages contained in that domain. URL-prefixed properties will only return search query results for pages prefixed with that URL. At the Domain property level, data aggregation performed at Google's end may have less detail than the equivalent URL-prefixed data, and as a result, you may observe data discrepancies when comparing one to the other.
+
+We adjust for this difference by preferentially loading data from the URL-prefixed property instead of the Domain property (where both exist) into a persistent derived table generated at the end of the `google_search.py` script.
+
+The microservice will begin loading Google Search data from the date specified in the configuration as `"start_date_default"`. If that is unspecified in the configuration, the script will attempt to load data from 18 months ago relative to the date when the script is run. If more recent data already exists in Redshift; it will load data from _the day after_ the most recent date that has already been loaded into Redshift up to a latest date of two-days ago (relative to the date on which the script is being run).
+
+When run, the script collects property data in batches of 30 days at a time before posting a data file into the S3 bucket specified in the config. If querying recent data, the file will contain 30 days or fewer. For instance: If you set this job up as a cron task, the data file for a given property will typically contain only one day worth of data.
 
 Log files are appended at the debug level into file called `google_search.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
 
 #### Configuration
+
+##### Credentials
+
+'credentials.dat' and 'credentials.json' are required to query data through the API.
+
+'credentials.dat' will be generated the first time this script runs after authenticating (you will be instructed on how to authenticate when this runs).
+
+'credentials.json' must be generated according to the instructions at https://developers.google.com/webmaster-tools/search-console-api-original/v3/how-tos/authorizing#APIKey. You must first have a project created at https://console.cloud.google.com/ and associate that project to use the "Google Search Console API".
 
 ##### Environment Variables
 
@@ -32,7 +54,7 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
 - `"bucket"`: a string to define the S3 bucket where CSV Google Search API query responses are stored.
 - `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are inserted to to after their creation.
 - `"sites"`: a JSON array containing objects defining a `"name"` and an optional `"start_date_default"`.
-  - `"name"`: the site URL to query the Google Search API on.
+  - `"name"`: the property URL-prefixed or Domain to query the Google Search API on.
   - `"start_date_default"`: an _optional_ key identifying where to begin queries from as a YYYY-MM-DD string. If excluded, the default behaviour is to look back to the earliest date that the Google Search API exposes, which is 16 months (scripted as 480 days).
 
 ```
@@ -42,6 +64,10 @@ The JSON configuration is loaded as an environmental variable defined as `GOOGLE
     "sites":[
         {
         "name":"https://www2.gov.bc.ca/"
+        },
+        {
+        "name":"sc-domain:gov.bc.ca",
+        "start_date_default":"2020-01-01"
         }
     ]
 }

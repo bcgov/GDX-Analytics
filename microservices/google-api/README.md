@@ -26,7 +26,7 @@ The microservice will begin loading Google Search data from the date specified i
 
 When run, the script collects property data in batches of 30 days at a time before posting a data file into the S3 bucket specified in the config. If querying recent data, the file will contain 30 days or fewer. For instance: If you set this job up as a cron task, the data file for a given property will typically contain only one day worth of data.
 
-Log files are appended at the debug level into file called `google_search.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
+Log files are appended at the debug level into file called `google_search.log` under a `logs/` folder which must be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
 
 #### Configuration
 
@@ -106,7 +106,7 @@ The Google Search API loader microservice requires the following environment var
 The JSON configuration is required, following a `-c` or `--conf` flag when running the `google_mybusiness.py` script. It follows this structure:
 
 - `"bucket"`: a string to define the S3 bucket where CSV Google My Business API query responses are stored.
-- `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are copied to to after their creation.
+- `"dbtable"`: a string to define the Redshift table where the S3 stored CSV files are copied to after their creation.
 - `"metrics"`: an list containing the list of metrics to pull from Google My Business
 - `"locations"`: an object that annotates account information from clients that have provided us access”
   - `"client_shortname"`: the client name to be recorded in the client column of the table for filtering. This shortname will also map the path where the `.csv` files loaded into AWS S3 as `'client/google_mybusiness_<client_shortname>/'`.
@@ -123,7 +123,7 @@ The JSON configuration is required, following a `-c` or `--conf` flag when runni
 
 The `google_directions.py` script automates the loading of Google MyBusiness Driving Directions insights reports into S3 (as a `.csv` file), which it then loads to Redshift. Create the logs directory before running if it does not already exist. The script requires a `JSON` config file as specifid in the "_Configuration_" section below. It also must be passed command line locations for Google Credentials files; a usage example is in the header comment in the script itself.
 
-Log files are appended at the debug level into file called `google_directions.log` under a `logs/` folder which much be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
+Log files are appended at the debug level into file called `google_directions.log` under a `logs/` folder which must be created manually. Info level logs are output to stdout. In the log file, events are logged with the format showing the log level, the function name, the timestamp with milliseconds, and the message: `INFO:__main__:2010-10-10 10:00:00,000:<log message here>`.
 
 #### Table
 

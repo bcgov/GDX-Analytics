@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS worbc.asset_downloads
+CREATE TABLE IF NOT EXISTS workbc.asset_downloads
 ( 
   "ip_address" VARCHAR(255) ENCODE ZSTD NOT NULL,
   "date_timestamp" timestamp without time zone ENCODE ZSTD,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS worbc.asset_downloads
   "browser_family" VARCHAR(255) ENCODE ZSTD,
   "browser_version" VARCHAR(255) ENCODE ZSTD,
   "referrer_source" VARCHAR(255) ENCODE ZSTD,
-  "referrer_medium" VARCHAR(255) ENCODE ZSTD,
+  "referrer_medium" VARCHAR(255) ENCODE ZSTD
 );
 
 GRANT SELECT ON workbc.asset_downloads TO "looker";

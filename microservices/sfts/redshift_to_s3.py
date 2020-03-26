@@ -201,13 +201,15 @@ if sql_parse_key:
     # pass the keyword_dict to the request query formatter
     request_query = request_query.format(**keyword_dict)
 
+nowtime = datetime.now().strftime('%Y%m%dT%H%M%S')
+
 # The UNLOAD query to support S3 loading direct from a Redshift query
 # ref: https://docs.aws.amazon.com/redshift/latest/dg/r_UNLOAD.html
 # This UNLOAD inserts into the S3 SOURCE path. Use s3_to_sfts.py to move these
 # SOURCE files into the SFTS, copying them to DESTINATION GOOD/BAD paths
 log_query = '''
 UNLOAD ('{request_query}')
-TO 's3://{bucket}/{source_prefix}/{object_prefix}_{start_date}_{end_date}_part'
+TO 's3://{bucket}/{source_prefix}/{object_prefix}_{start_date}_{end_date}_{nowtime}_part'
 credentials 'aws_access_key_id={aws_access_key_id};\
 aws_secret_access_key={aws_secret_access_key}'
 {header}
@@ -218,6 +220,7 @@ PARALLEL OFF
     source_prefix=source_prefix,
     object_prefix=object_prefix,
     start_date=start_date,
+    nowtime=nowtime,
     end_date=end_date,
     header='HEADER' if header else '',
     aws_access_key_id='{aws_access_key_id}',

@@ -9,6 +9,6 @@
   "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN",
   "extension": "",
   "sql_parse_key": "pmrp_date_range",
-  "start_date": "20200301",
-  "end_date": "20200305"
+  "start_date": "unset",
+  "end_date": "max"
 }

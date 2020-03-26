@@ -175,7 +175,7 @@ if start_date == 'unsent':
 
 # set end_date if not a YYYYMMDD value
 if any(end_date == pick for pick in ['min','max','unsent']):
-    if pick == 'unsent'
+    if pick == 'unsent':
         pick = 'max'
     end_date = get_date(pick)
 
@@ -205,7 +205,7 @@ if sql_parse_key:
 # ref: https://docs.aws.amazon.com/redshift/latest/dg/r_UNLOAD.html
 # This UNLOAD inserts into the S3 SOURCE path. Use s3_to_sfts.py to move these
 # SOURCE files into the SFTS, copying them to DESTINATION GOOD/BAD paths
-query = '''
+log_query = '''
 UNLOAD ('{request_query}')
 TO 's3://{bucket}/{source_prefix}/{object_prefix}_{start_date}_{end_date}_part'
 credentials 'aws_access_key_id={aws_access_key_id};\
@@ -217,14 +217,22 @@ PARALLEL OFF
     bucket=bucket,
     source_prefix=source_prefix,
     object_prefix=object_prefix,
+    start_date=start_date,
+    end_date=end_date,
     header='HEADER' if header else '',
+    aws_access_key_id='{aws_access_key_id}',
+    aws_secret_access_key='{aws_secret_access_key}')
+
+query = log_query.format(
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
 
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:
+            logger.debug("executing query")
             curs.execute(query)
+            logger.debug(log_query)
         except psycopg2.Error as e:
             logger.exception("psycopg2.Error:")
             logger.error(('UNLOAD transaction on %s failed.'
@@ -232,4 +240,4 @@ with psycopg2.connect(conn_string) as conn:
             sys.exit(1)
         else:
             logger.info('UNLOAD successful. Object prefix is %s/%s/%s_%s_%s',
-                        bucket,source_prefix,object_preix,start_date,end_date)
+                        bucket,source_prefix,object_prefix,start_date,end_date)

@@ -78,7 +78,7 @@ directory = config['directory']
 source_prefix = '{}/{}'.format(source,directory)
 
 destination = config['destination']
-good_prefix = '{}/good/{}'.format(
+good_prefix = '{}/good/{}/{}'.format(
     destination,config['source'],config['directory'])
 
 dml_file = config['dml']
@@ -124,16 +124,17 @@ def last_modified_object_key(bucket, prefix):
     # set up S3 connection
     client = boto3.client('s3')
     # extract the list of objects
-    list = client.list_objects_v2(Bucket=bucket, Prefix=good_prefix)
+    list = client.list_objects_v2(Bucket=bucket, Prefix=prefix)
 
     if list['IsTruncated']:
         logger.warning('The list of objects in: %s/%s was truncated.',
-                       bucket, good_prefix)
-    if len(list['Contents']) is 0:
-        logger.warning('No objects found in %s/%s', bucket, good_prefix)
+                       bucket, prefix)
+    if list['KeyCount'] is 0:
+        logger.warning('No objects found in %s/%s', bucket, prefix)
         return None
     else:
-        last_modified_sorter = lambda obj: int(obj['LastModified'].timestamp())
+        # https://stackoverflow.com/questions/45375999/how-to-download-the-latest-file-of-an-s3-bucket-using-boto3
+        last_modified_sorter = lambda obj: int(obj['LastModified'].strftime('%s'))
         objs = list['Contents']
         last_added = [obj['Key'] for obj in sorted(
             objs, key=last_modified_sorter, reverse=True)][0]
@@ -141,22 +142,23 @@ def last_modified_object_key(bucket, prefix):
 
 def unsent():
     # determine the start date
-    last_file = last_modified_object_key(bucket, prefix)
+    last_file = last_modified_object_key(bucket, good_prefix)
     # default start date to three days ago if no objects present
     if last_file is None:
         logger.debug("No previous files to extract start date key from")
         start_date = (date.today() - timedelta(days=3)).strftime('%Y%m%d')
     # extract a start date based on the end date of the last uploaded file
     else:
-        logger.debug("key of last added file is: %s", last_added)
-        last_added_end_date = last_added.split("_")[1].split("-")[1]
+        logger.debug("key of last added file is: %s", last_file)
+        # 3rd from last index on split contains the file's end date as YYYYMMDD
+        start_date = last_file.split("_")[-3]
         start_date = "{}".format(
-            (date.strptime(last_added_end_date,'%Y%m%d') + timedelta(days=1))
+            (datetime.strptime(start_date,'%Y%m%d') + timedelta(days=1))
             .strftime('%Y%m%d'))
     return start_date
 
 def get_date(pick):
-    query = (("SELECT to_char({}(date),''YYYYMMDD'') FROM "
+    query = (("SELECT to_char({}(date), 'YYYYMMDD') FROM "
               "google.google_mybusiness_servicebc_derived").format(pick))
     return return_query(query)
 
@@ -175,7 +177,7 @@ if start_date == 'unsent':
 
 # set end_date if not a YYYYMMDD value
 if any(end_date == pick for pick in ['min','max','unsent']):
-    if pick == 'unsent':
+    if end_date == 'unsent':
         pick = 'max'
     end_date = get_date(pick)
 

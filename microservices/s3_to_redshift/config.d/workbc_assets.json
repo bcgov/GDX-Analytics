@@ -5,7 +5,7 @@
     "directory": "assets_workbc",
     "doc": "workbc_analytics.*",
     "dbtable": "workbc.asset_downloads",
-    "column_count": 15,
+    "column_count": 16,
     "columns": [
       "ip",
       "id",
@@ -16,6 +16,7 @@
       "return_size",
       "referrer",
       "user_agent_http_request_header",
+      "proxy",
       "os_family",
       "os_version",
       "browser_family",
@@ -56,6 +57,10 @@
     "access_log_parse": {
       "regexs": [
         {
+          "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$",
+          "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|\\10"
+        },
+        {
           "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\"$",
           "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|"
         }
@@ -67,7 +72,10 @@
       "linefeed": "\r\n",
       "ua_parse": {},
       "referrer_parse":{
-        "curr_url": "https://www2.gov.bc.ca"
+        "curr_url": "https://www.workbc.ca"
       }
-    }
+    },
+    "schema_name": "workbc",
+    "asset_host": "www.workbc.ca",
+    "asset_source": "WorkBC"
 }

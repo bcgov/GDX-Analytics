@@ -74,5 +74,8 @@
       "referrer_parse":{
         "curr_url": "https://www2.gov.bc.ca"
       }
-    }
+    },
+    "schema_name": "cmslite",
+    "asset_host": "www2.gov.bc.ca",
+    "asset_source": "CMSLite"
 }

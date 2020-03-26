@@ -145,7 +145,7 @@ def unsent():
     # default start date to three days ago if no objects present
     if last_file is None:
         logger.debug("No previous files to extract start date key from")
-        start_date = date.today() - timedelta(days=3)).strftime('%Y%m%d')
+        start_date = (date.today() - timedelta(days=3)).strftime('%Y%m%d')
     # extract a start date based on the end date of the last uploaded file
     else:
         logger.debug("key of last added file is: %s", last_added)

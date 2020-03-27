@@ -1,6 +1,9 @@
 {
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
-  "dbtable": "google.locations",
+  "source": "client",
+  "destination": "processed",
+  "directory": "google_mybusiness/gdxdsd2333",
+  "dbtable": "google.locations_gdxdsd2333",
   "metrics": [
     "VIEWS_SEARCH",
     "VIEWS_MAPS",
@@ -19,10 +22,6 @@
     {
       "client_shortname": "servicebc",
       "name": "Service BC Locations",
-      "names_replacement": [
-        "Service BC Centre ",
-        ""
-      ],
       "id": 5448030039,
       "start_date": "",
       "end_date": ""

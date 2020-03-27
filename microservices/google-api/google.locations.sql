@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS google.locations;
-CREATE TABLE IF NOT EXISTS google.locations (
+DROP TABLE IF EXISTS google.locations_gdxdsd2333;
+CREATE TABLE IF NOT EXISTS google.locations_gdxdsd2333 (
   actions_driving_directions   INTEGER,
   actions_phone   INTEGER,
   actions_website   INTEGER,
@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS google.locations (
   client   VARCHAR(255)    ENCODE ZSTD,
   date   DATE
 );
-ALTER TABLE google.locations OWNER TO microservice;
-GRANT SELECT ON TABLE google.locations TO LOOKER;
+ALTER TABLE google.locations_gdxdsd2333 OWNER TO microservice;
+GRANT SELECT ON TABLE google.locations_gdxdsd2333 TO LOOKER;

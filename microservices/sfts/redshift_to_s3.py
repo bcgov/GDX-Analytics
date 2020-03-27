@@ -181,6 +181,12 @@ if any(end_date == pick for pick in ['min','max','unsent']):
         pick = 'max'
     end_date = get_date(pick)
 
+if datetime.strptime(start_date,'%Y%m%d') > datetime.strptime(end_date,'%Y%m%d'):
+    logger.info(
+        'start_date: %s is greater than end_date: %s, giving up.',
+        start_date, end_date)
+    sys.exit(1)
+
 # the _substantive_ query, one that users expect to see as output in S3.
 # TODO: MAKE AS CONFIG
 request_query = open('dml/{}'.format(dml_file), 'r').read()

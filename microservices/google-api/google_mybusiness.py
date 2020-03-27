@@ -430,8 +430,19 @@ for account in validated_accounts:
                         "Loading failed {0} with error:\n{1}"
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
+                    movefile = destination + "/bad/" + object_key
                 else:
                     logger.info("".join((
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
+                    movefile = destination + "/good/" + object_key
+
+        # copy the object to the S3 outfile (processed/good/ or processed/bad/)
+        try:
+            s3.copy_object(
+                Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+                CopySource="sp-ca-bc-gov-131565110619-12-microservices/{}"
+                .format(object_key), Key=movefile)
+        except boto3.exceptions.ClientError:
+            logger.exception("S3 transfer to %s failed", movefile)

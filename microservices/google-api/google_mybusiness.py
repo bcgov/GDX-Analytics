@@ -263,7 +263,6 @@ for account in validated_accounts:
 
         # encode as ASCII for dataframe
         location_uri = loc['name'].encode('ascii', 'ignore')
-        location_name = loc['locationName'].replace(find_in_name, rep_in_name)
 
         # if a start_date is defined in the config file, use that date
         start_date = account['start_date']

@@ -91,6 +91,10 @@ formatter = logging.Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+# Create a folder for the logfiles.
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
 # create file handler for logs at the DEBUG level
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), 'a',

@@ -400,7 +400,8 @@ for account in validated_accounts:
         object_key_path = '{}/{}/{}'.format(
             config_source, config_directory, account['client_shortname'])
 
-        outfile = 'gmb_{0}_{1}_{2}.csv'.format(location_id,start_date,end_date)
+        outfile = 'gmb_{0}_{1}_{2}.csv'.format(
+            location_name.replace(' ', '-'),start_date,end_date)
         object_key = object_key_path + outfile
 
         resource.Bucket(config_bucket).put_object(

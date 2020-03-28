@@ -397,7 +397,7 @@ for account in validated_accounts:
         df.to_csv(csv_buffer, index=True, header=True, sep='|')
 
         # Set up the S3 path to write the csv buffer to
-        object_key_path = '{}/{}/{}'.format(
+        object_key_path = '{}/{}/{}/'.format(
             config_source, config_directory, account['client_shortname'])
 
         outfile = 'gmb_{0}_{1}_{2}.csv'.format(

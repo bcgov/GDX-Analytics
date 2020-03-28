@@ -435,13 +435,13 @@ for account in validated_accounts:
                         "Loading failed {0} with error:\n{1}"
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
-                    movefile = destination + "/bad/" + object_key
+                    movefile = config_destination + "/bad/" + object_key
                 else:
                     logger.info("".join((
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
-                    movefile = destination + "/good/" + object_key
+                    movefile = config_destination + "/good/" + object_key
 
         # copy the object to the S3 outfile (processed/good/ or processed/bad/)
         try:

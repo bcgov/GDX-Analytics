@@ -10,16 +10,25 @@
 	"type": "object",
 	"properties": {
 		"organization": {
-			"type": "string",
-			"maxLength": 255
+			type": "array",
+                        "items": {
+                                "type": "string",
+                                "maxLength": 255
+                        }
 		},
 		"status": {
-			"type": "string",
-			"maxLength": 255
+			type": "array",
+                        "items": {
+                                "type": "string",
+                                "maxLength": 255
+                        }
 		},
-		"application_type": {
-			"type": "string",
-			"maxLength": 255
+		"applicant_type": {
+			type": "array",
+                        "items": {
+                                "type": "string",
+                                "maxLength": 255
+                        }
 		},
 		"start_date_start": {
 			"type": "string",

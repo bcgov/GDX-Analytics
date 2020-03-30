@@ -2,8 +2,8 @@
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "source": "client",
   "destination": "processed",
-  "directory": "google_mybusiness/gdxdsd2333",
-  "dbtable": "google.locations_gdxdsd2333",
+  "directory": "google_mybusiness",
+  "dbtable": "google.locations",
   "metrics": [
     "VIEWS_SEARCH",
     "VIEWS_MAPS",

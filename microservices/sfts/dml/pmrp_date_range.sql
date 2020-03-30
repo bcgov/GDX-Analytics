@@ -1,6 +1,6 @@
 SELECT * FROM
 (SELECT
-	DATE(locations.date ) AS "locations.date_date",
+	locations.date AS "locations.date_date",
 	locations.location  AS "locations.location",
 	locations.office_id  AS "locations.office_id",
 	locations.office_site  AS "locations.office_site",
@@ -17,7 +17,8 @@ SELECT * FROM
 	COALESCE(SUM(locations.photos_count_merchant ), 0) AS "locations.photos_count_merchant",
 	COALESCE(SUM(locations.photos_views_customers ), 0) AS "locations.photos_views_customers",
 	COALESCE(SUM(locations.photos_views_merchant ), 0) AS "locations.photos_views_merchant"
-FROM google.google_mybusiness_servicebc_derived  AS locations WHERE locations.client = ''servicebc''
+FROM google.google_mybusiness_servicebc_derived  AS locations
+  WHERE locations.client = ''servicebc''
+  AND locations.date BETWEEN {pmrp_date_range}
 GROUP BY 1,2,3,4,5
-ORDER BY 1 DESC
-LIMIT 50)
+)

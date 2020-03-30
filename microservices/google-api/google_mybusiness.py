@@ -91,6 +91,10 @@ formatter = logging.Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+# Create a folder for the logfiles.
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
 # create file handler for logs at the DEBUG level
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
 handler = logging.FileHandler(os.path.join('logs', log_filename), 'a',
@@ -122,13 +126,16 @@ with open(CONFIG) as f:
     config = json.load(f)
 
 config_bucket = config['bucket']
+config_source = config['source']
+config_destination = config['destination']
+config_directory = config['directory']
 config_dbtable = config['dbtable']
 config_metrics = config['metrics']
 config_locations = config['locations']
 
 
 # set up the S3 resource
-client = boto3.client('s3')
+s3 = boto3.client('s3')
 resource = boto3.resource('s3')
 
 
@@ -229,8 +236,7 @@ for loc in config_locations:
                 'id': item['accountNumber'],
                 'client_shortname': loc['client_shortname'],
                 'start_date': loc['start_date'],
-                'end_date': loc['end_date'],
-                'names_replacement': loc['names_replacement']}
+                'end_date': loc['end_date']}
                  for item
                  in accounts
                  if item['accountNumber'] == str(loc['id'])))
@@ -254,13 +260,10 @@ for account in validated_accounts:
 
         logger.debug("Begin processing on location: {}"
                      .format(loc['locationName']))
-        # substring replacement for location names from config file
-        find_in_name = account['names_replacement'][0]
-        rep_in_name = account['names_replacement'][1]
 
         # encode as ASCII for dataframe
         location_uri = loc['name'].encode('ascii', 'ignore')
-        location_name = loc['locationName'].replace(find_in_name, rep_in_name)
+        location_name = loc['locationName']
 
         # if a start_date is defined in the config file, use that date
         start_date = account['start_date']
@@ -298,7 +301,6 @@ for account in validated_accounts:
         # if an end_date is defined in the config file, use that date
         end_date = account['end_date']
         if end_date == '':
-
             end_date = date_api_upper_limit
         if end_date > date_api_upper_limit:
             logger.warning("The end_date for location {} is more recent than 2\
@@ -395,13 +397,11 @@ for account in validated_accounts:
         df.to_csv(csv_buffer, index=True, header=True, sep='|')
 
         # Set up the S3 path to write the csv buffer to
-        object_key_path = 'client/google_mybusiness_{}/'.format(
-            account['client_shortname'])
+        object_key_path = '{}/{}/{}/'.format(
+            config_source, config_directory, account['client_shortname'])
 
         outfile = 'gmb_{0}_{1}_{2}.csv'.format(
-            location_name.replace(' ', '-'),
-            start_date,
-            end_date)
+            location_name.replace(' ', '-'),start_date,end_date)
         object_key = object_key_path + outfile
 
         resource.Bucket(config_bucket).put_object(
@@ -409,25 +409,20 @@ for account in validated_accounts:
             Body=csv_buffer.getvalue())
         logger.debug('PUT_OBJECT: {0}:{1}'.format(outfile, config_bucket))
         object_summary = resource.ObjectSummary(config_bucket, object_key)
-        logger.debug('OBJECT LOADED ON: {0} \nOBJECT SIZE: {1}'
+        logger.debug('OBJECT LOADED ON: {0} OBJECT SIZE: {1}'
                      .format(object_summary.last_modified,
                              object_summary.size))
 
         # Prepare the Redshift COPY command.
-        query = (
-            "copy " + config_dbtable + " FROM 's3://" + config_bucket
-            + "/" + object_key + "' CREDENTIALS 'aws_access_key_id="
-            + os.environ['AWS_ACCESS_KEY_ID'] + ";aws_secret_access_key="
-            + os.environ['AWS_SECRET_ACCESS_KEY']
-            + ("' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER"
-                + " '|' NULL AS '-' ESCAPE;"))
-        logquery = (
-            "copy " + config_dbtable + " FROM 's3://" + config_bucket
-            + "/" + object_key + "' CREDENTIALS 'aws_access_key_id="
-            + 'AWS_ACCESS_KEY_ID' + ";aws_secret_access_key="
-            + 'AWS_SECRET_ACCESS_KEY' + (
-                "' IGNOREHEADER AS 1 MAXERROR"
-                + " AS 0 DELIMITER '|' NULL AS '-' ESCAPE;"))
+        logquery = (("copy {} FROM 's3://{}/{}' CREDENTIALS "
+                     "'aws_access_key_id={};aws_secret_access_key={}' "
+                     "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
+                     "NULL AS '-' ESCAPE;").format(
+                         config_dbtable, config_bucket,object_key,
+                         '{AWS_ACCESS_KEY_ID}','{AWS_SECRET_ACCESS_KEY}'))
+        query = logquery.format(
+            AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
+            AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])
         logger.debug(logquery)
 
         # Connect to Redshift and execute the query.
@@ -440,8 +435,19 @@ for account in validated_accounts:
                         "Loading failed {0} with error:\n{1}"
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
+                    movefile = config_destination + "/bad/" + object_key
                 else:
                     logger.info("".join((
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
+                    movefile = config_destination + "/good/" + object_key
+
+        # copy the object to the S3 outfile (processed/good/ or processed/bad/)
+        try:
+            s3.copy_object(
+                Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+                CopySource="sp-ca-bc-gov-131565110619-12-microservices/{}"
+                .format(object_key), Key=movefile)
+        except boto3.exceptions.ClientError:
+            logger.exception("S3 transfer to %s failed", movefile)

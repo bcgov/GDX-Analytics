@@ -1,7 +1,7 @@
 {
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "source": "client",
-  "directory": "pmrp_gdx/example",
+  "directory": "pmrp_gdx/pmrp_all",
   "destination": "processed",
   "object_prefix": "pmrp",
   "dml": "pmrp_date_range.sql",
@@ -9,6 +9,6 @@
   "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN",
   "extension": ".csv",
   "sql_parse_key": "pmrp_date_range",
-  "start_date": "unsent",
+  "start_date": "min",
   "end_date": "max"
 }

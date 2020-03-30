@@ -7,8 +7,8 @@
   "dml": "pmrp_date_range.sql",
   "header": false,
   "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN",
-  "extension": "",
+  "extension": ".csv",
   "sql_parse_key": "pmrp_date_range",
-  "start_date": "unset",
+  "start_date": "unsent",
   "end_date": "max"
 }

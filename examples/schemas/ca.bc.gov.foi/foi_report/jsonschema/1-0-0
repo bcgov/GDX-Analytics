@@ -1,0 +1,46 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for tracking use of FOI reporting form",
+	"self": {
+		"vendor": "ca.bc.gov.foi",
+		"name": "foi_report",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"organization": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"status": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"application_type": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"start_date_start": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"start_date_end": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"due_date_start": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"due_date_end": {
+			"type": "string",
+			"maxLength": 255
+		},
+		"file_format": {
+			"type": "string",
+			"maxLength": 255
+		}
+	},
+	"additionalProperties": false
+}

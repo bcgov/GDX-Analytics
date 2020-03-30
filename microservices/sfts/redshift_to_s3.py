@@ -178,8 +178,8 @@ if start_date == 'unsent':
 # set end_date if not a YYYYMMDD value
 if any(end_date == pick for pick in ['min','max','unsent']):
     if end_date == 'unsent':
-        pick = 'max'
-    end_date = get_date(pick)
+        end_date = 'max'
+    end_date = get_date(end_date)
 
 if datetime.strptime(start_date,'%Y%m%d') > datetime.strptime(end_date,'%Y%m%d'):
     logger.info(

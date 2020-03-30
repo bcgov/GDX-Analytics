@@ -10,21 +10,21 @@
 	"type": "object",
 	"properties": {
 		"organization": {
-			type": "array",
+			"type": "array",
                         "items": {
                                 "type": "string",
                                 "maxLength": 255
                         }
 		},
 		"status": {
-			type": "array",
+			"type": "array",
                         "items": {
                                 "type": "string",
                                 "maxLength": 255
                         }
 		},
 		"applicant_type": {
-			type": "array",
+			"type": "array",
                         "items": {
                                 "type": "string",
                                 "maxLength": 255

@@ -42,13 +42,6 @@
       "start_date_default":"2020-01-20"
     },
     {
-      "name": "http://www.bccdc.ca/"
-    },
-    {
-      "name": "http://covid-19.bccdc.ca/",
-      "start_date_default":"2020-03-17"
-    },
-    {
       "name": "sc-domain:gov.bc.ca"
     },
     {

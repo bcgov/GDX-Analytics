@@ -12,44 +12,45 @@
 		"organization": {
 			"type": "array",
                         "items": {
-                                "type": "string",
+                                "type": ["string","null"],
                                 "maxLength": 255
                         }
 		},
 		"status": {
 			"type": "array",
                         "items": {
-                                "type": "string",
+                                "type": ["string","null"],
                                 "maxLength": 255
                         }
 		},
 		"applicant_type": {
 			"type": "array",
                         "items": {
-                                "type": "string",
+                                "type": ["string","null"],
                                 "maxLength": 255
                         }
 		},
 		"start_date_start": {
-			"type": "string",
+			"type": ["string","null"],
 			"maxLength": 255
 		},
 		"start_date_end": {
-			"type": "string",
+			"type": ["string","null"],
 			"maxLength": 255
 		},
 		"due_date_start": {
-			"type": "string",
+			"type": ["string","null"],
 			"maxLength": 255
 		},
 		"due_date_end": {
-			"type": "string",
+			"type": ["string","null"],
 			"maxLength": 255
 		},
 		"file_format": {
-			"type": "string",
+			"type": ["string","null"],
 			"maxLength": 255
 		}
 	},
+	"required": ["organization","status","applicant_type","start_date_start","start_date_end","due_date_start","due_date_end","file_format"],
 	"additionalProperties": false
 }

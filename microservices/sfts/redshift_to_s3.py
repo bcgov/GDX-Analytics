@@ -168,7 +168,7 @@ end_date   = max_date() if 'end_date'   not in config else config['end_date']
 
 # set start_date if not a YYYYMMDD value
 if any(start_date == pick for pick in ['min','max']):
-    start_date = get_date(pick)
+    start_date = get_date(start_date)
 
 # determine unsent value for start date
 if start_date == 'unsent':

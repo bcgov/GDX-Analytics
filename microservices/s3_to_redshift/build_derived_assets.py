@@ -21,6 +21,7 @@
 import os
 import psycopg2
 import logging
+import sys
 import json  # to read json config files
 
 # Logging has two handlers: INFO to stdout and DEBUG to a file handler

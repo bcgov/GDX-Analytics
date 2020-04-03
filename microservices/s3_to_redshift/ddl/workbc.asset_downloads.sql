@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS workbc.asset_downloads
 ( 
-  "ip_address" VARCHAR(255) ENCODE ZSTD NOT NULL,
+  "ip" VARCHAR(255) ENCODE ZSTD NOT NULL,
   "date_timestamp" VARCHAR(255)  ENCODE ZSTD,
   "request_string" VARCHAR(4095) ENCODE ZSTD,
   "status_code" DOUBLE PRECISION ENCODE ZSTD,

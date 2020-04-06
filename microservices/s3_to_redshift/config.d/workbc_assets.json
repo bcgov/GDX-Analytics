@@ -2,9 +2,9 @@
     "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
     "source": "client",
     "destination": "processed",
-    "directory": "cmslite_gdx",
-    "doc": "gov_assets.*",
-    "dbtable": "cmslite.asset_downloads",
+    "directory": "assets_workbc",
+    "doc": "workbc_analytics.*",
+    "dbtable": "workbc.asset_downloads",
     "column_count": 16,
     "columns": [
       "ip",
@@ -72,10 +72,10 @@
       "linefeed": "\r\n",
       "ua_parse": {},
       "referrer_parse":{
-        "curr_url": "https://www2.gov.bc.ca"
+        "curr_url": "https://www.workbc.ca"
       }
     },
-    "schema_name": "cmslite",
-    "asset_host": "www2.gov.bc.ca",
-    "asset_source": "CMSLite"
+    "schema_name": "workbc",
+    "asset_host": "www.workbc.ca",
+    "asset_source": "WorkBC"
 }

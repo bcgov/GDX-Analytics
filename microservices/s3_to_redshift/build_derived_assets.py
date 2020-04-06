@@ -1,5 +1,5 @@
 ###################################################################
-# Script Name   : build_derived_gov_assets.py
+# Script Name   : build_derived_assets.py
 #
 # Description   : Creates asset_downloads_derived, which is a
 #               : persistent derived table (PDT)
@@ -11,16 +11,18 @@
 #               : export pgpass=<<database_password>>
 #
 #
-# Usage         : python build_derived_gov_assets.py
+# Usage         : python build_derived_assets.py
 #
 #               : This microservice can be run after asset_data_to_redshift.py
-#               : has run using the gov_assets.json config file and updated the
-#               : cmslite.asset_downloads table.
+#               : has run using the *_assets.json config file and updated the
+#               : {{schema}}.asset_downloads table.
 #
 
 import os
 import psycopg2
 import logging
+import sys
+import json  # to read json config files
 
 # Logging has two handlers: INFO to stdout and DEBUG to a file handler
 logger = logging.getLogger(__name__)
@@ -43,6 +45,24 @@ formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+# check that configuration file was passed as argument
+if (len(sys.argv) != 2):
+    print('Usage: python build_derived_assets.py config.json')
+    sys.exit(1)
+configfile = sys.argv[1]
+# confirm that the file exists
+if os.path.isfile(configfile) is False:
+    print("Invalid file name {}".format(configfile))
+    sys.exit(1)
+# open the confifile for reading
+with open(configfile) as f:
+    data = json.load(f)
+
+schema_name = data['schema_name']
+asset_host = data['asset_host']
+asset_source = data['asset_source']
+
+
 conn_string = """
 dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 """.format(dbname='snowplow',
@@ -53,7 +73,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 
 query = '''
     BEGIN;
-    SET SEARCH_PATH TO cmslite;
+    SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
     SELECT 'https://www2.gov.bc.ca' ||
@@ -67,14 +87,14 @@ query = '''
     assets.status_code,
     assets.user_agent_http_request_header,
     assets.request_string,
-    'www2.gov.bc.ca' as asset_host,
-    'CMSLite' as asset_source,
+    '{asset_host}' as asset_host,
+    '{asset_source}' as asset_source,
     CASE
         WHEN assets.referrer is NULL THEN TRUE
         ELSE FALSE
         END AS direct_download,
     CASE
-        WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> 'www2.gov.bc.ca' THEN TRUE
+        WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{asset_host}' THEN TRUE
         ELSE FALSE
         END AS offsite_download,
     CASE
@@ -137,11 +157,11 @@ query = '''
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) 
         ELSE ''
         END AS referrer_urlquery
-    FROM cmslite.asset_downloads AS assets;
+    FROM {schema_name}.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
-'''
+'''.format(schema_name=schema_name, asset_host=asset_host, asset_source=asset_source)
 
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

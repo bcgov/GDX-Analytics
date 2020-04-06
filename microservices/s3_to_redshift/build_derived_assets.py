@@ -61,6 +61,7 @@ with open(configfile) as f:
 schema_name = data['schema_name']
 asset_host = data['asset_host']
 asset_source = data['asset_source']
+asset_url = data['asset_url_scheme_and_authority'])
 
 
 conn_string = """
@@ -76,7 +77,7 @@ query = '''
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
-    SELECT 'https://www2.gov.bc.ca' ||
+    SELECT '{asset_url_scheme_and_authority}' ||
         SPLIT_PART(assets.request_string, ' ',2)
         AS asset_url,
     assets.date_timestamp::TIMESTAMP,

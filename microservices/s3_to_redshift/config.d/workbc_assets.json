@@ -70,12 +70,10 @@
         "replace": "%7C"
       },
       "linefeed": "\r\n",
-      "ua_parse": {},
-      "referrer_parse":{
-        "curr_url": "https://www.workbc.ca"
-      }
+      "ua_parse": {}
     },
     "schema_name": "workbc",
     "asset_host": "www.workbc.ca",
-    "asset_source": "WorkBC"
+    "asset_source": "WorkBC",
+    "asset_scheme_and_authority": "https://www.workbc.ca"
 }

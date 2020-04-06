@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "GovBC-GDX-cloudwatch-event-parser"
+s3_prefix = "GovBC-GDX-cloudwatch-event-parser"
+region = "ca-central-1"
+profile = "mfa"
+capabilities = "CAPABILITY_IAM"

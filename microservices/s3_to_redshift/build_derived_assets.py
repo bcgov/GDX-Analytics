@@ -77,7 +77,7 @@ query = '''
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
     SELECT 'https://www2.gov.bc.ca' ||
-        replace(replace(replace(assets.request_string,'GET ',''), ' HTTP/1.0',''), ' HTTP/1.1','')
+        SPLIT_PART(assets.request_string, ' ',2)
         AS asset_url,
     assets.date_timestamp::TIMESTAMP,
     assets.ip AS ip_address,

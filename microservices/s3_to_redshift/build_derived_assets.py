@@ -77,7 +77,7 @@ query = '''
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
-    SELECT '{asset_url_scheme_and_authority}' ||
+    SELECT '{asset_scheme_and_authority}' ||
         SPLIT_PART(assets.request_string, ' ',2)
         AS asset_url,
     assets.date_timestamp::TIMESTAMP,

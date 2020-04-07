@@ -61,6 +61,7 @@ with open(configfile) as f:
 schema_name = data['schema_name']
 asset_host = data['asset_host']
 asset_source = data['asset_source']
+asset_scheme_and_authority = data['asset_scheme_and_authority']
 
 
 conn_string = """
@@ -76,8 +77,8 @@ query = '''
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
-    SELECT 'https://www2.gov.bc.ca' ||
-        replace(replace(replace(assets.request_string,'GET ',''), ' HTTP/1.0',''), ' HTTP/1.1','')
+    SELECT '{asset_scheme_and_authority}' ||
+        SPLIT_PART(assets.request_string, ' ',2)
         AS asset_url,
     assets.date_timestamp::TIMESTAMP,
     assets.ip AS ip_address,
@@ -94,7 +95,8 @@ query = '''
         ELSE FALSE
         END AS direct_download,
     CASE
-        WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{asset_host}' THEN TRUE
+        WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{asset_host}'
+        THEN TRUE
         ELSE FALSE
         END AS offsite_download,
     CASE
@@ -154,14 +156,17 @@ query = '''
         END AS referrer_urlpath,
     CASE
         WHEN POSITION ('?' IN referrer) > 0
-        THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1) 
+        THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
         ELSE ''
         END AS referrer_urlquery
     FROM {schema_name}.asset_downloads AS assets;
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
-'''.format(schema_name=schema_name, asset_host=asset_host, asset_source=asset_source)
+'''.format(schema_name=schema_name,
+           asset_scheme_and_authority=asset_scheme_and_authority,
+           asset_host=asset_host,
+           asset_source=asset_source)
 
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

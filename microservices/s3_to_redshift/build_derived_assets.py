@@ -61,7 +61,7 @@ with open(configfile) as f:
 schema_name = data['schema_name']
 asset_host = data['asset_host']
 asset_source = data['asset_source']
-asset_url = data['asset_url_scheme_and_authority'])
+asset_url = data['asset_url_scheme_and_authority']
 
 
 conn_string = """

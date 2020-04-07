@@ -235,9 +235,7 @@ for object_summary in objects_to_process:
                     # Parse user_agent and referrer strings into lists
                     parsed_ua = user_agent_parser.Parse(user_agent)
                     parsed_referrer_url = Referer(referrer_url,
-                                                  data['access_log_parse']
-                                                  ['referrer_parse']
-                                                  ['curr_url'])
+                                                  data['asset_scheme_and_authority'])
 
                     # Add OS family and version to user agent string
                     ua_string = '|' + parsed_ua['os']['family']

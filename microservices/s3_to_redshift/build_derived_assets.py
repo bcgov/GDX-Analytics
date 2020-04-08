@@ -92,9 +92,10 @@ query = '''
             '([^\/]+\.[A-Za-z0-9]+)$'
         ) AS asset_file,
     CASE 
-    WHEN SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(asset_url, '?', 1), '#', 1), '(.aspx)$'), asset_host, 2) LIKE '%.%'
-    THEN REGEXP_SUBSTR(SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(asset_url, '?', 1), '#', 1), '(.aspx)$'), asset_host, 2), '([^\.]+$)')
-    ELSE NULL END as test_file_extension
+        WHEN SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(asset_url, '?', 1), '#', 1), '(.aspx)$'), asset_host, 2) LIKE '%.%'
+        THEN REGEXP_SUBSTR(SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(asset_url, '?', 1), '#', 1), '(.aspx)$'), asset_host, 2), '([^\.]+$)')
+        ELSE NULL 
+    END AS asset_ext,
     assets.user_agent_http_request_header,
     assets.request_string,
     '{asset_host}' as asset_host,

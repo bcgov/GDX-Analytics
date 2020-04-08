@@ -93,7 +93,7 @@ query = '''
         ) AS asset_file,
     CASE 
         WHEN SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(asset_url, '?', 1), '(.aspx)$'), '{asset_host}', 2) LIKE '%.%'
-        THEN REGEXP_SUBSTR(SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(asset_url, '?', 1), '(.aspx)$'), asset_host, 2), '([^\.]+$)')
+        THEN REGEXP_SUBSTR(SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(asset_url, '?', 1), '(.aspx)$'), '{asset_host}', 2), '([^\.]+$)')
         ELSE NULL 
         END as asset_ext,
     assets.user_agent_http_request_header,

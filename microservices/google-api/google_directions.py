@@ -72,6 +72,7 @@ from apiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
+import lib.logs as log
 
 
 # Ctrl+C
@@ -82,24 +83,7 @@ def signal_handler(signal, frame):
 
 # Set up logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# create console handler for logs at the INFO level
-# This will be emailed when the cron task runs; formatted to give messages only
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# create file handler for logs at the DEBUG level
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename), 'a',
-                              encoding=None, delay='true')
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(levelname)s:%(name)s:%(asctime)s:%(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+log.setup()
 
 
 # Command line arguments

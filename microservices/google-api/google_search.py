@@ -1,3 +1,4 @@
+"""Google Search Console API Loader Script"""
 ###################################################################
 # Script Name   : google_search.py
 #
@@ -55,58 +56,42 @@
 import re
 from datetime import date, timedelta
 from time import sleep
-import httplib2
 import json
 import argparse
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.file import Storage
-from oauth2client import tools
-from apiclient.discovery import build
-import psycopg2  # For Amazon Redshift IO
-import boto3     # For Amazon S3 IO
 import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
-
-# set up logging
 import logging
+import boto3     # For Amazon S3 IO
+import httplib2
+from oauth2client.client import HttpAccessTokenRefreshError
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.file import Storage
+from oauth2client import tools
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError as GoogleHttpError
+import psycopg2  # For Amazon Redshift IO
+import lib.logs as log
+
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# create stdout handler for logs at the INFO level
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# create file handler for logs at the DEBUG level
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
-                              encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+log.setup()
 
 
-# Check for a sites last loaded date in Redshift
-def last_loaded(site_name):
+def last_loaded(s):
+    """Check for a sites last loaded date in Redshift"""
     # Load the Redshift connection
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
-    query = ("SELECT MAX(DATE) "
-             "FROM google.googlesearch "
-             "WHERE site = '{0}'").format(site_name)
-    cursor.execute(query)
+    q = f"SELECT MAX(DATE) FROM google.googlesearch WHERE site = '{s}'"
+    cursor.execute(q)
     # get the last loaded date
-    last_loaded_date = (cursor.fetchall())[0][0]
+    lld = (cursor.fetchall())[0][0]
     # close the redshift connection
     cursor.close()
     con.commit()
     con.close()
-    return last_loaded_date
+    return lld
 
 
 # the latest available Google API data is two less than the query date (today)
@@ -125,13 +110,13 @@ client = boto3.client('s3')
 resource = boto3.resource('s3')
 
 # set up the Redshift connection
-conn_string = """
-dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
-""".format(dbname='snowplow',
-           host='redshift.analytics.gov.bc.ca',
-           port='5439',
-           user=os.environ['pguser'],
-           password=os.environ['pgpass'])
+dbname = 'snowplow'
+host = 'redshift.analytics.gov.bc.ca'
+port = '5439'
+user = os.environ['pguser']
+password = os.environ['pgpass']
+conn_string = (f"dbname='{dbname}' host='{host}' port='{port}' "
+               f"user='{user}' password={password}")
 
 # each site in the config list of sites gets processed in this loop
 for site_item in sites:
@@ -180,14 +165,16 @@ for site_item in sites:
 
         # set the file name that will be written to S3
         site_clean = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
-        outfile = "googlesearch-" + site_clean + "-" + str(start_dt) + "-" + str(end_dt) + ".csv"
-        object_key = 'client/google_gdx/{0}'.format(outfile)
+        outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
+        outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
+        object_key = f"client/google_gdx/{outfile}"
 
         # calling the Google API. If credentials.dat is not yet generated
         # then brower based Google Account validation will be required
         API_NAME = 'searchconsole'
         API_VERSION = 'v1'
-        DISCOVERY_URI = 'https://www.googleapis.com/discovery/v1/apis/webmasters/v3/rest'
+        DISCOVERY_URI = ('https://www.googleapis.com/'
+                         'discovery/v1/apis/webmasters/v3/rest')
 
         parser = argparse.ArgumentParser(parents=[tools.argparser])
         flags = parser.parse_args()
@@ -195,7 +182,10 @@ for site_item in sites:
         credentials_file = 'credentials.json'
 
         flow_scope = 'https://www.googleapis.com/auth/webmasters.readonly'
-        flow = flow_from_clientsecrets(credentials_file, scope=flow_scope, redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+        flow = flow_from_clientsecrets(
+            credentials_file,
+            scope=flow_scope,
+            redirect_uri='urn:ietf:wg:oauth:2.0:oob')
 
         flow.params['access_type'] = 'offline'
         flow.params['approval_prompt'] = 'force'
@@ -207,7 +197,7 @@ for site_item in sites:
             try:
                 h = httplib2.Http()
                 credentials.refresh(h)
-            except Exception as e:
+            except HttpAccessTokenRefreshError:
                 pass
 
         if credentials is None or credentials.invalid:
@@ -215,22 +205,27 @@ for site_item in sites:
 
         http = credentials.authorize(httplib2.Http())
 
-        service = build(API_NAME, API_VERSION, http=http, discoveryServiceUrl=DISCOVERY_URI)
+        service = build(API_NAME,
+                        API_VERSION,
+                        http=http,
+                        discoveryServiceUrl=DISCOVERY_URI)
         # site_list_response = service.sites().list().execute()
 
         # prepare stream
         stream = io.StringIO()
 
         # site is prepended to the response from the Google Search API
-        outrow = u"site|date|query|country|device|page|position|clicks|ctr|impressions\n"
+        outrow = (u"site|date|query|country|device|"
+                  "page|position|clicks|ctr|impressions\n")
         stream.write(outrow)
 
-        # Limit each query to 20000 rows. If there are more than 20000 rows in a given day, it will split the query up.
+        # Limit each query to 20000 rows. If there are more than 20000 rows
+        # in a given day, it will split the query up.
         rowlimit = 20000
         index = 0
 
-        # daterange yields a generator of all dates from date1 to date2
         def daterange(date1, date2):
+            """yields a generator of all dates from date1 to date2"""
             for n in range(int((date2 - date1).days)+1):
                 yield date1 + timedelta(n)
 
@@ -245,7 +240,7 @@ for site_item in sites:
 
             index = 0
             while (index == 0 or ('rows' in search_analytics_response)):
-                logger.debug(str(date_in_range) + " " + str(index))
+                logger.debug('%s %s', date_in_range, index)
 
                 # The request body for the Google Search API query
                 bodyvar = {
@@ -273,45 +268,59 @@ for site_item in sites:
                 retry = 1
                 while True:
                     try:
-                        search_analytics_response = service.searchanalytics().query(siteUrl=site_name, body=bodyvar).execute()
-                    except Exception as e:
+                        search_analytics_response = service.searchanalytics() \
+                            .query(siteUrl=site_name, body=bodyvar).execute()
+                    except GoogleHttpError:
                         if retry == 11:
-                            logger.error("Failing with HTTP error after 10 retries with query time easening.")
+                            logger.error(("Failing with HTTP error after 10 "
+                                          "retries with query time easening."))
                             sys.exit()
                         wait_time = wait_time * 2
-                        logger.warning("retrying site " +  site_name +": {0} with wait time {1}"
-                                       .format(retry, wait_time))
+                        logger.warning(
+                            "retrying site %s: %s with wait time %s",
+                            site_name, retry, wait_time)
                         retry = retry + 1
                         sleep(wait_time)
                     else:
                         break
 
                 index = index + 1
-                if ('rows' in search_analytics_response):
+
+                if 'rows' in search_analytics_response:
                     for row in search_analytics_response['rows']:
                         outrow = site_name + "|"
                         for key in row['keys']:
                             # for now, we strip | from searches
-                            key = re.sub('\|', '', key)
-                            # for now, we strip | from searches
+                            key = re.sub(r'\|', '', key)
+                            # for now, we strip \\ from searches
                             key = re.sub('\\\\', '', key)
                             outrow = outrow + key + "|"
-                        outrow = outrow + str(row['position']) + "|" + re.sub('\.0', '', str(row['clicks'])) + "|" + str(row['ctr']) + "|" + re.sub('\.0', '', str(row['impressions'])) + "\n"
+                        outrow = \
+                            outrow + str(row['position']) + "|" + \
+                            re.sub(r'\.0', '', str(row['clicks'])) + "|" + \
+                            str(row['ctr']) + "|" + \
+                            re.sub(r'\.0', '', str(row['impressions'])) + "\n"
                         stream.write(outrow)
 
         # Write the stream to an outfile in the S3 bucket with naming
         # like "googlesearch-sitename-startdate-enddate.csv"
         resource.Bucket(bucket).put_object(Key=object_key,
                                            Body=stream.getvalue())
-        logger.debug('PUT_OBJECT: {0}:{1}'.format(outfile, bucket))
+        logger.debug('PUT_OBJECT: %s:%s', outfile, bucket)
         object_summary = resource.ObjectSummary(bucket, object_key)
         logger.debug('OBJECT LOADED ON: {0} \nOBJECT SIZE: {1}'
                      .format(object_summary.last_modified,
                              object_summary.size))
 
         # Prepare the Redshift query
-        query = "copy " + dbtable + " FROM 's3://" + bucket + "/" + object_key + "' CREDENTIALS 'aws_access_key_id=" + os.environ['AWS_ACCESS_KEY_ID'] + ";aws_secret_access_key=" + os.environ['AWS_SECRET_ACCESS_KEY'] + "' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;"
-        logquery = "copy " + dbtable + " FROM 's3://" + bucket + "/" + object_key + "' CREDENTIALS 'aws_access_key_id=" + 'AWS_ACCESS_KEY_ID' + ";aws_secret_access_key=" + 'AWS_SECRET_ACCESS_KEY' + "' IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;"
+        logquery = (
+            f"copy {dbtable} FROM 's3://{bucket}/{object_key}' CREDENTIALS "
+            "'aws_access_key_id={};aws_secret_access_key="
+            "{AWS_SECRET_ACCESS_KEY}' IGNOREHEADER AS 1 MAXERROR AS 0 "
+            "DELIMITER '|' NULL AS '-' ESCAPE;")
+        query = logquery.format(
+            AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
+            AWS_SECRET_ACCESS_KEY=os.environ['AWS_ACCESS_KEY_ID'])
         logger.debug(logquery)
 
         # Load into Redshift

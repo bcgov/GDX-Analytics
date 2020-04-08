@@ -169,7 +169,8 @@ query = '''
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
         ELSE ''
         END AS referrer_urlquery
-    FROM {schema_name}.asset_downloads AS assets;
+    FROM {schema_name}.asset_downloads AS assets
+    WHERE asset_url NOT LIKE '/Contact-Us' AND asset_url NOT LIKE '/';
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;

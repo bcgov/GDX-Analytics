@@ -91,17 +91,11 @@ query = '''
             REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(assets.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'),
             '([^\/]+\.[A-Za-z0-9]+)$'
         ) AS asset_file,
-    CASE
-        WHEN REGEXP_REPLACE
-            (
-                SPLIT_PART(SPLIT_PART(SPLIT_PART(assets.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'
-            ) LIKE '%.%' 
-        THEN REGEXP_SUBSTR
-            (
-                REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(assets.request_string, ' ', 2), '#', 1), '?', 1), '.aspx', ''), '([^\.]+$)'
-            ) 
+    CASE 
+        WHEN SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(asset_url, '?', 1), '(.aspx)$'), asset_host, 2) LIKE '%.%'
+        THEN REGEXP_SUBSTR(SPLIT_PART(REGEXP_REPLACE(SPLIT_PART(asset_url, '?', 1), '(.aspx)$'), asset_host, 2), '([^\.]+$)')
         ELSE NULL 
-        END AS asset_ext,
+        END as asset_ext,
     assets.user_agent_http_request_header,
     assets.request_string,
     '{asset_host}' as asset_host,

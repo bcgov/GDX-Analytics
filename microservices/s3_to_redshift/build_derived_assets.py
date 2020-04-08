@@ -86,6 +86,22 @@ query = '''
     assets.referrer,
     assets.return_size,
     assets.status_code,
+    REGEXP_SUBSTR
+        (
+            REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(asset_downloads.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'),
+            '([^\/]+\.[A-Za-z0-9]+)$'
+        ) AS assets.asset_file,
+    CASE
+        WHEN REGEXP_REPLACE
+            (
+                SPLIT_PART(SPLIT_PART(SPLIT_PART(asset_downloads.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'
+            ) LIKE '%.%' 
+        THEN REGEXP_SUBSTR
+            (
+                REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(asset_downloads.request_string, ' ', 2), '#', 1), '?', 1), '.aspx', ''), '([^\.]+$)'
+            ) 
+        ELSE NULL 
+        END AS assets.asset_ext,
     assets.user_agent_http_request_header,
     assets.request_string,
     '{asset_host}' as asset_host,

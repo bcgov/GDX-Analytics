@@ -88,17 +88,17 @@ query = '''
     assets.status_code,
     REGEXP_SUBSTR
         (
-            REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(asset_downloads.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'),
+            REGEXP_REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(assets.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'),
             '([^\/]+\.[A-Za-z0-9]+)$'
         ) AS asset_file,
     CASE
         WHEN REGEXP_REPLACE
             (
-                SPLIT_PART(SPLIT_PART(SPLIT_PART(asset_downloads.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'
+                SPLIT_PART(SPLIT_PART(SPLIT_PART(assets.request_string, ' ', 2), '#', 1), '?', 1), '(.aspx)$'
             ) LIKE '%.%' 
         THEN REGEXP_SUBSTR
             (
-                REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(asset_downloads.request_string, ' ', 2), '#', 1), '?', 1), '.aspx', ''), '([^\.]+$)'
+                REPLACE(SPLIT_PART(SPLIT_PART(SPLIT_PART(assets.request_string, ' ', 2), '#', 1), '?', 1), '.aspx', ''), '([^\.]+$)'
             ) 
         ELSE NULL 
         END AS asset_ext,

@@ -71,6 +71,13 @@ Note: local invoke may not yield desired outcome due to inadequate permission
 context support of SAM
 
 ### Step-through debugging with VS Code
+
+#### Prerequisites
+All prerequisites listed in *Deploy the application* section above plus
+
+* [VS Code](https://code.visualstudio.com/)
+* (Optionally) [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) extension for VS Code 
+
 To enable step-through debugging, 
  1. Open [app.code-workspace](./app.code-workspace) in VS Code
  2. uncomment following 3 lines in [json_formatter/app.py](./json_formatter/app.py#L7)
@@ -80,7 +87,7 @@ To enable step-through debugging,
     # ptvsd.enable_attach(address=('0.0.0.0', 5890), redirect_output=True)
     # ptvsd.wait_for_attach()
     ```
- 3. Set a breakpoint in json_formatter/app.py
+ 3. Set a breakpoint in json_formatter/app.py below the above uncommented lines
  4. Run
 
     ```

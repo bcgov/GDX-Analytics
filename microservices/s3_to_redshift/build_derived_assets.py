@@ -201,6 +201,7 @@ query = r'''
                 REGEXP_REPLACE(assets.referrer,'.*:\/\/'), '/.*'), '?', 1),
                 '#', 1)
     AS referrer_urlpath,
+    SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
     CASE
         WHEN referrer_urlhost = 'www2.gov.bc.ca'
             AND referrer_urlpath = '/gov/search'
@@ -223,17 +224,16 @@ query = r'''
                 referrer_urlpath,
                 'index.(html|htm|aspx|php|cgi|shtml|shtm)$','')
         END AS page_referrer_display_url,
-    SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
     LOWER(asset_url) AS asset_url_case_insensitive,
-    REGEXP_REPLACE(asset_url) AS asset_url_nopar,
+    REGEXP_REPLACE(asset_url, '\\?.*$') AS asset_url_nopar,
     LOWER(
         REGEXP_REPLACE(asset_url, '\\?.*$'))
     AS asset_url_nopar_case_insensitive,
     REGEXP_REPLACE(
         REGEXP_REPLACE(
             REGEXP_REPLACE(
-                asset_url_nopar_case_insensitive,'/((index|default)\\.(htm|html|cgi|shtml|shtm))|(default\\.(asp|aspx))
-                /{0,}$','/'),
+                asset_url_nopar_case_insensitive,
+                '/((index|default)\\.(htm|html|cgi|shtml|shtm))|(default\\.(asp|aspx))/{0,}$','/'),
             '//$','/'),
         '%20',' ')
     AS truncated_asset_url_nopar_case_insensitive

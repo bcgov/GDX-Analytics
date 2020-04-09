@@ -200,7 +200,7 @@ query = r'''
             REGEXP_SUBSTR(
                 REGEXP_REPLACE(assets.referrer,'.*:\/\/'), '/.*'), '?', 1),
                 '#', 1)
-    AS referrer_urlpath
+    AS referrer_urlpath,
     CASE
         WHEN referrer_urlhost = 'www2.gov.bc.ca'
             AND referrer_urlpath = '/gov/search'

@@ -86,6 +86,8 @@ query = r'''
     assets.referrer,
     assets.return_size,
     assets.status_code,
+    -- strip down the asset_url by removing host, query, etc,
+    -- then use a regex to get the filename from the remaining path.
     REGEXP_SUBSTR(
         REGEXP_REPLACE(
           SPLIT_PART(
@@ -96,6 +98,8 @@ query = r'''
             '#', 1),
           '(.aspx)$'),
     '([^\/]+\.[A-Za-z0-9]+)$') AS asset_file,
+    -- strip down the asset_url by removing host, query, etc, then use
+    -- a regex to get the file extension from the remaining path.
     CASE
       WHEN SPLIT_PART(
         REGEXP_REPLACE(
@@ -192,9 +196,10 @@ query = r'''
         ELSE ''
         END AS referrer_urlquery
     FROM {schema_name}.asset_downloads AS assets
-    -- Asset files not in the getmedia folder for workbc must be filtered out --
-    WHERE (request_string NOT LIKE '%getmedia%' AND asset_url NOT LIKE 'https://www.workbc.ca%') 
-    OR (request_string LIKE '%getmedia%' AND asset_url LIKE 'https://www.workbc.ca%');
+    -- Asset files not in the getmedia folder for workbc must be filtered out
+    WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
+    OR (request_string LIKE '%getmedia%'
+        AND asset_url LIKE 'https://www.workbc.ca%');
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
@@ -208,12 +213,10 @@ with psycopg2.connect(conn_string) as conn:
         try:
             curs.execute(query)
         except psycopg2.Error:
-            logger.exception((
-                'Error: failed to execute the transaction '
-                'to prepare the {schema_name}.asset_downloads_derived PDT')
-                .format(schema_name=schema_name))
+            logger.exception(
+                ('Error: failed to execute the transaction '
+                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
         else:
-            logger.info((
-                'Success: executed the transaction '
-                'to prepare the {schema_name}.asset_downloads_derived PDT')
-                .format(schema_name=schema_name))
+            logger.info(
+                ('Success: executed the transaction '
+                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)

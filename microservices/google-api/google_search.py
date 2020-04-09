@@ -73,6 +73,13 @@ from googleapiclient.errors import HttpError as GoogleHttpError
 import psycopg2  # For Amazon Redshift IO
 import lib.logs as log
 
+
+# Ctrl+C
+def signal_handler(signal, frame):
+    logger.debug('Ctrl+C pressed!')
+    sys.exit(0)
+
+
 logger = logging.getLogger(__name__)
 log.setup()
 
@@ -97,8 +104,23 @@ def last_loaded(s):
 # the latest available Google API data is two less than the query date (today)
 latest_date = date.today() - timedelta(days=2)
 
+# Command line arguments
+parser = argparse.ArgumentParser(
+    parents=[tools.argparser],
+    description='GDX Analytics ETL utility for Google My Business insights.')
+parser.add_argument('-o', '--cred', help='OAuth Credentials JSON file.')
+parser.add_argument('-a', '--auth', help='Stored authorization dat file.')
+parser.add_argument('-c', '--conf', help='Microservice configuration file.',)
+parser.add_argument('-d', '--debug', help='Run in debug mode.',
+                    action='store_true')
+flags = parser.parse_args()
+
+CLIENT_SECRET = flags.cred
+AUTHORIZATION = flags.auth
+CONFIG = flags.conf
+
 # Read configuration file from env parameter
-with open(os.environ['GOOGLE_MICROSERVICE_CONFIG']) as f:
+with open(CONFIG) as f:
     config = json.load(f)
 
 sites = config['sites']
@@ -179,18 +201,17 @@ for site_item in sites:
         parser = argparse.ArgumentParser(parents=[tools.argparser])
         flags = parser.parse_args()
         flags.noauth_local_webserver = True
-        credentials_file = 'credentials.json'
 
         flow_scope = 'https://www.googleapis.com/auth/webmasters.readonly'
         flow = flow_from_clientsecrets(
-            credentials_file,
+            CLIENT_SECRET,
             scope=flow_scope,
             redirect_uri='urn:ietf:wg:oauth:2.0:oob')
 
         flow.params['access_type'] = 'offline'
         flow.params['approval_prompt'] = 'force'
 
-        storage = Storage('credentials.dat')
+        storage = Storage(AUTHORIZATION)
         credentials = storage.get()
 
         if credentials is not None and credentials.access_token_expired:
@@ -308,9 +329,8 @@ for site_item in sites:
                                            Body=stream.getvalue())
         logger.debug('PUT_OBJECT: %s:%s', outfile, bucket)
         object_summary = resource.ObjectSummary(bucket, object_key)
-        logger.debug('OBJECT LOADED ON: {0} \nOBJECT SIZE: {1}'
-                     .format(object_summary.last_modified,
-                             object_summary.size))
+        logger.debug('OBJECT LOADED ON: %s, OBJECT SIZE: %s',
+                     object_summary.last_modified, object_summary.size)
 
         # Prepare the Redshift query
         logquery = (
@@ -329,16 +349,16 @@ for site_item in sites:
                 try:
                     curs.execute(query)
                 # if the DB call fails, print error and place file in /bad
-                except psycopg2.Error as e:
-                    logger.error("".join((
-                        "Loading failed {0} index {1} for {2} with error:\n{3}"
-                        .format(site_name, index, date_in_range, e.pgerror),
-                        " Object key: {0}".format(object_key.split('/')[-1]))))
+                except psycopg2.Error:
+                    logger.exception(
+                        "Loading failed: %s index %s on object key %s.",
+                        site_name, index, date_in_range,
+                        object_key.split('/')[-1])
                 else:
-                    logger.info("".join((
-                        "Loaded {0} index {1} for {2}  successfully."
-                        .format(site_name, index, date_in_range),
-                        ' Object key: {0}'.format(object_key.split('/')[-1]))))
+                    logger.info(
+                        "Loaded: %s index %s for %s on object key %s",
+                        site_name, index, date_in_range,
+                        object_key.split('/')[-1])
         # if we didn't add any new rows, set last_loaded_date to latest_date to
         # break the loop, otherwise, set it to the last loaded date
         if last_loaded_date == last_loaded(site_name):
@@ -419,8 +439,7 @@ with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:
             curs.execute(query)
-        except psycopg2.Error as e:
-            logger.error("Google Search PDT loading failed\n{0}".
-                         format(e.pgerror))
+        except psycopg2.Error:
+            logger.exception("Google Search PDT loading failed")
         else:
             logger.info("Google Search PDT loaded successfully")

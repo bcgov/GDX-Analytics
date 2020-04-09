@@ -192,7 +192,7 @@ query = r'''
         ELSE ''
         END AS referrer_urlquery
     FROM {schema_name}.asset_downloads AS assets
-    WHERE asset_url NOT LIKE '/Contact-Us' AND asset_url NOT LIKE '/';
+    WHERE asset_url NOT LIKE 'https://www.workbc.ca/Contact-Us' AND asset_url NOT LIKE 'https://www.workbc.ca/';
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;

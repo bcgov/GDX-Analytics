@@ -19,10 +19,10 @@
 #
 
 import os
-import psycopg2
 import logging
 import sys
 import json  # to read json config files
+import psycopg2
 
 # Logging has two handlers: INFO to stdout and DEBUG to a file handler
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # check that configuration file was passed as argument
-if (len(sys.argv) != 2):
+if len(sys.argv) != 2:
     print('Usage: python build_derived_assets.py config.json')
     sys.exit(1)
 configfile = sys.argv[1]
@@ -72,7 +72,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
 
-query = '''
+query = r'''
     BEGIN;
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
@@ -86,6 +86,41 @@ query = '''
     assets.referrer,
     assets.return_size,
     assets.status_code,
+    -- strip down the asset_url by removing host, query, etc,
+    -- then use a regex to get the filename from the remaining path.
+    REGEXP_SUBSTR(
+        REGEXP_REPLACE(
+          SPLIT_PART(
+            SPLIT_PART(
+              SPLIT_PART(
+                asset_url, '{asset_host}' , 2),
+              '?', 1),
+            '#', 1),
+          '(.aspx)$'),
+    '([^\/]+\.[A-Za-z0-9]+)$') AS asset_file,
+    -- strip down the asset_url by removing host, query, etc, then use
+    -- a regex to get the file extension from the remaining path.
+    CASE
+      WHEN SPLIT_PART(
+        REGEXP_REPLACE(
+          SPLIT_PART(
+            SPLIT_PART(
+              asset_url, '?', 1),
+            '#', 1),
+          '(.aspx)$'),
+        '{asset_host}', 2) LIKE '%.%'
+      THEN REGEXP_SUBSTR(
+        SPLIT_PART(
+          REGEXP_REPLACE(
+            SPLIT_PART(
+              SPLIT_PART(
+                asset_url, '?', 1),
+              '#', 1),
+            '(.aspx)$'),
+          '{asset_host}', 2),
+        '([^\.]+$)')
+      ELSE NULL
+    END AS asset_ext,
     assets.user_agent_http_request_header,
     assets.request_string,
     '{asset_host}' as asset_host,
@@ -95,7 +130,8 @@ query = '''
         ELSE FALSE
         END AS direct_download,
     CASE
-        WHEN REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{asset_host}'
+        WHEN
+            REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{asset_host}'
         THEN TRUE
         ELSE FALSE
         END AS offsite_download,
@@ -159,7 +195,11 @@ query = '''
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
         ELSE ''
         END AS referrer_urlquery
-    FROM {schema_name}.asset_downloads AS assets;
+    FROM {schema_name}.asset_downloads AS assets
+    -- Asset files not in the getmedia folder for workbc must be filtered out
+    WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
+    OR (request_string LIKE '%getmedia%'
+        AND asset_url LIKE 'https://www.workbc.ca%');
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
@@ -173,10 +213,10 @@ with psycopg2.connect(conn_string) as conn:
         try:
             curs.execute(query)
         except psycopg2.Error:
-            logger.exception((
-                'Error: failed to execute the transaction '
-                'to prepare the gov_assets_derived PDT'))
+            logger.exception(
+                ('Error: failed to execute the transaction '
+                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
         else:
-            logger.info((
-                'Success: executed the transaction '
-                'to prepare the gov_assets_derived PDT'))
+            logger.info(
+                ('Success: executed the transaction '
+                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)

@@ -186,8 +186,10 @@ with psycopg2.connect(conn_string) as conn:
         except psycopg2.Error:
             logger.exception((
                 'Error: failed to execute the transaction '
-                'to prepare the gov_assets_derived PDT'))
+                'to prepare the {schema_name}.asset_downloads_derived PDT')
+                .format(schema_name=schema_name))
         else:
             logger.info((
                 'Success: executed the transaction '
-                'to prepare the gov_assets_derived PDT'))
+                'to prepare the {schema_name}.asset_downloads_derived PDT')
+                .format(schema_name=schema_name))

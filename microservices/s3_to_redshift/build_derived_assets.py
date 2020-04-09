@@ -236,7 +236,7 @@ query = r'''
                 /{0,}$','/'),
             '//$','/'),
         '%20',' ')
-    AS truncated_asset_url_nopar_case_insensitive,
+    AS truncated_asset_url_nopar_case_insensitive
     FROM {schema_name}.asset_downloads AS assets
     -- Asset files not in the getmedia folder for workbc must be filtered out
     WHERE asset_url NOT LIKE 'https://www.workbc.ca%'

@@ -335,7 +335,7 @@ for site_item in sites:
         # Prepare the Redshift query
         logquery = (
             f"copy {dbtable} FROM 's3://{bucket}/{object_key}' CREDENTIALS "
-            "'aws_access_key_id={};aws_secret_access_key="
+            "'aws_access_key_id={AWS_ACCESS_KEY_ID};aws_secret_access_key="
             "{AWS_SECRET_ACCESS_KEY}' IGNOREHEADER AS 1 MAXERROR AS 0 "
             "DELIMITER '|' NULL AS '-' ESCAPE;")
         query = logquery.format(

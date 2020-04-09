@@ -112,29 +112,16 @@ config_destination = config['destination']
 config_locationGroups = config['locationGroups']
 
 # set up the Redshift connection
-conn_string = """
-dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
-""".format(dbname='snowplow',
-           host='redshift.analytics.gov.bc.ca',
-           port='5439',
-           user=os.environ['pguser'],
-           password=os.environ['pgpass'])
+dbname = 'snowplow'
+host = 'redshift.analytics.gov.bc.ca'
+port = '5439'
+user = os.environ['pguser']
+password = os.environ['pgpass']
+conn_string = (f"dbname='{dbname}' host='{host}' port='{port}' "
+               f"user='{user}' password={password}")
 
-# the copy command will be formatted when the query is ready to be excecuted
-copy_command = (
-    "COPY {table} ({columns}) FROM 's3://{bucket}/{object}' "
-    "CREDENTIALS 'aws_access_key_id={key};aws_secret_access_key={secret}' "
-    "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;")
-
-copy_cols = ("client_shortname,days_aggregated,location_label,"
-             "location_locality,location_name,"
-             "location_postal_code,location_time_zone,rank_on_query,"
-             "region_label,region_latitude,region_longitude,utc_query_date,"
-             "region_count_seven_days,region_count_ninety_days,"
-             "region_count_thirty_days")
-
-aws_key = os.environ['AWS_ACCESS_KEY_ID']
-aws_secret = os.environ['AWS_SECRET_ACCESS_KEY']
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 # set the query date as now in UTC
 query_date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
@@ -200,16 +187,16 @@ def is_processed(key):
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
-        logger.debug("{0} was processed as good already.".format(filename))
+        logger.debug("%s was processed as good already.", filename)
         return True
     try:
         client.head_object(Bucket=config_bucket, Key=badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
-        logger.debug("{0} was processed as bad already.".format(filename))
+        logger.debug("%s was processed as bad already.", filename)
         return True
-    logger.debug("{0} has not been processed.".format(filename))
+    logger.debug("%s has not been processed.", filename)
     return False
 
 
@@ -226,7 +213,7 @@ accounts = service.accounts().list().execute()['accounts'][1:]
 for loc in config_locationGroups:
     # access the environment variable that sets the Account ID for this
     # Location Group, which is to be passed to the validated accounts list
-    accountNumber = os.environ['{0}_accountid'.format(loc['clientShortname'])]
+    accountNumber = os.environ[f"{loc['clientShortname']}_accountid"]
     try:
         validated_accounts.append(
             next({
@@ -238,9 +225,8 @@ for loc in config_locationGroups:
                  in accounts
                  if item['accountNumber'] == accountNumber))
     except StopIteration:
-        logger.warning(
-            'No access to {0}: {1}. Skipping.'
-            .format(loc['clientShortname'], accountNumber))
+        logger.warning('No access to %s: %s. Skipping.',
+                       loc['clientShortname'], accountNumber)
         continue
 
 # iterate over ever validated account
@@ -249,34 +235,30 @@ for account in validated_accounts:
     if 1 <= len(account["aggregate_days"]) <= 3:
         for i in account["aggregate_days"]:
             if not any(i == s for s in ["SEVEN", "THIRTY", "NINETY"]):
-                logger.error("".join((
-                    "{i} is an invalid aggregate option.",
-                    "Skipping {clientShortname} location group.")).format(
-                        i=i, clientShortname=account['clientShortname']))
+                logger.error(
+                    "%s is an invalid aggregate option. Skipping %s.",
+                    i, account['clientShortname'])
                 continue
     else:
         logger.error(
-            "aggregate_days on {} is invalid due to size. Skipping.".format(
-                account['clientShortname']))
+            "aggregate_days on %s is invalid due to size. Skipping.",
+            account['clientShortname'])
         continue
 
     # Set up the S3 path to write the csv buffer to
-    object_key_path = 'client/google_mybusiness_{}/'.format(
-        account['clientShortname'])
+    object_key_path = f"client/google_mybusiness_{account['clientShortname']}/"
 
-    outfile = 'gmb_directions_{0}_{1}.csv'.format(
-        account['clientShortname'], query_date)
+    outfile = f"gmb_directions_{account['clientShortname']}_{query_date}.csv"
     object_key = object_key_path + outfile
 
     if is_processed(object_key):
         logger.warning(
-            "".join((
-                "The file: {} has already been generated ",
-                "and processed by this script today.")).format(object_key))
+            ("The file: %s has already been generated "
+             "and processed by this script today."), object_key)
         continue
 
-    goodfile = config_destination + "/good/" + object_key
-    badfile = config_destination + "/bad/" + object_key
+    goodfile = f"{config_destination}/good/{object_key}"
+    badfile = f"{config_destination}/bad/{object_key}"
 
     # Create a dataframe with dates as rows and columns according to the table
     df = pd.DataFrame()
@@ -308,21 +290,20 @@ for account in validated_accounts:
     # stitching the responses into a single list to process after the API calls
     stitched_responses = {'locationDrivingDirectionMetrics': []}
     for key, batch in enumerate(batched_location_names):
-        logger.debug("Begin processing on locations batch {0} of {1}".format(
-            key + 1, len(batched_location_names)))
+        logger.debug("Begin processing on locations batch %s of %s",
+                     str(key + 1), len(batched_location_names))
         for days in account['aggregate_days']:
-            logger.debug("Begin processing on {} day aggregate".format(days))
+            logger.debug("Begin processing on %s day aggregate", days)
             bodyvar = {
                 'locationNames': batch,
                 # https://developers.google.com/my-business/reference/rest/v4/accounts.locations/reportInsights#DrivingDirectionMetricsRequest
                 'drivingDirectionsRequest': {
-                    'numDays': '{}'.format(days),
+                    'numDays': f'{days}',
                     'languageCode': 'en-US'
                     }
                 }
 
-            logger.debug(
-                "Request JSON -- \n{0}".format(json.dumps(bodyvar, indent=2)))
+            logger.debug("Request JSON -- \n%s", json.dumps(bodyvar, indent=2))
 
             # Posts the API request
             try:
@@ -410,27 +391,35 @@ for account in validated_accounts:
     resource.Bucket(config_bucket).put_object(
         Key=object_key,
         Body=csv_stream.getvalue())
-    logger.debug('S3 PUT_OBJECT: {0}:{1}'.format(outfile, config_bucket))
+    logger.debug('S3 PUT_OBJECT: %s:%s', outfile, config_bucket)
     object_summary = resource.ObjectSummary(config_bucket, object_key)
-    logger.debug('S3 OBJECT LOADED ON: {0} \nOBJECT SIZE: {1}'
-                 .format(object_summary.last_modified,
-                         object_summary.size))
+    logger.debug('S3 OBJECT LOADED ON: %s OBJECT SIZE: %s',
+                 object_summary.last_modified, object_summary.size)
 
-    # Prepare the Redshift COPY command.
-    query = copy_command.format(
-            table=config_dbtable,
-            columns=copy_cols,
-            bucket=config_bucket,
-            object=object_key,
-            key=aws_key,
-            secret=aws_secret)
-    logquery = copy_command.format(
-            table=config_dbtable,
-            columns=copy_cols,
-            bucket=config_bucket,
-            object=object_key,
-            key='AWS_ACCESS_KEY_ID',
-            secret='AWS_SECRET_ACCESS_KEY')
+    logquery = (
+        f"COPY {config_dbtable} ("
+        "client_shortname,"
+        "days_aggregated,"
+        "location_label,"
+        "location_locality,"
+        "location_name,"
+        "location_postal_code,"
+        "location_time_zone,"
+        "rank_on_query,"
+        "region_label,"
+        "region_latitude,"
+        "region_longitude,"
+        "utc_query_date,"
+        "region_count_seven_days,"
+        "region_count_ninety_days,"
+        "region_count_thirty_days"
+        f") FROM 's3://{config_bucket}/{object_key}' CREDENTIALS '"
+        "aws_access_key_id={AWS_ACCESS_KEY_ID};"
+        "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
+        "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;")
+    query = logquery.format(
+            AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID,
+            AWS_SECRET_ACCESS_KEY=AWS_SECRET_ACCESS_KEY)
     logger.debug(logquery)
 
     # Connect to Redshift and execute the query.
@@ -439,16 +428,17 @@ for account in validated_accounts:
             try:
                 curs.execute(query)
             except psycopg2.Error:
-                logger.exception("".join((
-                    "Loading driving directions for failed {0} with exception:"
-                    .format(account['clientShortname']),
-                    " Object key: {0}".format(object_key.split('/')[-1]))))
+                logger.exception(
+                    ("Loading driving directions for failed %s "
+                     "on Object key: %s"),
+                    account['clientShortname'],
+                    object_key.split('/')[-1])
                 outfile = badfile
             else:
-                logger.info("".join((
-                    "Loaded {0} driving directions successfully."
-                    .format(account['clientShortname']),
-                    ' Object key: {0}'.format(object_key.split('/')[-1]))))
+                logger.info(
+                    ("Loaded {0} driving directions successfully. "
+                     "Object key %s."),
+                    account['clientShortname'], object_key.split('/')[-1])
                 outfile = goodfile
 
     # copy the processed file to the outfile destination path
@@ -457,6 +447,6 @@ for account in validated_accounts:
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
             CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
             + object_summary.key, Key=outfile)
-    except boto3.exceptions.ClientError as e:
-        logger.exception("S3 copy {key} to {outfile} location failed.".format(
-            key=object_summary.key, outfile=outfile))
+    except boto3.exceptions.ClientError:
+        logger.exception("S3 copy %s to %s location failed.",
+                         object_summary.key, outfile=outfile)

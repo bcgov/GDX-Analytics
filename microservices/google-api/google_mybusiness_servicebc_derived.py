@@ -23,13 +23,14 @@ import lib.logs as log
 logger = logging.getLogger(__name__)
 log.setup()
 
-conn_string = """
-dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
-""".format(dbname='snowplow',
-           host='redshift.analytics.gov.bc.ca',
-           port='5439',
-           user=os.environ['pguser'],
-           password=os.environ['pgpass'])
+# set up the Redshift connection
+dbname = 'snowplow'
+host = 'redshift.analytics.gov.bc.ca'
+port = '5439'
+user = os.environ['pguser']
+password = os.environ['pgpass']
+conn_string = (f"dbname='{dbname}' host='{host}' port='{port}' "
+               f"user='{user}' password={password}")
 
 query = '''
 BEGIN;

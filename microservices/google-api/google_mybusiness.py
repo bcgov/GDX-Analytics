@@ -73,6 +73,7 @@ from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
 import lib.logs as log
 
+
 # Ctrl+C
 def signal_handler(signal, frame):
     logger.debug('Ctrl+C pressed!')
@@ -119,13 +120,13 @@ resource = boto3.resource('s3')
 
 
 # set up the Redshift connection
-conn_string = """
-dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
-""".format(dbname='snowplow',
-           host='redshift.analytics.gov.bc.ca',
-           port='5439',
-           user=os.environ['pguser'],
-           password=os.environ['pgpass'])
+dbname = 'snowplow'
+host = 'redshift.analytics.gov.bc.ca'
+port = '5439'
+user = os.environ['pguser']
+password = os.environ['pgpass']
+conn_string = (f"dbname='{dbname}' host='{host}' port='{port}' "
+               f"user='{user}' password={password}")
 
 
 # Setup OAuth 2.0 flow for the Google My Business API
@@ -221,8 +222,7 @@ for loc in config_locations:
                  if item['accountNumber'] == str(loc['id'])))
     except StopIteration:
         logger.exception(
-            'No API access to {0}. Excluding from insights query.'
-            .format(loc['name']))
+            'No API access to %s. Excluding from insights query.', loc['name'])
         continue
 
 # iterate over ever location of every account
@@ -237,8 +237,7 @@ for account in validated_accounts:
     # we will handle each location separately
     for loc in locations['locations']:
 
-        logger.debug("Begin processing on location: {}"
-                     .format(loc['locationName']))
+        logger.debug("Begin processing on location: %s", loc['locationName'])
 
         # encode as ASCII for dataframe
         location_uri = loc['name'].encode('ascii', 'ignore')
@@ -260,8 +259,8 @@ for account in validated_accounts:
         # query RedShift to see if there is a date already loaded
         last_loaded_date = last_loaded(config_dbtable, loc['name'])
         if last_loaded_date is None:
-            logger.info("first time loading {}: {}"
-                        .format(account['name'], loc['name']))
+            logger.info("first time loading %s: %s",
+                        account['name'], loc['name'])
 
         # If it is loaded with some data for this ID, use that date plus
         # one day as the start_date.
@@ -282,19 +281,20 @@ for account in validated_accounts:
         if end_date == '':
             end_date = date_api_upper_limit
         if end_date > date_api_upper_limit:
-            logger.warning("The end_date for location {} is more recent than 2\
-                            days ago.".format(location_name))
+            logger.warning(
+                "The end_date for location %s is more recent than 2 days ago.",
+                location_name)
 
         end_time = end_date + 'T00:00:00Z'
 
         # if start and end times are same, then there's no new data
         if start_time == end_time:
-            logger.info("Redshift already contains the latest avaialble data\
-                        for location {}.".format(location_name))
+            logger.info(
+                "Redshift already contains the latest avaialble data for %s.",
+                location_name)
             continue
 
-        logger.debug("Querying range from {0} to {1}"
-                     .format(start_date, end_date))
+        logger.debug("Querying range from %s to %s", start_date, end_date)
 
         # the API call must construct each metric request in a list of dicts
         metricRequests = []
@@ -307,21 +307,20 @@ for account in validated_accounts:
                 )
 
         bodyvar = {
-            'locationNames': ['{0}'.format(location_uri)],
+            'locationNames': [f'{location_uri}'],
             'basicRequest': {
                 # https://developers.google.com/my-business/reference/rest/v4/Metric
                 'metricRequests': metricRequests,
                 # https://developers.google.com/my-business/reference/rest/v4/BasicMetricsRequest
                 # The maximum range is 18 months from the request date.
                 'timeRange': {
-                    'startTime': '{0}'.format(start_time),
-                    'endTime': '{0}'.format(end_time)
+                    'startTime': f'{start_time}',
+                    'endTime': f'{end_time}'
                     }
                 }
             }
 
-        logger.debug("Request body:\n{0}"
-                     .format(json.dumps(bodyvar, indent=2)))
+        logger.debug("Request body:\n%s", json.dumps(bodyvar, indent=2))
 
         # retrieves the request for this location.
         try:
@@ -339,7 +338,7 @@ for account in validated_accounts:
         for metric in metrics:
             metric_name = metric['metric'].lower().encode('ascii', 'ignore')
 
-            logger.debug("processing metric: {0}".format(metric_name))
+            logger.debug("processing metric: %s", metric_name)
 
             # iterate on the dimensional values for this metric.
 
@@ -376,29 +375,33 @@ for account in validated_accounts:
         df.to_csv(csv_buffer, index=True, header=True, sep='|')
 
         # Set up the S3 path to write the csv buffer to
-        object_key_path = '{}/{}/{}/'.format(
-            config_source, config_directory, account['client_shortname'])
+        object_key_path = (f"{config_source}/"
+                           f"{config_directory}/"
+                           f"{account['client_shortname']}/")
 
-        outfile = 'gmb_{0}_{1}_{2}.csv'.format(
-            location_name.replace(' ', '-'),start_date,end_date)
+        outfile = (f"gmb_"
+                   f"{location_name.replace(' ', '-')}_"
+                   f"{start_date}_"
+                   f"{end_date}"
+                   f".csv")
+
         object_key = object_key_path + outfile
 
         resource.Bucket(config_bucket).put_object(
             Key=object_key,
             Body=csv_buffer.getvalue())
-        logger.debug('PUT_OBJECT: {0}:{1}'.format(outfile, config_bucket))
+        logger.debug('PUT_OBJECT: %s:%s', outfile, config_bucket)
         object_summary = resource.ObjectSummary(config_bucket, object_key)
-        logger.debug('OBJECT LOADED ON: {0} OBJECT SIZE: {1}'
-                     .format(object_summary.last_modified,
-                             object_summary.size))
+        logger.debug('OBJECT LOADED ON: %s OBJECT SIZE: %s',
+                     object_summary.last_modified, object_summary.size)
 
         # Prepare the Redshift COPY command.
-        logquery = (("copy {} FROM 's3://{}/{}' CREDENTIALS "
-                     "'aws_access_key_id={};aws_secret_access_key={}' "
-                     "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
-                     "NULL AS '-' ESCAPE;").format(
-                         config_dbtable, config_bucket,object_key,
-                         '{AWS_ACCESS_KEY_ID}','{AWS_SECRET_ACCESS_KEY}'))
+        logquery = (
+            (f"copy {config_dbtable} FROM 's3://{config_bucket}/{object_key}' "
+             "CREDENTIALS 'aws_access_key_id'{AWS_ACCESS_KEY_ID};"
+             "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
+             "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
+             "NULL AS '-' ESCAPE;"))
         query = logquery.format(
             AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])

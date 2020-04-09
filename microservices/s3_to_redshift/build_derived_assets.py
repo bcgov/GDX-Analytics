@@ -74,10 +74,10 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 
 query = r'''
     BEGIN;
-    SET SEARCH_PATH TO '{schema_name}';
+    SET SEARCH_PATH TO '{0}';
     DROP TABLE IF EXISTS asset_downloads_derived;
     CREATE TABLE asset_downloads_derived AS
-    SELECT '{asset_scheme_and_authority}' ||
+    SELECT '{1}' ||
         SPLIT_PART(assets.request_string, ' ',2)
         AS asset_url,
     assets.date_timestamp::TIMESTAMP,
@@ -93,7 +93,7 @@ query = r'''
           SPLIT_PART(
             SPLIT_PART(
               SPLIT_PART(
-                asset_url, '{asset_host}' , 2),
+                asset_url, '{2}' , 2),
               '?', 1),
             '#', 1),
           '(.aspx)$'),
@@ -108,7 +108,7 @@ query = r'''
               asset_url, '?', 1),
             '#', 1),
           '(.aspx)$'),
-        '{asset_host}', 2) LIKE '%.%'
+        '{2}', 2) LIKE '%.%'
       THEN REGEXP_SUBSTR(
         SPLIT_PART(
           REGEXP_REPLACE(
@@ -117,21 +117,21 @@ query = r'''
                 asset_url, '?', 1),
               '#', 1),
             '(.aspx)$'),
-          '{asset_host}', 2),
+          '{2}', 2),
         '([^\.]+$)')
       ELSE NULL
     END AS asset_ext,
     assets.user_agent_http_request_header,
     assets.request_string,
-    '{asset_host}' as asset_host,
-    '{asset_source}' as asset_source,
+    '{2}' as asset_host,
+    '{3}' as asset_source,
     CASE
         WHEN assets.referrer is NULL THEN TRUE
         ELSE FALSE
         END AS direct_download,
     CASE
         WHEN
-            REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{asset_host}'
+            REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') <> '{2}'
         THEN TRUE
         ELSE FALSE
         END AS offsite_download,
@@ -237,7 +237,7 @@ query = r'''
             '//$','/'),
         '%20',' ')
     AS truncated_asset_url_nopar_case_insensitive
-    FROM {schema_name}.asset_downloads AS assets
+    FROM {0}.asset_downloads AS assets
     -- Asset files not in the getmedia folder for workbc must be filtered out
     WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
     OR (request_string LIKE '%getmedia%'
@@ -245,10 +245,10 @@ query = r'''
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
-'''.format(schema_name=schema_name,
-           asset_scheme_and_authority=asset_scheme_and_authority,
-           asset_host=asset_host,
-           asset_source=asset_source)
+'''.format(schema_name,
+           asset_scheme_and_authority,
+           asset_host,
+           asset_source)
 
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

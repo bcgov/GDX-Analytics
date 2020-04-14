@@ -54,7 +54,7 @@
 
 
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from time import sleep
 import json
 import argparse
@@ -160,10 +160,8 @@ for site_item in sites:
         start_date_default = date.today() - timedelta(days=480)
     # if a start date was specified, it has to be formatted into a date type
     else:
-        start_date_default = map(int, start_date_default.split('-'))
-        start_date_default = date(start_date_default[0],
-                                  start_date_default[1],
-                                  start_date_default[2])
+        start_date_default = datetime.strptime(
+            start_date_default,'%Y-%m-%d').date()
 
     # Load 30 days at a time until the data in Redshift has
     # caught up to the most recently available data from Google

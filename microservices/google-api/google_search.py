@@ -90,7 +90,7 @@ def last_loaded(s):
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
-    q = f"SELECT MAX(DATE) FROM google.googlesearch WHERE site = '{s}'"
+    q = f"SELECT MAX(DATE) FROM {dbtable} WHERE site = '{s}'"
     cursor.execute(q)
     # get the last loaded date
     lld = (cursor.fetchall())[0][0]
@@ -107,17 +107,53 @@ latest_date = date.today() - timedelta(days=2)
 # Command line arguments
 parser = argparse.ArgumentParser(
     parents=[tools.argparser],
-    description='GDX Analytics ETL utility for Google My Business insights.')
+    description='GDX Analytics ETL utility for Google search.')
 parser.add_argument('-o', '--cred', help='OAuth Credentials JSON file.')
 parser.add_argument('-a', '--auth', help='Stored authorization dat file.')
-parser.add_argument('-c', '--conf', help='Microservice configuration file.',)
-parser.add_argument('-d', '--debug', help='Run in debug mode.',
-                    action='store_true')
+parser.add_argument('-c', '--conf', help='Microservice configuration file.')
 flags = parser.parse_args()
+flags.noauth_local_webserver = True
 
 CLIENT_SECRET = flags.cred
 AUTHORIZATION = flags.auth
 CONFIG = flags.conf
+
+# calling the Google API. If credentials.dat is not yet generated
+# then brower based Google Account validation will be required
+API_NAME = 'searchconsole'
+API_VERSION = 'v1'
+DISCOVERY_URI = ('https://www.googleapis.com/'
+                 'discovery/v1/apis/webmasters/v3/rest')
+
+flow_scope = 'https://www.googleapis.com/auth/webmasters.readonly'
+flow = flow_from_clientsecrets(
+    CLIENT_SECRET,
+    scope=flow_scope,
+    redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+
+flow.params['access_type'] = 'offline'
+flow.params['approval_prompt'] = 'force'
+
+storage = Storage(AUTHORIZATION)
+credentials = storage.get()
+
+if credentials is not None and credentials.access_token_expired:
+    try:
+        h = httplib2.Http()
+        credentials.refresh(h)
+    except HttpAccessTokenRefreshError:
+        pass
+
+if credentials is None or credentials.invalid:
+    credentials = tools.run_flow(flow, storage, flags)
+
+http = credentials.authorize(httplib2.Http())
+
+service = build(API_NAME,
+                API_VERSION,
+                http=http,
+                discoveryServiceUrl=DISCOVERY_URI,
+                cache_discovery=False)
 
 # Read configuration file from env parameter
 with open(CONFIG) as f:
@@ -130,7 +166,7 @@ config_source = config['source']
 config_directory = config['directory']
 
 # set up the S3 resource
-client = boto3.client('s3')
+client = boto3.client('s3', region_name='ca-central-1')
 resource = boto3.resource('s3')
 
 # set up the Redshift connection
@@ -191,45 +227,6 @@ for site_item in sites:
         outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
         object_key = f"{config_source}/{config_directory}/{outfile}"
 
-        # calling the Google API. If credentials.dat is not yet generated
-        # then brower based Google Account validation will be required
-        API_NAME = 'searchconsole'
-        API_VERSION = 'v1'
-        DISCOVERY_URI = ('https://www.googleapis.com/'
-                         'discovery/v1/apis/webmasters/v3/rest')
-
-        parser = argparse.ArgumentParser(parents=[tools.argparser])
-        flags = parser.parse_args()
-        flags.noauth_local_webserver = True
-
-        flow_scope = 'https://www.googleapis.com/auth/webmasters.readonly'
-        flow = flow_from_clientsecrets(
-            CLIENT_SECRET,
-            scope=flow_scope,
-            redirect_uri='urn:ietf:wg:oauth:2.0:oob')
-
-        flow.params['access_type'] = 'offline'
-        flow.params['approval_prompt'] = 'force'
-
-        storage = Storage(AUTHORIZATION)
-        credentials = storage.get()
-
-        if credentials is not None and credentials.access_token_expired:
-            try:
-                h = httplib2.Http()
-                credentials.refresh(h)
-            except HttpAccessTokenRefreshError:
-                pass
-
-        if credentials is None or credentials.invalid:
-            credentials = tools.run_flow(flow, storage, flags)
-
-        http = credentials.authorize(httplib2.Http())
-
-        service = build(API_NAME,
-                        API_VERSION,
-                        http=http,
-                        discoveryServiceUrl=DISCOVERY_URI)
         # site_list_response = service.sites().list().execute()
 
         # prepare stream
@@ -261,7 +258,7 @@ for site_item in sites:
 
             index = 0
             while (index == 0 or ('rows' in search_analytics_response)):
-                logger.debug('%s %s', date_in_range, index)
+                logger.debug('%s %s', str(date_in_range), index)
 
                 # The request body for the Google Search API query
                 bodyvar = {
@@ -334,9 +331,10 @@ for site_item in sites:
 
         # Prepare the Redshift query
         logquery = (
-            f"copy {dbtable} FROM 's3://{bucket}/{object_key}' CREDENTIALS "
+            f"COPY {dbtable} FROM 's3://{bucket}/{object_key}' CREDENTIALS "
             "'aws_access_key_id={AWS_ACCESS_KEY_ID};aws_secret_access_key="
-            "{AWS_SECRET_ACCESS_KEY}' IGNOREHEADER AS 1 MAXERROR AS 0 "
+            "{AWS_SECRET_ACCESS_KEY}' REGION AS 'ca-central-1' "
+            "IGNOREHEADER AS 1 MAXERROR AS 0 "
             "DELIMITER '|' NULL AS '-' ESCAPE;")
         query = logquery.format(
             AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
@@ -352,12 +350,12 @@ for site_item in sites:
                 except psycopg2.Error:
                     logger.exception(
                         "Loading failed: %s index %s on object key %s.",
-                        site_name, index, date_in_range,
+                        site_name, str(index),
                         object_key.split('/')[-1])
                 else:
                     logger.info(
-                        "Loaded: %s index %s for %s on object key %s",
-                        site_name, index, date_in_range,
+                        "Loaded: %s index %d for %s on object key %s",
+                        site_name, str(index),
                         object_key.split('/')[-1])
         # if we didn't add any new rows, set last_loaded_date to latest_date to
         # break the loop, otherwise, set it to the last loaded date

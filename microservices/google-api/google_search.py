@@ -126,6 +126,8 @@ with open(CONFIG) as f:
 sites = config['sites']
 bucket = config['bucket']
 dbtable = config['dbtable']
+config_source = config['source']
+config_directory = config['directory']
 
 # set up the S3 resource
 client = boto3.client('s3')
@@ -187,7 +189,7 @@ for site_item in sites:
         site_clean = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
         outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
         outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
-        object_key = f"client/google_gdx/{outfile}"
+        object_key = f"{config_source}/{config_directory}/{outfile}"
 
         # calling the Google API. If credentials.dat is not yet generated
         # then brower based Google Account validation will be required

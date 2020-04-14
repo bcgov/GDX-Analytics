@@ -185,17 +185,17 @@ query = r'''
     -- the regex for referrer_urlhost.
     REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
-    CASE
-        WHEN POSITION ('?' IN referrer) > 0
-        THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
-        ELSE ''
-        END AS referrer_urlquery,
     SPLIT_PART(
         SPLIT_PART(
             REGEXP_SUBSTR(
                 REGEXP_REPLACE(assets.referrer,'.*:\/\/'), '/.*'), '?', 1),
                 '#', 1)
     AS referrer_urlpath,
+    CASE
+        WHEN POSITION ('?' IN referrer) > 0
+        THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
+        ELSE ''
+        END AS referrer_urlquery,
     SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
     CASE
         WHEN referrer_urlhost = 'www2.gov.bc.ca'

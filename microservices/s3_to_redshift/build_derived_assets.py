@@ -245,7 +245,6 @@ query = r'''
            asset_host=asset_host,
            asset_source=asset_source)
 
-sys.exit(1)
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:

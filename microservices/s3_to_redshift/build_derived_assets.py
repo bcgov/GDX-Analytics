@@ -72,7 +72,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
 
-query = f'''
+query = r'''
     BEGIN;
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
@@ -186,11 +186,6 @@ query = f'''
     REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
     assets.referrer_medium,
     CASE
-        WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/')
-        THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/')
-        ELSE ''
-        END AS referrer_urlpath,
-    CASE
         WHEN POSITION ('?' IN referrer) > 0
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
         ELSE ''
@@ -245,8 +240,11 @@ query = f'''
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
-'''
-print(query)
+'''.format(schema_name=schema_name,
+           asset_scheme_and_authority=asset_scheme_and_authority,
+           asset_host=asset_host,
+           asset_source=asset_source)
+
 sys.exit(1)
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

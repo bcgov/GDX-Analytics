@@ -110,6 +110,7 @@ config_bucket = config['bucket']
 config_dbtable = config['dbtable']
 config_destination = config['destination']
 config_locationGroups = config['locationGroups']
+config_prefix = config['prefix']
 
 # set up the Redshift connection
 dbname = 'snowplow'
@@ -246,7 +247,7 @@ for account in validated_accounts:
         continue
 
     # Set up the S3 path to write the csv buffer to
-    object_key_path = f"client/google_mybusiness_{account['clientShortname']}/"
+    object_key_path = f"client/{config_prefix}_{account['clientShortname']}/"
 
     outfile = f"gmb_directions_{account['clientShortname']}_{query_date}.csv"
     object_key = object_key_path + outfile

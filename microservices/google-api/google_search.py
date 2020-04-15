@@ -90,7 +90,7 @@ def last_loaded(s):
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
-    q = f"SELECT MAX(DATE) FROM {dbtable} WHERE site = '{s}'"
+    q = f"SELECT MAX(DATE) FROM {config_dbtable} WHERE site = '{s}'"
     cursor.execute(q)
     # get the last loaded date
     lld = (cursor.fetchall())[0][0]
@@ -162,27 +162,31 @@ service = build(API_NAME,
 with open(CONFIG) as f:
     config = json.load(f)
 
-sites = config['sites']
-bucket = config['bucket']
-dbtable = config['dbtable']
+config_sites = config['sites']
+config_bucket = config['bucket']
+config_dbtable = config['dbtable']
 config_source = config['source']
 config_directory = config['directory']
 
 # set up the S3 resource
-client = boto3.client('s3', region_name='ca-central-1')
+client = boto3.client('s3')
 resource = boto3.resource('s3')
 
 # set up the Redshift connection
 dbname = 'snowplow'
 host = 'redshift.analytics.gov.bc.ca'
-port = '5439'
-user = os.environ['pguser']
-password = os.environ['pgpass']
-conn_string = (f"dbname='{dbname}' host='{host}' port='{port}' "
-               f"user='{user}' password={password}")
+port = 5439
+pguser = os.environ['pguser']
+pgpass = os.environ['pgpass']
+conn_string = (
+    f"dbname='{dbname}' "
+    f"host='{host}' "
+    f"port='{port}' "
+    f"user='{pguser}' "
+    f"password={pgpass}")
 
 # each site in the config list of sites gets processed in this loop
-for site_item in sites:
+for site_item in config_sites:
     # read the config for the site name and default start date if specified
     site_name = site_item["name"]
 
@@ -229,8 +233,6 @@ for site_item in sites:
         outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
         outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
         object_key = f"{config_source}/{config_directory}/{outfile}"
-
-        # site_list_response = service.sites().list().execute()
 
         # prepare stream
         stream = io.StringIO()
@@ -325,23 +327,23 @@ for site_item in sites:
 
         # Write the stream to an outfile in the S3 bucket with naming
         # like "googlesearch-sitename-startdate-enddate.csv"
-        resource.Bucket(bucket).put_object(Key=object_key,
-                                           Body=stream.getvalue())
-        logger.debug('PUT_OBJECT: %s:%s', outfile, bucket)
-        object_summary = resource.ObjectSummary(bucket, object_key)
+        resource.Bucket(config_bucket).put_object(Key=object_key,
+                                                  Body=stream.getvalue())
+        logger.debug('PUT_OBJECT: %s:%s', outfile, config_bucket)
+        object_summary = resource.ObjectSummary(config_bucket, object_key)
         logger.debug('OBJECT LOADED ON: %s, OBJECT SIZE: %s',
                      object_summary.last_modified, object_summary.size)
 
-        # Prepare the Redshift query
+        # Prepare the Redshift COPY command.
         logquery = (
-            f"COPY {dbtable} FROM 's3://{bucket}/{object_key}' CREDENTIALS "
-            "'aws_access_key_id={AWS_ACCESS_KEY_ID};aws_secret_access_key="
-            "{AWS_SECRET_ACCESS_KEY}' REGION AS 'ca-central-1' "
-            "IGNOREHEADER AS 1 MAXERROR AS 0 "
-            "DELIMITER '|' NULL AS '-' ESCAPE;")
+            f"copy {config_dbtable} FROM 's3://{config_bucket}/{object_key}' "
+             "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
+             "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
+             "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
+             "NULL AS '-' ESCAPE;")
         query = logquery.format(
             AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
-            AWS_SECRET_ACCESS_KEY=os.environ['AWS_ACCESS_KEY_ID'])
+            AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])
         logger.debug(logquery)
 
         # Load into Redshift
@@ -352,14 +354,12 @@ for site_item in sites:
                 # if the DB call fails, print error and place file in /bad
                 except psycopg2.Error:
                     logger.exception(
-                        "Loading failed: %s index %s on object key %s.",
-                        site_name, str(index),
-                        object_key.split('/')[-1])
+                        "Loading failed: %s on object key %s.",
+                        site_name, object_key.split('/')[-1])
                 else:
                     logger.info(
-                        "Loaded: %s index %d for %s on object key %s",
-                        site_name, str(index),
-                        object_key.split('/')[-1])
+                        "Loaded: %s for %s on object key %s",
+                        site_name, object_key.split('/')[-1])
         # if we didn't add any new rows, set last_loaded_date to latest_date to
         # break the loop, otherwise, set it to the last loaded date
         if last_loaded_date == last_loaded(site_name):
@@ -369,78 +369,78 @@ for site_item in sites:
             last_loaded_date = last_loaded(site_name)
 
 
-# # This query will INSERT data that is the result of a JOIN into
-# # cmslite.google_pdt, a persistent dereived table which facilitating the LookML
-# query = """
-# -- perform this as a transaction.
-# -- Either the whole query completes, or it leaves the old table intact
-# BEGIN;
-# DROP TABLE IF EXISTS cmslite.google_pdt_scratch;
-# DROP TABLE IF EXISTS cmslite.google_pdt_old;
-#
-# CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
-#         "site"          VARCHAR(255),
-#         "date"          date,
-#         "query"         VARCHAR(2048),
-#         "country"       VARCHAR(255),
-#         "device"        VARCHAR(255),
-#         "page"          VARCHAR(2047),
-#         "position"      FLOAT,
-#         "clicks"        DECIMAL,
-#         "ctr"           FLOAT,
-#         "impressions"   DECIMAL,
-#         "node_id"       VARCHAR(255),
-#         "page_urlhost"  VARCHAR(255),
-#         "title"         VARCHAR(2047),
-#         "theme_id"      VARCHAR(255),
-#         "subtheme_id"   VARCHAR(255),
-#         "topic_id"      VARCHAR(255),
-#         "theme"         VARCHAR(2047),
-#         "subtheme"      VARCHAR(2047),
-#         "topic"         VARCHAR(2047)
-# );
-# ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
-# GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
-#
-# INSERT INTO cmslite.google_pdt_scratch
-#       SELECT gs.*,
-#           COALESCE(node_id,'') AS node_id,
-#           SPLIT_PART(page, '/',3) as page_urlhost,
-#           title,
-#           theme_id, subtheme_id, topic_id, theme, subtheme, topic
-#       FROM google.googlesearch AS gs
-#       -- fix for misreporting of redirected front page URL in Google search
-#       LEFT JOIN cmslite.themes AS themes ON
-#         CASE WHEN page = 'https://www2.gov.bc.ca/'
-#             THEN 'https://www2.gov.bc.ca/gov/content/home'
-#             ELSE page
-#             END = themes.hr_url
-#         WHERE site NOT IN ('sc-domain:gov.bc.ca', 'sc-domain:engage.gov.bc.ca')
-#             OR site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
-#                 'healthgateway.gov.bc.ca',
-#                 'engage.gov.bc.ca',
-#                 'feedback.engage.gov.bc.ca',
-#                 'www2.gov.bc.ca',
-#                 'www.engage.gov.bc.ca',
-#                 'curriculum.gov.bc.ca',
-#                 'studentsuccess.gov.bc.ca',
-#                 'news.gov.bc.ca',
-#                 'bcforhighschool.gov.bc.ca')
-#             OR site = 'sc-domain:engage.gov.bc.ca';
-#
-# ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
-# ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;
-# DROP TABLE cmslite.google_pdt_old;
-# COMMIT;
-# """
-#
-# # Execute the query and log the outcome
-# logger.debug(query)
-# with psycopg2.connect(conn_string) as conn:
-#     with conn.cursor() as curs:
-#         try:
-#             curs.execute(query)
-#         except psycopg2.Error:
-#             logger.exception("Google Search PDT loading failed")
-#         else:
-#             logger.info("Google Search PDT loaded successfully")
+# This query will INSERT data that is the result of a JOIN into
+# cmslite.google_pdt, a persistent dereived table which facilitating the LookML
+query = """
+-- perform this as a transaction.
+-- Either the whole query completes, or it leaves the old table intact
+BEGIN;
+DROP TABLE IF EXISTS cmslite.google_pdt_scratch;
+DROP TABLE IF EXISTS cmslite.google_pdt_old;
+
+CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
+        "site"          VARCHAR(255),
+        "date"          date,
+        "query"         VARCHAR(2048),
+        "country"       VARCHAR(255),
+        "device"        VARCHAR(255),
+        "page"          VARCHAR(2047),
+        "position"      FLOAT,
+        "clicks"        DECIMAL,
+        "ctr"           FLOAT,
+        "impressions"   DECIMAL,
+        "node_id"       VARCHAR(255),
+        "page_urlhost"  VARCHAR(255),
+        "title"         VARCHAR(2047),
+        "theme_id"      VARCHAR(255),
+        "subtheme_id"   VARCHAR(255),
+        "topic_id"      VARCHAR(255),
+        "theme"         VARCHAR(2047),
+        "subtheme"      VARCHAR(2047),
+        "topic"         VARCHAR(2047)
+);
+ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
+GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
+
+INSERT INTO cmslite.google_pdt_scratch
+      SELECT gs.*,
+          COALESCE(node_id,'') AS node_id,
+          SPLIT_PART(page, '/',3) as page_urlhost,
+          title,
+          theme_id, subtheme_id, topic_id, theme, subtheme, topic
+      FROM google.googlesearch AS gs
+      -- fix for misreporting of redirected front page URL in Google search
+      LEFT JOIN cmslite.themes AS themes ON
+        CASE WHEN page = 'https://www2.gov.bc.ca/'
+            THEN 'https://www2.gov.bc.ca/gov/content/home'
+            ELSE page
+            END = themes.hr_url
+        WHERE site NOT IN ('sc-domain:gov.bc.ca', 'sc-domain:engage.gov.bc.ca')
+            OR site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
+                'healthgateway.gov.bc.ca',
+                'engage.gov.bc.ca',
+                'feedback.engage.gov.bc.ca',
+                'www2.gov.bc.ca',
+                'www.engage.gov.bc.ca',
+                'curriculum.gov.bc.ca',
+                'studentsuccess.gov.bc.ca',
+                'news.gov.bc.ca',
+                'bcforhighschool.gov.bc.ca')
+            OR site = 'sc-domain:engage.gov.bc.ca';
+
+ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
+ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;
+DROP TABLE cmslite.google_pdt_old;
+COMMIT;
+"""
+
+# Execute the query and log the outcome
+logger.debug(query)
+with psycopg2.connect(conn_string) as conn:
+    with conn.cursor() as curs:
+        try:
+            curs.execute(query)
+        except psycopg2.Error:
+            logger.exception("Google Search PDT loading failed")
+        else:
+            logger.info("Google Search PDT loaded successfully")

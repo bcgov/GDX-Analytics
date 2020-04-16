@@ -1,3 +1,4 @@
+"""Google My Business API Loader Script"""
 ###################################################################
 # Script Name   : google_mybusiness.py
 #
@@ -64,10 +65,10 @@ import dateutil.relativedelta
 
 import googleapiclient.errors
 
-from io import BytesIO
+from io import StringIO
 import datetime
 from datetime import timedelta
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
@@ -240,7 +241,7 @@ for account in validated_accounts:
         logger.debug("Begin processing on location: %s", loc['locationName'])
 
         # encode as ASCII for dataframe
-        location_uri = loc['name'].encode('ascii', 'ignore')
+        location_uri = loc['name']
         location_name = loc['locationName']
 
         # if a start_date is defined in the config file, use that date
@@ -331,12 +332,14 @@ for account in validated_accounts:
             logger.exception("Request contains an invalid argument. Skipping.")
             continue
 
+        logger.debug("Response body\n%s", reportInsights)
+
         # We constrain API calls to one location at a time, so
         # there is only one element in the locationMetrics list:
         metrics = reportInsights['locationMetrics'][0]['metricValues']
 
         for metric in metrics:
-            metric_name = metric['metric'].lower().encode('ascii', 'ignore')
+            metric_name = metric['metric'].lower()
 
             logger.debug("processing metric: %s", metric_name)
 
@@ -371,7 +374,7 @@ for account in validated_accounts:
         df = df.astype('int64')
 
         # prepare csv buffer
-        csv_buffer = BytesIO()
+        csv_buffer = StringIO()
         df.to_csv(csv_buffer, index=True, header=True, sep='|')
 
         # Set up the S3 path to write the csv buffer to
@@ -398,7 +401,7 @@ for account in validated_accounts:
         # Prepare the Redshift COPY command.
         logquery = (
             (f"copy {config_dbtable} FROM 's3://{config_bucket}/{object_key}' "
-             "CREDENTIALS 'aws_access_key_id'{AWS_ACCESS_KEY_ID};"
+             "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
              "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
              "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
              "NULL AS '-' ESCAPE;"))

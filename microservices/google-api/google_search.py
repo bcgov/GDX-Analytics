@@ -358,7 +358,7 @@ for site_item in config_sites:
                         site_name, object_key.split('/')[-1])
                 else:
                     logger.info(
-                        "Loaded: %s for %s on object key %s",
+                        "Loaded: %s on object key %s.",
                         site_name, object_key.split('/')[-1])
         # if we didn't add any new rows, set last_loaded_date to latest_date to
         # break the loop, otherwise, set it to the last loaded date

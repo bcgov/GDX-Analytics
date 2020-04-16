@@ -64,11 +64,11 @@ import psycopg2
 import argparse
 import httplib2
 import pandas as pd
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import googleapiclient.errors
-from io import BytesIO
+from io import StringIO
 import datetime
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
@@ -385,7 +385,16 @@ for account in validated_accounts:
     df.drop(columns='region_count', inplace=True)
 
     # output csv formatted dataframe to stream
-    csv_stream = BytesIO()
+    csv_stream = StringIO()
+    # set order of columns for S3 file in order to facilitate table COPY
+    column_names = [
+        "client_shortname", "days_aggregated", "location_label",
+        "location_locality", "location_name", "location_postal_code",
+        "location_time_zone", "rank_on_query", "region_label",
+        "region_latitude", "region_longitude", "utc_query_date",
+        "region_count_seven_days", "region_count_ninety_days",
+        "region_count_thirty_days"]
+    df = df.reindex(columns=column_names)
     df.to_csv(csv_stream, sep='|', encoding='utf-8', index=False)
 
     # write csv to S3
@@ -432,12 +441,11 @@ for account in validated_accounts:
                 logger.exception(
                     ("Loading driving directions for failed %s "
                      "on Object key: %s"),
-                    account['clientShortname'],
-                    object_key.split('/')[-1])
+                    account['clientShortname'],object_key.split('/')[-1])
                 outfile = badfile
             else:
                 logger.info(
-                    ("Loaded {0} driving directions successfully. "
+                    ("Loaded %s driving directions successfully. "
                      "Object key %s."),
                     account['clientShortname'], object_key.split('/')[-1])
                 outfile = goodfile

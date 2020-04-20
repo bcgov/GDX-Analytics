@@ -26,7 +26,7 @@ It includes  following files and folders
 ### Prerequisites
 
 * [Python 3.7](https://www.python.org/downloads/)
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+* [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 
 ### Build and Deploy
 To build and deploy your application for the first time, run the following in your shell:

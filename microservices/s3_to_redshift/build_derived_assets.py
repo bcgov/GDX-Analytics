@@ -105,7 +105,9 @@ query = fr'''
         REGEXP_REPLACE(
           SPLIT_PART(
             SPLIT_PART(
-              asset_url, '?', 1),
+              SPLIT_PART(
+                asset_url, '%', 1),
+              '?', 1),
             '#', 1),
           '(.aspx)$'),
         '{asset_host}', 2) LIKE '%.%'
@@ -114,7 +116,9 @@ query = fr'''
           REGEXP_REPLACE(
             SPLIT_PART(
               SPLIT_PART(
-                asset_url, '?', 1),
+                SPLIT_PART(
+                    asset_url, '%', 1),
+                '?', 1),
               '#', 1),
             '(.aspx)$'),
           '{asset_host}', 2),

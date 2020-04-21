@@ -24,11 +24,11 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import itertools  # functional tools for creating and using iterators
 import datetime
+import logging
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
 import psycopg2  # to connect to Redshift
-import logging
 import lib.logs as log
 
 logger = logging.getLogger(__name__)
@@ -103,53 +103,53 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 # order as the SQL table. If null (eg None in Python), will write all columns
 # in order.
 # index = if not Null, add an index column with this label
-def to_s3(bucket, batchfile, filename, df, columnlist, index):
+def to_s3(loc_batchfile, filename, loc_df, loc_columnlist, loc_index):
     """Funcion to write a CSV to S3"""
     # Put the full data set into a buffer and write it
     # to a "   " delimited file in the batch directory
     csv_buffer = StringIO()
-    if columnlist is None:  # no column list, no index
-        if index is None:
-            df.to_csv(csv_buffer,
-                      header=True,
-                      index=False,
-                      sep="	",
-                      encoding='utf-8')
+    if loc_columnlist is None:  # no column list, no index
+        if loc_index is None:
+            loc_df.to_csv(csv_buffer,
+                          header=True,
+                          index=False,
+                          sep="	",
+                          encoding='utf-8')
         else:  # no column list, include index
-            df.to_csv(csv_buffer,
-                      header=True,
-                      index=True,
-                      sep="	",
-                      index_label=index,
-                      encoding='utf-8')
+            loc_df.to_csv(csv_buffer,
+                          header=True,
+                          index=True,
+                          sep="	",
+                          index_label=loc_index,
+                          encoding='utf-8')
     else:
-        if index is None:  # column list, no index
-            df.to_csv(csv_buffer,
-                      header=True,
-                      index=False,
-                      sep="	",
-                      columns=columnlist,
-                      encoding='utf-8')
+        if loc_index is None:  # column list, no index
+            loc_df.to_csv(csv_buffer,
+                          header=True,
+                          index=False,
+                          sep="	",
+                          columns=loc_columnlist,
+                          encoding='utf-8')
         # column list, include index
         else:
-            df.to_csv(csv_buffer,
-                      header=True,
-                      index=True,
-                      sep="	",
-                      columns=columnlist,
-                      index_label=index,
-                      encoding='utf-8')
+            loc_df.to_csv(csv_buffer,
+                          header=True,
+                          index=True,
+                          sep="	",
+                          columns=loc_columnlist,
+                          index_label=loc_index,
+                          encoding='utf-8')
 
-    logger.debug("Writing " + filename + " to " + batchfile)
-    resource.Bucket(bucket).put_object(Key=batchfile + "/" + filename,
+    logger.debug("Writing " + filename + " to " + loc_batchfile)
+    resource.Bucket(bucket).put_object(Key=loc_batchfile + "/" + filename,
                                        Body=csv_buffer.getvalue())
 
 
 # Create a dictionary dataframe based on a column
-def to_dict(df, section):
+def to_dict(loc_df, section):
     '''build a dictionary type dataframe for a column with nested delimeters'''
     # drop any nulls and wrapping delimeters, split and flatten:
-    clean = df.copy().dropna(
+    clean = loc_df.copy().dropna(
         subset=[section])[section].str[1:-1].str.split(
             nested_delim).values.flatten()
     # set to exlude duplicates
@@ -159,21 +159,21 @@ def to_dict(df, section):
 
 
 # Check to see if the file has been processed already
-def is_processed(object_summary):
+def is_processed(loc_object_summary):
     '''check S3 for objects already processed'''
     # Check to see if the file has been processed already
-    key = object_summary.key
-    filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
-    goodfile = destination + "/good/" + key
-    badfile = destination + "/bad/" + key
+    loc_key = loc_object_summary.key
+    filename = loc_key[loc_key.rfind('/') + 1:]  # get the filename string
+    loc_goodfile = destination + "/good/" + key
+    loc_badfile = destination + "/bad/" + key
     try:
-        client.head_object(Bucket=bucket, Key=goodfile)
+        client.head_object(Bucket=bucket, Key=loc_goodfile)
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
         return True
     try:
-        client.head_object(Bucket=bucket, Key=badfile)
+        client.head_object(Bucket=bucket, Key=loc_badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
@@ -242,13 +242,12 @@ for object_summary in objects_to_process:
                          index_col=False,
                          dtype=dtype_dic,
                          usecols=range(column_count))
-    except Exception as e:
-        if str(e) == "No columns to parse from file":
-            logger.debug("Empty file, proceeding")
-            outfile = goodfile
-        else:
-            logger.exception("Parse error:")
-            outfile = badfile
+    except pd.errors.EmptyDataError:
+        logger.debug("Empty file, proceeding")
+        outfile = goodfile
+    except pd.errors.ParserError:
+        logger.exception("Parse error:")
+        outfile = badfile
 
         # For the two exceptions cases, write to either the Good or Bad folder.
         # Otherwise, continue to process the file.
@@ -350,7 +349,7 @@ for object_summary in objects_to_process:
                             df_new = pd.concat([df_new, d], ignore_index=True)
 
         # output the the dataframe as a csv
-        to_s3(bucket, batchfile, dbtable + '.csv', df_new, columnlist, key)
+        to_s3(batchfile, dbtable + '.csv', df_new, columnlist, key)
 
         copy_query_unformatted = (
             "COPY {dbtable}_scratch FROM \n"
@@ -515,12 +514,9 @@ with psycopg2.connect(conn_string) as conn:
             logger.info("Themes table loaded successfully")
             # if the job was succesful, write to cmslite.microservice_log
             endtime = str(datetime.datetime.now())
-            query = "".join(("SET search_path TO {dbschema}; ",
-                             "INSERT INTO microservice_log VALUES ",
-                             "('{starttime}', '{endtime}');")).format(
-                                 dbschema=dbschema,
-                                 starttime=starttime,
-                                 endtime=endtime)
+            query = (f"SET search_path TO {dbschema}; "
+                     "INSERT INTO microservice_log VALUES "
+                     f"('{starttime}', '{endtime}');")
             try:
                 curs.execute(query)
             except psycopg2.Error:  # if the DB call fails, print error

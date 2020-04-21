@@ -49,3 +49,6 @@ def setup(dir='logs', minLevel=logging.INFO):
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("boto3").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("googleapiclient.discovery").setLevel(logging.WARNING)
+    logging.getLogger("googleapiclient.discovery_cache").setLevel(
+        logging.ERROR)

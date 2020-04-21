@@ -23,38 +23,21 @@ import os  # to read environment variables
 import json  # to read json config files
 import sys  # to read command line parameters
 import itertools  # functional tools for creating and using iterators
-import logging
 import datetime
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
 import psycopg2  # to connect to Redshift
+import logging
+import lib.logs as log
+
+logger = logging.getLogger(__name__)
+log.setup()
 
 # we will use this timestamp to write to the cmslite.microservice_log table
 # changes to that table trigger Looker cacheing. As a result, Looker refreshes
 # its cmslite metadata cache each time this microservice completes
 starttime = str(datetime.datetime.now())
-
-# set up logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# create console handler for logs at the WARNING level
-# This will be emailed when the cron task runs; formatted to give messages only
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# create file handler for logs at the INFO level
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename),
-                              "a", encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 
 # Read configuration file

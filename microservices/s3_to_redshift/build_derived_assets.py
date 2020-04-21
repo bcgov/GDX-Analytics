@@ -72,7 +72,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
 
-query = rf'''
+query = r'''
     BEGIN;
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
@@ -187,7 +187,8 @@ query = rf'''
     assets.browser_version,
     -- Redshift requires the two extra escaping slashes for the backslash in
     -- the regex for referrer_urlhost.
-    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost_derived,
+    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+')
+    AS referrer_urlhost_derived,
     assets.referrer_medium,
     SPLIT_PART(
         SPLIT_PART(
@@ -244,7 +245,10 @@ query = rf'''
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
-'''
+'''.format(schema_name=schema_name,
+           asset_scheme_and_authority=asset_scheme_and_authority,
+           asset_host=asset_host,
+           asset_source=asset_source)
 
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

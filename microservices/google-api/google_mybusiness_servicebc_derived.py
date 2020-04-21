@@ -15,37 +15,22 @@
 # Usage         : python google_mybusiness_servicebc_derived.py
 #
 import os
-import psycopg2
 import logging
+import psycopg2
+import lib.logs as log
 
-# Logging has two handlers: INFO to stdout and DEBUG to a file handler
+# Set up logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+log.setup()
 
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-if not os.path.exists('logs'):
-    os.makedirs('logs')
-
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename),
-                              "a", encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-conn_string = """
-dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
-""".format(dbname='snowplow',
-           host='redshift.analytics.gov.bc.ca',
-           port='5439',
-           user=os.environ['pguser'],
-           password=os.environ['pgpass'])
+# set up the Redshift connection
+dbname = 'snowplow'
+host = 'redshift.analytics.gov.bc.ca'
+port = '5439'
+user = os.environ['pguser']
+password = os.environ['pgpass']
+conn_string = (f"dbname='{dbname}' host='{host}' port='{port}' "
+               f"user='{user}' password={password}")
 
 query = '''
 BEGIN;

@@ -1,0 +1,3 @@
+# Handles PyLint E1101 errors where googleapiclient.discovery
+# builds those members per Google's API Discovery URI
+generated-members=googleapiclient.discovery.Resource.*

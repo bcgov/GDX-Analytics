@@ -408,7 +408,7 @@ for object_summary in objects_to_process:
 query = (
     f"SET search_path TO {dbschema};"
     f"TRUNCATE {dbschema}.themes;"
-    f"INSERT INTO {dbschema}.themes"
+    f"INSERT INTO {dbschema}.themes "
     "WITH ids AS ("
     "\tSELECT cm.node_id,"
     "\t\tcm.title,"

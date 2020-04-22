@@ -298,14 +298,30 @@ for object_summary in objects_to_process:
     except pandas.errors.EmptyDataError as e:
         logger.exception('exception reading %s', object_summary.key)
         if str(e) == "No columns to parse from file":
-            logger.warning('File is empty, keying to goodfile and proceeding.')
+            logger.warning('%s is empty, keying to goodfile and proceeding.',
+                           object_summary.key)
             outfile = goodfile
         else:
-            logger.warning('File not empty, keying to badfile and proceeding.')
+            logger.warning('%s not empty, keying to badfile and proceeding.',
+                           object_summary.key)
             outfile = badfile
-        client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                           CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-                           + object_summary.key, Key=outfile)
+        try:
+            client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+        except ClientError:
+            logger.exception("S3 transfer failed")
+        continue
+    except ValueError:
+        logger.exception('ValueError exception reading %s', object_summary.key)
+        logger.warning('Keying to badfile and proceeding.')
+        outfile = badfile
+        try:
+            client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+        except ClientError:
+            logger.exception("S3 transfer failed")
         continue
 
     # map the dataframe column names to match the columns from the configuation
@@ -398,7 +414,7 @@ COMMIT;
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
             CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
             + object_summary.key, Key=outfile)
-    except boto3.exceptions.ClientError:
+    except ClientError:
         logger.exception("S3 transfer failed")
 
     logger.debug("finished")

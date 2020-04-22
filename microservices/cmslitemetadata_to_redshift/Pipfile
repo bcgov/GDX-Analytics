@@ -11,6 +11,7 @@ pandas = "*"
 botocore = "*"
 psycopg2-binary = "*"
 microservices = {editable = true,path = "./.."}
+numpy = "*"
 
 [requires]
 python_version = "3.7"

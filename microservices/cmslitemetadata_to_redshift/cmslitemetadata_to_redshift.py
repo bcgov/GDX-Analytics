@@ -28,6 +28,7 @@ import logging
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import numpy as np
 import psycopg2  # to connect to Redshift
 import lib.logs as log
 
@@ -83,6 +84,9 @@ client = boto3.client('s3')  # low-level functional API
 resource = boto3.resource('s3')  # high-level object-oriented API
 my_bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
 bucket_name = my_bucket.name
+
+aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
+aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
 
 # prep database call to pull the batch file into redshift
 conn_string = """
@@ -331,7 +335,7 @@ for object_summary in objects_to_process:
             df_new = pd.DataFrame(columns=columnlist)
             for index, row in df.copy().iterrows():
                 # iterate over the list of delimited terms
-                if row[column] is not pd.np.nan:
+                if row[column] is not np.nan:
                     # get the full string of delimited values to be looked up
                     entry = row[column]
                     # remove wrapping delimeters
@@ -351,25 +355,17 @@ for object_summary in objects_to_process:
         # output the the dataframe as a csv
         to_s3(batchfile, dbtable + '.csv', df_new, columnlist, key)
 
-        copy_query_unformatted = (
-            "COPY {dbtable}_scratch FROM \n"
-            "'s3://{my_bucket_name}/{batchfile}/{dbtable}.csv' \n"
-            "CREDENTIALS 'aws_access_key_id={aws_access_key_id};"
-            "aws_secret_access_key={aws_secret_access_key}' \n"
+        # append the formatted copy query to the copy_queries dictionary
+        copy_queries[dbtable] = (
+            f"COPY {dbtable}_scratch FROM \n"
+            f"'s3://{bucket_name}/{batchfile}/{dbtable}.csv' \n"
+            f"CREDENTIALS 'aws_access_key_id={aws_access_key_id};"
+            f"aws_secret_access_key={aws_secret_access_key}' \n"
             "IGNOREHEADER AS 1 MAXERROR AS 0 \n"
             "DELIMITER '	' NULL AS '-' ESCAPE;\n")
 
-        # append the formatted copy query to the copy_queries dictionary
-        copy_queries[dbtable] = copy_query_unformatted.format(
-            dbtable=dbtable,
-            my_bucket_name=bucket_name,
-            batchfile=batchfile,
-            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
-
     # prepare the single-transaction query
-    query = 'BEGIN; \nSET search_path TO {dbschema};'.format(
-        dbschema=dbschema)
+    query = f'BEGIN; \nSET search_path TO {dbschema};'
     for table, copy_query in copy_queries.items():
         start_query = (
             f'DROP TABLE IF EXISTS {table}_scratch;\n'
@@ -378,8 +374,8 @@ for object_summary in objects_to_process:
             f'ALTER TABLE {table}_scratch OWNER TO microservice;\n'
             f'GRANT SELECT ON {table}_scratch TO looker;\n')
         end_query = (
-            f'ALTER TABLE {table} RENAME TO {table}_old;\n',
-            f'ALTER TABLE {table}_scratch RENAME TO {table};\n',
+            f'ALTER TABLE {table} RENAME TO {table}_old;\n'
+            f'ALTER TABLE {table}_scratch RENAME TO {table};\n'
             f'DROP TABLE {table}_old;\n')
         query = query + start_query + copy_query + end_query
     query = query + 'COMMIT;\n'

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS workbc.asset_downloads_derived
   "ip_address" VARCHAR(255) ENCODE ZSTD NOT NULL,
   "proxy" VARCHAR(255) ENCODE ZSTD,
   "referrer" VARCHAR(4095) ENCODE ZSTD,
-  "referrer_urlhost" VARCHAR(255) ENCODE ZSTD,
+  "referrer_urlhost_derived" VARCHAR(255) ENCODE ZSTD,
   "referrer_medium" VARCHAR(255) ENCODE ZSTD,
   "return_size" DOUBLE PRECISION ENCODE ZSTD,
   "status_code" VARCHAR(255) ENCODE ZSTD,

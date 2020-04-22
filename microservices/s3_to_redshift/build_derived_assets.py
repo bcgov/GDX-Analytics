@@ -72,7 +72,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
 
-query = r'''
+query = fr'''
     BEGIN;
     SET SEARCH_PATH TO '{schema_name}';
     DROP TABLE IF EXISTS asset_downloads_derived;
@@ -105,7 +105,9 @@ query = r'''
         REGEXP_REPLACE(
           SPLIT_PART(
             SPLIT_PART(
-              asset_url, '?', 1),
+              SPLIT_PART(
+                asset_url, '%', 1),
+              '?', 1),
             '#', 1),
           '(.aspx)$'),
         '{asset_host}', 2) LIKE '%.%'
@@ -114,7 +116,9 @@ query = r'''
           REGEXP_REPLACE(
             SPLIT_PART(
               SPLIT_PART(
-                asset_url, '?', 1),
+                SPLIT_PART(
+                    asset_url, '%', 1),
+                '?', 1),
               '#', 1),
             '(.aspx)$'),
           '{asset_host}', 2),
@@ -183,18 +187,56 @@ query = r'''
     assets.browser_version,
     -- Redshift requires the two extra escaping slashes for the backslash in
     -- the regex for referrer_urlhost.
-    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+') AS referrer_urlhost,
+    REGEXP_SUBSTR(assets.referrer, '[^/]+\\\.[^/:]+')
+    AS referrer_urlhost_derived,
     assets.referrer_medium,
-    CASE
-        WHEN REGEXP_COUNT(assets.referrer,'^[a-z\-]+:\/\/[^/]+|file:\/\/')
-        THEN REGEXP_REPLACE(assets.referrer, '^[a-z\-]+:\/\/[^/]+|file:\/\/')
-        ELSE ''
-        END AS referrer_urlpath,
+    SPLIT_PART(
+        SPLIT_PART(
+            REGEXP_SUBSTR(
+                REGEXP_REPLACE(assets.referrer,'.*:\/\/'), '/.*'), '?', 1),
+                '#', 1)
+    AS referrer_urlpath,
     CASE
         WHEN POSITION ('?' IN referrer) > 0
         THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
         ELSE ''
-        END AS referrer_urlquery
+        END AS referrer_urlquery,
+    SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
+    CASE
+        WHEN referrer_urlhost_derived = 'www2.gov.bc.ca'
+            AND referrer_urlpath = '/gov/search'
+        THEN 'https://www2.gov.bc.ca/gov/search?' || referrer_urlquery
+        WHEN referrer_urlhost_derived = 'www2.gov.bc.ca'
+            AND referrer_urlpath = '/enSearch/sbcdetail'
+        THEN 'https://www2.gov.bc.ca/enSearch/sbcdetail?' ||
+            REGEXP_REPLACE(referrer_urlquery,'([^&]*&[^&]*)&.*','$1')
+        WHEN referrer_urlpath IN (
+            '/solutionexplorer/ES_Access',
+            '/solutionexplorer/ES_Question',
+            '/solutionexplorer/ES_Result',
+            '/solutionexplorer/ES_Action')
+            AND LEFT(referrer_urlquery, 3) = 'id='
+        THEN referrer_urlscheme || '://' || referrer_urlhost_derived  ||
+            referrer_urlpath ||'?' ||
+            SPLIT_PART(referrer_urlquery,'&',1)
+        ELSE referrer_urlscheme || '://' || referrer_urlhost_derived  ||
+            REGEXP_REPLACE(
+                referrer_urlpath,
+                'index.(html|htm|aspx|php|cgi|shtml|shtm)$','')
+        END AS page_referrer_display_url,
+    LOWER(asset_url) AS asset_url_case_insensitive,
+    REGEXP_REPLACE(asset_url, '\\?.*$') AS asset_url_nopar,
+    LOWER(
+        REGEXP_REPLACE(asset_url, '\\?.*$'))
+    AS asset_url_nopar_case_insensitive,
+    REGEXP_REPLACE(
+        REGEXP_REPLACE(
+            REGEXP_REPLACE(
+                asset_url_nopar_case_insensitive,
+                '/((index|default)\\.(htm|html|cgi|shtml|shtm))|(default\\.(asp|aspx))/{0,}$','/'),
+            '//$','/'),
+        '%20',' ')
+    AS truncated_asset_url_nopar_case_insensitive
     FROM {schema_name}.asset_downloads AS assets
     -- Asset files not in the getmedia folder for workbc must be filtered out
     WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
@@ -203,10 +245,7 @@ query = r'''
     ALTER TABLE asset_downloads_derived OWNER TO microservice;
     GRANT SELECT ON asset_downloads_derived TO looker;
     COMMIT;
-'''.format(schema_name=schema_name,
-           asset_scheme_and_authority=asset_scheme_and_authority,
-           asset_host=asset_host,
-           asset_source=asset_source)
+'''
 
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:

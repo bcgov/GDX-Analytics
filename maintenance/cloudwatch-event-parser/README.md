@@ -27,6 +27,7 @@ It includes  following files and folders
 
 * [Python 3.7](https://www.python.org/downloads/)
 * [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+* A valid AWS CLI profile. For account that requires MFA, the profile must contain a non-expired session token.
 
 ### Build and Deploy
 To build and deploy your application for the first time, run the following in your shell:
@@ -75,7 +76,7 @@ context support of SAM
 All prerequisites listed in *Deploy the application* section above plus
 
 * [VS Code](https://code.visualstudio.com/)
-* (Optionally) [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) extension for VS Code 
+* [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) extension for VS Code 
 
 To enable step-through debugging, 
  1. Open [app.code-workspace](./app.code-workspace) in VS Code
@@ -94,7 +95,7 @@ To enable step-through debugging,
     sam local invoke -e events/event.json -d 5890 JsonFormatterFunction
     ```
     The last cmd will hung waiting for a debugger to be attached.
- 5. Hit `F5` to start debugging
+ 5. Hit `F5` to start debugging using the *SAM CLI Python* launch config.
 
 ## Cleanup
 

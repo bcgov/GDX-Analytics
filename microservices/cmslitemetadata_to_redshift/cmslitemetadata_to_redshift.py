@@ -405,99 +405,120 @@ for object_summary in objects_to_process:
         Key=outfile)
 
 # now we run the single-time load on the cmslite.themes
-query = (
-    f"SET search_path TO {dbschema};"
-    f"TRUNCATE {dbschema}.themes;"
-    f"INSERT INTO {dbschema}.themes "
-    "WITH ids AS ("
-    "\tSELECT cm.node_id,"
-    "\t\tcm.title,"
-    "\t\tcm.hr_url,"
-    "\t\tcm.parent_node_id,"
-    "\t\tcm_parent.title AS parent_title,"
-    "\t\tCASE"
-    "\t\t\tWHEN cm.node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',"
-    "'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL "
-    "-- page is a home page either web or intranet home"
-    "\t\t\tWHEN cm.parent_node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',"
-    "'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN ('BC Gov Theme',"
-    "'Intranet Home') THEN cm.node_id "
-    "-- page is a theme -- NOTE we call intranet 'homes' as Themes"
-    "\t\t\tWHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN ('BC Gov"
-    " Theme','Intranet Home') THEN cm.parent_node_id -- parent is a theme"
-    "\t\t\tWHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) <> '' THEN TRIM("
-    "SPLIT_PART(cm.ancestor_nodes, '|', 2)) "
-    "-- take the second entry. The first is always blank as the string has"
-    " '|' on each end"
-    "\t\t\tELSE NULL"
-    "\t\tEND AS theme_id,"
-    "\t\tCASE"
-    "\t\t\tWHEN cm.node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',"
-    "'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL -- page is a home page"
-    "\t\t\tWHEN cm.parent_node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',"
-    "'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN ('BC Gov Theme',"
-    "'Intranet Home') THEN NULL "
-    "-- page is a theme -- NOTE we call intranet 'homes' as Themes"
-    "\t\t\tWHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN "
-    "('BC Gov Theme','Intranet Home') THEN cm.node_id "
-    "-- parent is a theme, so this is a subtheme"
-    "\t\t\tWHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' THEN "
-    "cm.parent_node_id -- the parent is a subtheme"
-    "\t\t\tWHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) <> '' THEN "
-    "TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) -- take the third entry. "
-    "The first is always blank as the string has '|' on each end and the "
-    "second is the theme, the third is a subtheme"
-    "\t\t\tELSE NULL"
-    "\t\tEND AS subtheme_id,"
-    "\t\tCASE"
-    "\t\t\tWHEN cm.node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',"
-    "'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL -- page is a home page"
-    "\t\t\tWHEN cm.parent_node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',"
-    "'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN ('BC Gov Theme',"
-    "'Intranet Home') THEN NULL -- page is a theme"
-    "\t\t\tWHEN cm.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' OR "
-    "cm_parent.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' THEN "
-    "'FD6DB5BA2A5248038EEF54D9F9F37C4D' "
-    "-- built in override to make all ServiceBC pages one topic"
-    "\t\t\tWHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = '' AND "
-    "cm_parent.page_type IN ('BC Gov Theme','Intranet Theme') AND "
-    "cm.page_type = 'Topic' THEN cm.node_id "
-    "-- the page's parent is a sub-theme and it is a topic page"
-    "\t\t\tWHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) = '' AND "
-    "cm_parent.page_type = 'Topic' THEN cm.parent_node_id "
-    "-- the page's parent is a topic"
-    "\t\t\tWHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) <> '' THEN "
-    "TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) -- take the fourth entry. "
-    "The first is always blank as the string has '|' on each end and the "
-    "second is the theme, third is sub-theme"
-    "\t\t\tELSE NULL"
-    "\t\tEND AS topic_id"
-    f"\t\tFROM {dbschema}.metadata AS cm"
-    f"\t\tLEFT JOIN {dbschema}.metadata AS cm_parent ON cm_parent.node_id = "
-    "cm.parent_node_id"
-    "\t),"
-    "biglist AS ("
-    "\tSELECT"
-    "\t\tROW_NUMBER () OVER ( PARTITION BY ids.node_id ) AS index,"
-    "\t\tids.*,"
-    "\t\tcm_theme.title AS theme,"
-    "\t\tcm_sub_theme.title AS subtheme,"
-    "\t\tcm_topic.title AS topic"
-    "\t\tFROM ids"
-    f"\t\tLEFT JOIN {dbschema}.metadata AS cm_theme ON cm_theme.node_id = "
-    "theme_id"
-    f"\t\tLEFT JOIN {dbschema}.metadata AS cm_sub_theme ON cm_sub"
-    "_theme.node_id = subtheme_id"
-    f"\t\tLEFT JOIN {dbschema}.metadata AS cm_topic ON cm_topic.node_id = "
-    "topic_id"
-    "\t)"
-    "SELECT node_id, title, hr_url, parent_node_id, parent_title, theme_id, "
-    "subtheme_id, topic_id, theme, subtheme, topic FROM biglist WHERE"
-    " index = 1 ;"
-)
+query = """
+SET search_path TO {dbschema};
+TRUNCATE {dbschema}.themes;
+INSERT INTO {dbschema}.themes
+WITH ids AS (
+    SELECT cm.node_id,
+        cm.title,
+        cm.hr_url,
+        cm.parent_node_id,
+        cm_parent.title AS parent_title,
+        CASE
+            -- page is a home page either web or intranet home
+            WHEN cm.node_id IN (
+                'CA4CBBBB070F043ACF7FB35FE3FD1081',
+                'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL
+             -- page is a theme -- NOTE we call intranet "homes" as Themes
+            WHEN cm.parent_node_id IN (
+                'CA4CBBBB070F043ACF7FB35FE3FD1081',
+                'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN (
+                    'BC Gov Theme','Intranet Home') THEN cm.node_id
+            -- parent is a theme
+            WHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN (
+                'BC Gov Theme','Intranet Home') THEN cm.parent_node_id
+            -- take the second entry.
+            -- The first is always blank as the string has '|' on each end
+            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) <> '' THEN TRIM(
+                SPLIT_PART(cm.ancestor_nodes, '|', 2))
+            ELSE NULL
+        END AS theme_id,
+        CASE
+            -- page is a home page
+            WHEN cm.node_id IN (
+                'CA4CBBBB070F043ACF7FB35FE3FD1081',
+                'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL
+            -- page is a theme -- NOTE we call intranet "homes" as Themes
+            WHEN cm.parent_node_id IN (
+                'CA4CBBBB070F043ACF7FB35FE3FD1081',
+                'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN (
+                    'BC Gov Theme','Intranet Home') THEN NULL
+            -- parent is a theme, so this is a subtheme
+            WHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN (
+                'BC Gov Theme','Intranet Home') THEN cm.node_id
+            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = ''
+                THEN cm.parent_node_id -- the parent is a subtheme
+            -- take the third entry. The first is always blank as the string
+            -- has '|' on each end and the second is the theme,
+            -- the third is a subtheme
+            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) <> ''
+                THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3))
+            ELSE NULL
+        END AS subtheme_id,
+        CASE
+            -- page is a home page
+            WHEN cm.node_id IN (
+                'CA4CBBBB070F043ACF7FB35FE3FD1081',
+                'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL
+            -- page is a theme
+            WHEN cm.parent_node_id IN (
+                'CA4CBBBB070F043ACF7FB35FE3FD1081',
+                'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN (
+                    'BC Gov Theme','Intranet Home') THEN NULL
+            WHEN cm.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+                OR cm_parent.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+                THEN 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+            -- the page's parent is a sub-theme and it is a topic page
+            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = ''
+                AND cm_parent.page_type IN ('BC Gov Theme','Intranet Theme')
+                AND cm.page_type = 'Topic' THEN cm.node_id
+            -- the page's parent is a topic
+            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) = ''
+                AND cm_parent.page_type = 'Topic' THEN cm.parent_node_id
+            -- take the fourth entry. The first is always blank as the
+            -- string has '|' on each end and the second is the theme,
+            -- third is sub-theme
+            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) <> ''
+                THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4))
+            ELSE NULL
+        END AS topic_id
+        FROM {dbschema}.metadata AS cm
+        LEFT JOIN {dbschema}.metadata AS cm_parent
+            ON cm_parent.node_id = cm.parent_node_id
+    ),
+biglist AS (
+    SELECT
+        ROW_NUMBER () OVER ( PARTITION BY ids.node_id ) AS index,
+        ids.*,
+        cm_theme.title AS theme,
+        cm_sub_theme.title AS subtheme,
+        cm_topic.title AS topic
+        FROM ids
+        LEFT JOIN {dbschema}.metadata AS cm_theme
+            ON cm_theme.node_id = theme_id
+        LEFT JOIN {dbschema}.metadata AS cm_sub_theme
+            ON cm_sub_theme.node_id = subtheme_id
+        LEFT JOIN {dbschema}.metadata AS cm_topic
+            ON cm_topic.node_id = topic_id
+    )
+SELECT node_id,
+       title,
+       hr_url,
+       parent_node_id,
+       parent_title,
+       theme_id,
+       subtheme_id,
+       topic_id,
+       theme,
+       subtheme,
+       topic
+FROM   biglist
+WHERE  index = 1;
+""".format(dbschema=dbschema)
 
 # Execute the query and log the outcome
-logger.debug(query)
+logger.debug('Executing query:\n%s', query)
 with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:

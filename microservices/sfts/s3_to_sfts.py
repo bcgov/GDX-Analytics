@@ -1,3 +1,4 @@
+"""Uploads objects from S3 to the SFTS system."""
 ###################################################################
 # Script Name   : s3_to_sfts.py
 #
@@ -21,35 +22,17 @@
 import os
 import sys
 import shutil
-import boto3
-from botocore.exceptions import ClientError
 import re
 import logging
 import argparse
 import json
 import subprocess
+import boto3
+from botocore.exceptions import ClientError
+import lib.logs as log
 
-# Logging has two handlers: INFO to stdout and DEBUG to a file handler
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-if not os.path.exists('logs'):
-    os.makedirs('logs')
-
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename),
-                              "a", encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
+log.setup()
 
 # Command line arguments
 parser = argparse.ArgumentParser(
@@ -65,7 +48,7 @@ config = flags.conf
 with open(config) as f:
     config = json.load(f)
 
-bucket = config['bucket']
+config_bucket = config['bucket']
 source = config['source']
 directory = config['directory']
 prefix = source + "/" + directory + "/"
@@ -82,42 +65,40 @@ xfer_path = os.environ['xfer_path']
 # set up S3 connection
 client = boto3.client('s3')  # low-level functional API
 resource = boto3.resource('s3')  # high-level object-oriented API
-my_bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
-bucket_name = my_bucket.name
+res_bucket = resource.Bucket(config_bucket)  # resource bucket object
+bucket_name = res_bucket.name
 
 
 def download_object(o):
+    '''downloads object to a tmp directoy'''
     dl_name = o.replace(prefix, '')
     try:
-        my_bucket.download_file(o, './tmp/{0}{1}'.format(dl_name, extension))
+        res_bucket.download_file(o, './tmp/{0}{1}'.format(dl_name, extension))
     except ClientError as e:
         if e.response['Error']['Code'] == "404":
             logger.error("The object does not exist.")
-            logger.debug("ClientError 404: {}".format(e))
+            logger.exception("ClientError 404:")
         else:
             raise
 
 
-# Check to see if the file has been processed already
-def is_processed(object_summary):
-    filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
-    goodfile = destination + "/good/" + key
-    badfile = destination + "/bad/" + key
+def is_processed():
+    '''Check to see if the file has been processed already'''
     try:
-        client.head_object(Bucket=bucket, Key=goodfile)
+        client.head_object(Bucket=config_bucket, Key=goodfile)
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
-        logger.debug("{0} was processed as good already.".format(filename))
+        logger.debug("%s was processed as good already.", filename)
         return True
     try:
-        client.head_object(Bucket=bucket, Key=badfile)
+        client.head_object(Bucket=config_bucket, Key=badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
-        logger.debug("{0} was processed as bad already.".format(filename))
+        logger.debug("%s was processed as bad already.", filename)
         return True
-    logger.debug("{0} has not been processed.".format(filename))
+    logger.debug("%s has not been processed.", filename)
     return False
 
 
@@ -134,18 +115,17 @@ filename_regex = (
     '(2[0-3]|[01][0-9])[0-5][0-9][0-6][0-9]_part[0-9]{{3}}$'
     .format(object_prefix=object_prefix))
 objects_to_process = []
-for object_summary in my_bucket.objects.filter(Prefix=prefix):
+for object_summary in res_bucket.objects.filter(Prefix=prefix):
     key = object_summary.key
-    goodfile = destination + "/good/" + object_summary.key
-    badfile = destination + "/bad/" + object_summary.key
     filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
+    goodfile = f"{destination}/good/{key}"
+    badfile = f"{destination}/bad/{key}"
     # skip to next object if already processed
-    if is_processed(key):
+    if is_processed():
         continue
-    else:
-        if re.search(filename_regex, filename):
-            objects_to_process.append(object_summary)
-            logger.debug('added {} for processing'.format(filename))
+    if re.search(filename_regex, filename):
+        objects_to_process.append(object_summary)
+        logger.debug('added %a for processing', filename)
 
 if not objects_to_process:
     logger.debug('no files to process')
@@ -154,8 +134,8 @@ if not objects_to_process:
 # downloads go to a temporary folder: ./tmp
 if not os.path.exists('./tmp'):
     os.makedirs('./tmp')
-for object in objects_to_process:
-    download_object(object.key)
+for obj in objects_to_process:
+    download_object(obj.key)
 
 # Copy to SFTS
 # write a file to use with the -s flag for the xfer.sh service
@@ -165,49 +145,58 @@ sf_full_path = os.path.realpath(sf.name)
 # switch to the writable directory
 sf.write('cd {}\n'.format(sfts_path))
 # write all file names downloaded in "A" in the objects_to_process list
-for object in objects_to_process:
-    transfer_file = './tmp/{0}{1}'.format(object.key.replace(prefix, ''), extension)
+for obj in objects_to_process:
+    transfer_file = f"./tmp/{obj.key.replace(prefix, '')}{extension}"
     sf.write('put {}\n'.format(transfer_file))
 sf.write('quit\n')
 sf.close()
 
-logger.debug('file for xfer -s call is {}'.format(os.path.realpath(sf.name)))
+logger.debug('file for xfer -s call is %s', os.path.realpath(sf.name))
 with open(sfts_conf, 'r') as sf:
-    logger.debug('Contents:\n{}'.format(sf.read()))
+    logger.debug('Contents:\n%s', sf.read())
 sf.close()
 
 # as a subprocess pass the credentials and the sfile to run xfer in batch mode
 # https://docs.ipswitch.com/MOVEit/Transfer2017Plus/FreelyXfer/MoveITXferManual.html
+# TODO: do uploads one at a time and treat them on S3 one-by-one
 try:
-    xfer_jar = "{}/xfer.jar".format(xfer_path)
-    jna_jar = "{}/jna.jar".format(xfer_path)
-    print("trying to call subprocess:\nxfer.jar: {}\njna.jar : {}".format(
-        xfer_jar, jna_jar))
+    xfer_jar = f"{xfer_path}/xfer.jar"
+    jna_jar = f"{xfer_path}/jna.jar"
+    print(("trying to call subprocess:\nxfer.jar: "
+           f"{xfer_jar}\njna.jar : {jna_jar}"))
     subprocess.check_call(
-        ["java", "-classpath", "{}:{}".format(xfer_jar, jna_jar), "xfer",
-         "-user:{}".format(sfts_user),
-         "-password:{}".format(sfts_pass),
-         "-s:{}".format(sfts_conf),
+        ["java", "-classpath", f"{xfer_jar}:{jna_jar}",
+         "xfer",
+         f"-user:{sfts_user}",
+         f"-password:{sfts_pass}",
+         f"-s:{sfts_conf}",
          "filetransfer.gov.bc.ca"])
-    outfile = goodfile
-except subprocess.CalledProcessError as e:
-    logger.error('Non-zero exit code calling XFer.')
-    logger.debug('{}'.format(e))
-    outfile = badfile
+    xfer_proc = True
+except subprocess.CalledProcessError:
+    logger.exception('Non-zero exit code calling XFer:')
+    xfer_proc = False
 
-# copy the file to the outfile destination path
-try:
-    client.copy_object(
-        Bucket=bucket,
-        CopySource='{}/{}'.format(bucket, object_summary.key),
-        Key=outfile)
-except ClientError as e:
-    logger.error('Exception copying object')
-    logger.debug('{}'.format(e))
+# copy the processed files to their outfile destination path
+for obj in objects_to_process:
+    key = obj.key
+    # TODO: check SFTS endpoint to determine which files reached SFTS
+    # currently it's all based on whether or not the XFER call returned 0 or 1
+    if xfer_proc:
+        outfile = f"{destination}/good/{key}"
+    else:
+        outfile = f"{destination}/bad/{key}"
+    try:
+        client.copy_object(
+            Bucket=config_bucket,
+            CopySource='{}/{}'.format(config_bucket, obj.key),
+            Key=outfile)
+    except ClientError:
+        logger.exception('Exception copying object %s', obj.key)
+    else:
+        logger.debug('copied %s to %s', obj.key, outfile)
 
 # Remove the temporary local files used to transfer
 try:
     shutil.rmtree('./tmp')
-except Exception as e:
-    logger.error('Exception deleting temporary folder')
-    logger.debug('{}'.format(e))
+except (os.error, OSError):
+    logger.exception('Exception deleting temporary folder:')

@@ -82,7 +82,7 @@ query = fr'''
         AS asset_url,
     assets.date_timestamp::TIMESTAMP,
     assets.ip AS ip_address,
-    assets.proxy,
+    assets.request_response_time,
     assets.referrer,
     assets.return_size,
     assets.status_code,

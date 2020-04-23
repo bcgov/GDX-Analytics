@@ -16,7 +16,7 @@
       "return_size",
       "referrer",
       "user_agent_http_request_header",
-      "proxy",
+      "request_response_time",
       "os_family",
       "os_version",
       "browser_family",

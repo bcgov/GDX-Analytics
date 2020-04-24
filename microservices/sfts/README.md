@@ -7,6 +7,14 @@ This folder contains scripts, configuration files (within the [config.d](./confi
 
 Two scripts exist to separate their functions into smaller, potentially independently operating services. Used together in sequence, they perform the overall function of copying data from Redshift to SFTS. S3 and EC2 are required as intermediary services (EC2 to execute the scripts and store and modify temporary files, and S3 to store objects unloaded from Redshift). The "first" script in this process is `redshift_to_s3.py`, and the "second" script is `s3_to_sfts.py`. A example below demonstrates the sequential use of the scripts to perform the overall service ([skip to Usage Example section](#usage-example)).
 
+### Setup
+
+The Pipfiles included in this repository instructs pipenv on what dependencies are required for the virtual environment used to invoke these scripts. It must be installed using the following command:
+
+```
+pipenv install
+```
+
 ### `redshift_to_s3.py`
 
 The Redshift to S3 microservice requires:
@@ -28,7 +36,7 @@ The Redshift to S3 microservice requires:
 The configuration file format is described in more detail below. Usage is like:
 
 ```
-python redshift_to_s3.py -c config.d/config.json
+pipenv run python redshift_to_s3.py -c config.d/config.json
 ```
 
 #### Output File
@@ -75,7 +83,7 @@ The S3 to SFTS microservice requires:
 The configuration file format is described in more detail below. Usage is like:
 
 ```
-python s3_to_sfts.py -c config.d/config.json
+pipenv run python s3_to_sfts.py -c config.d/config.json
 ```
 
 ## Configuration
@@ -153,10 +161,10 @@ The example service may be run once as follows:
 
 ```
 ## step 1
-$ python redshift_to_s3.py -c config.d/example.json
+$ pipenv run python redshift_to_s3.py -c config.d/example.json
 
 ## step 2
-$ python s3_to_sfts.py -c config.d/example.json
+$ pipenv run python s3_to_sfts.py -c config.d/example.json
 ```
 
 The first step created an object in S3, specifically into `S3://sp-ca-bc-gov-131565110619-12-microservices/client/pmrp_gdx/example`, which stores delimited content emitted from Redshift, based on the results of the configured `"dml"` value: [`"example.sql"`](./dml/example.json). The key of the object created under that path will resemble: `pmrp_YYYYMMDD_YYYYMMDD_YYYYMMDDTHH_part000` (where the dates in the key name are computed values).

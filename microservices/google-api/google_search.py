@@ -354,12 +354,14 @@ for site_item in config_sites:
                 # if the DB call fails, print error and place file in /bad
                 except psycopg2.Error:
                     logger.exception(
-                        "Loading failed: %s on object key %s.",
-                        site_name, object_key.split('/')[-1])
+                        "Load failure: %s index %s for %s. Object key %s.",
+                        site_name, str(index), str(date_in_range),
+                        object_key.split('/')[-1])
                 else:
                     logger.info(
-                        "Loaded: %s on object key %s.",
-                        site_name, object_key.split('/')[-1])
+                        "Load success: %s index %s for %s. Object key %s.",
+                        site_name, str(index), str(date_in_range),
+                        object_key.split('/')[-1])
         # if we didn't add any new rows, set last_loaded_date to latest_date to
         # break the loop, otherwise, set it to the last loaded date
         if last_loaded_date == last_loaded(site_name):

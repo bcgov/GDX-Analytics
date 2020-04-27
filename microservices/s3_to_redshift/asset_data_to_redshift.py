@@ -216,7 +216,7 @@ for object_summary in objects_to_process:
             # The config contains regex's that correspond to the
             # number of columns in the log entry.
             # This is necessary because some log entries do not
-            # have the tenth column for proxy port number.
+            # have the tenth column for server response time in ms.
             # Check if there are 9 or 10 columns in access log entry by
             # attempting to apply these regex's until finding one that parses.
             for exp in data['access_log_parse']['regexs']:

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS cmslite.asset_downloads_derived
   "asset_path" VARCHAR(4117) ENCODE ZSTD NOT NULL,
   "date_timestamp" timestamp without time zone ENCODE ZSTD,
   "ip_address" VARCHAR(255) ENCODE ZSTD NOT NULL,
-  "proxy" VARCHAR(255) ENCODE ZSTD,
+  "request_response_time" VARCHAR(255) ENCODE ZSTD,
   "referrer" VARCHAR(4095) ENCODE ZSTD,
   "referrer_urlhost_derived" VARCHAR(255) ENCODE ZSTD,
   "referrer_medium" VARCHAR(255) ENCODE ZSTD,

@@ -30,7 +30,7 @@ if (window.location.pathname.split('/')[1] == 'search'
        // This will find the search terms parameter and parses the terms into an array.                                  
       terms = terms.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
     }
-    terms = terms.split(/\s+/);
+    terms = terms.replace('+', " ").split(/\s+/);
     return terms;
   }
 //<!-- Snowplow stop plowing -->

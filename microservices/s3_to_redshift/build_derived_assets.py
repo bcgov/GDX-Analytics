@@ -233,7 +233,7 @@ query = fr'''
         REGEXP_REPLACE(
             REGEXP_REPLACE(
                 asset_url_nopar_case_insensitive,
-                '/((index|default)\\.(htm|html|cgi|shtml|shtm))|(default\\.(asp|aspx))/{0,}$','/'),
+                '/((index|default)\\.(htm|html|cgi|shtml|shtm))|(default\\.(asp|aspx))/{{0,}}$','/'),
             '//$','/'),
         '%20',' ')
     AS truncated_asset_url_nopar_case_insensitive

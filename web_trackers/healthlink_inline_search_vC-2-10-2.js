@@ -3,7 +3,7 @@
     p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
     };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
     n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","https://sp-js.apps.gov.bc.ca/MDWay3UqFnIiGVLIo7aoMi4xMC4y.js","snowplow"));
-var collector = 'spm.apps.gov.bc.ca';
+var collector = 'spm.gov.bc.ca';
 window.snowplow('newTracker','rt',collector, {
     appId: "Snowplow_standalone",
     platform: 'web',
@@ -21,16 +21,16 @@ window.snowplow('trackPageView');
 if (window.location.pathname.split('/')[1] == 'search'
     && window.location.pathname != "/search"
 ) {
-    window.snowplow('trackSiteSearch', decode_search(window.location.pathname.split('/')[2]));
+    window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2])]);
 }
 
   function decode_search(encoded_terms) {
     terms = decodeURIComponent(encoded_terms);
     if (terms.indexOf('bs=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
-      terms = terms.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
+      terms = terms.split('bs=')[1].replace(/ OR/g,"");
     }
-    terms = terms.replace('+', " ").split(/\s+/);
+    terms = terms.replace('+', " ").replace(/"/g,"").replace(/,/g,"");
     return terms;
   }
 //<!-- Snowplow stop plowing -->

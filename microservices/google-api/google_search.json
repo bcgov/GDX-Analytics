@@ -60,6 +60,18 @@
     },
     {
       "name": "https://www.healthlinkbc.ca"
+    },
+    {
+      "name": "https://www.workbc.ca/",
+      "start_date_default": "2020-04-23"
+    },
+    {
+      "name": "https://www.costofliving.workbc.ca/",
+      "start_date_default": "2020-04-23"
+    },
+    {
+      "name": "https://www.careertrekbc.ca/",
+      "start_date_default": "2020-04-23"
     }
   ]
 }

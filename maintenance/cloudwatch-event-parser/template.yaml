@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cloudwatch-event-parser
+
+  Sample SAM Template for cloudwatch-event-parser
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  JsonFormatterFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: json_formatter/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - AmazonSNSFullAccess
+      Environment:
+        Variables:
+          TARGET_SNS_ARN:
+            Ref: targetSNSArnParameter
+  JsonFormatterLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Join:
+          - '/'
+          - - '/aws/lambda'
+            - Ref: JsonFormatterFunction
+      RetentionInDays: 30
+    Type: AWS::Logs::LogGroup
+Parameters:
+  targetSNSArnParameter:
+    Type: String
+    Description: target SNS Arn
+    Default: changeMe
+Outputs:
+  JsonFormatterFunction:
+    Description: 'Json Formatter Lambda Function ARN'
+    Value: !GetAtt JsonFormatterFunction.Arn
+  JsonFormatterLogGroup:
+    Description: 'Json Formatter Log group ARN'
+    Value: !GetAtt JsonFormatterLogGroup.Arn
+  JsonFormatterFunctionIamRole:
+    Description: 'Implicit IAM Role created for Json Formatter function'
+    Value: !GetAtt JsonFormatterFunctionRole.Arn

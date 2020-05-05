@@ -18,17 +18,19 @@ window.snowplow('enableActivityTracking', 30, 30); // Ping every 30 seconds afte
 window.snowplow('enableLinkClickTracking');
 window.snowplow('trackPageView');
 
-if (window.location.pathname.split('/')[1] == 'search') {
+if (window.location.pathname.split('/')[1] == 'search'
+    && window.location.pathname != "/search"
+) {
     window.snowplow('trackSiteSearch', [decode_search(window.location.pathname.split('/')[2])]);
-  }
+}
 
   function decode_search(encoded_terms) {
     terms = decodeURIComponent(encoded_terms);
     if (terms.indexOf('bs=')  >= 0) {
        // This will find the search terms parameter and parses the terms into an array.                                  
-      terms = terms.split('bs=')[1].replace(/"/g,"").replace(/ OR/g,"");
+      terms = terms.split('bs=')[1].replace(/ OR/g,"");
     }
-    terms = terms.split(" ");
+    terms = terms.replace('+', " ").replace(/"/g,"").replace(/,/g,"");
     return terms;
   }
 //<!-- Snowplow stop plowing -->

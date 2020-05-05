@@ -8,6 +8,7 @@ It will connect to Snowplow Mini, which is used for development and testing. Onc
 * [`gov_sp_script.js`](./gov_sp_script.js) should only be used by CMS Lite. It includes a custom context to capture the Node ID of the current page. 
 * [`gov_search_sp_script.js`](./gov_search_sp_script.js) should only be used for search pages in CMS Lite.
 * [`wordpress_sp_script.js`](./wordpress_sp_script.js) should be used by sites using the standard Wordpress setup. This includes Engage.gov sites and Standalone sites. 
+* [`healthlink_inline_search.js`](./healthlink_inline_search.js) should only be used for the Healthlink BC website.
 * [`Snowplow_inline_code.js`](./Snowplow_inline_code.js) can be placed on any Standalone site that uses GDX Analytics services that does not have a search function.
 * [`Snowplow_inline_code_search.js`](./Snowplow_inline_code_search.js) can be placed on any Standalone site that uses GDX Analytics services and has a search fuction. This script requires the variable `searchParameter` be assigned to match the search query parameter on your site. In most cases the search query parameter is `'q'`, and in the case of Wordpress it is `'s'`.
 

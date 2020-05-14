@@ -38,14 +38,13 @@
 				"maxLength": 255
 			}
 		},
-		"overdue": {
-			"type": "array",
-			"items": {
-				"type": [
-					"boolean",
-					"null"
-				]
-			}
+		"is_overdue": {
+			"type": "string",
+			"enum": [
+				"Yes",
+				"No",
+				"All"
+			]
 		},
 		"start_date_start": {
 			"type": [
@@ -89,7 +88,7 @@
 		"organization",
 		"status",
 		"applicant_type",
-		"overdue",
+		"is_overdue",
 		"start_date_start",
 		"start_date_end",
 		"due_date_start",

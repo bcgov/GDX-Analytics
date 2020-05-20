@@ -24,7 +24,13 @@
     "S5CSAT"
   ],
   "no_header": true,
-  "dtype_dic_ints": ["DateKey","TimeKey","PeripheralCallType"],
+  "dtype_dic_ints": ["TimeKey","PeripheralCallType"],
   "delim": "|",
-  "truncate": false
+  "truncate": false,
+  "dateformat": [
+    {
+      "field": "Datekey",
+      "format": "%Y%m%d"
+    }
+  ]
 }

@@ -29,7 +29,7 @@
   "truncate": false,
   "dateformat": [
     {
-      "field": "Datekey",
+      "field": "DateKey",
       "format": "%Y%m%d"
     }
   ]

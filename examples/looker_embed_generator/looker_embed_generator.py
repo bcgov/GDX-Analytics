@@ -19,8 +19,8 @@
 #               : 1 Filter and 1 Value
 #               :
 #               : python looker_embed_generator.py <<embed url>>
-#               :   '{"filter-name": ["matchtype": "matchtype-value", 
-#               :                     "values":"filter-value"]}'
+#               :   '{"filter-name": {"matchtype": "matchtype-value", 
+#               :                     "values":"filter-value"}'
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
 #               :   '{"City":["matchtype":"=", "values":"Metropolis"]}'
@@ -35,7 +35,7 @@
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
 #               :   '{"City":[{"matchtype":"=", "values":"Duncan - British Columbia"},
-#               :             {"matchtype":"starts", "values":"Nanaimo - British Columbia"}]'
+#               :             {"matchtype":"starts", "values":"Nanaimo - British Columbia"}]}'
 #               :
 #               : or:
 #               : 

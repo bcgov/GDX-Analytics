@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 ##################################################
 #
-# get the size of tables in schema "derived" 
-# as well as total size of all tables
-# into a row with table name "_TOTAL_"
+# get top 10 largest tables
 #
 ##################################################
 
-sql="select getdate() as date, \"table\",size FROM SVV_TABLE_INFO where schema='derived'
-union
-select getdate(), '_TOTAL_', sum(size) FROM SVV_TABLE_INFO where schema='derived'
-order by size desc"
+sql="select getdate() as date, schema, \"table\",size FROM SVV_TABLE_INFO order by size desc limit 10"
 adminuser_rs -tqc "$sql"

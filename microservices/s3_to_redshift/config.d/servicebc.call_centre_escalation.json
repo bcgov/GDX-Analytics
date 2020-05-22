@@ -17,7 +17,17 @@
     "ResolvedWithinReportingMonth"
   ],
   "no_header": true,
-  "dtype_dic_ints": ["ReceivedDateKey","ReceivedTimeKey","CompletedDateKey","BusinessDaysAged"],
+  "dtype_dic_ints": ["ReceivedTimeKey","BusinessDaysAged"],
   "delim": "|",
-  "truncate": false
+  "truncate": false,
+  "dateformat": [
+    {
+      "field": "ReceivedDateKey",
+      "format": "%Y%m%d"
+    },
+    {
+      "field": "CompletedDateKey",
+      "format": "%Y%m%d"
+    }
+  ]
 }

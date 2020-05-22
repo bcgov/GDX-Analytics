@@ -24,5 +24,11 @@
   "no_header": true,
   "dtype_dic_ints": ["TSFFlag"],
   "delim": "|",
-  "truncate": false
+  "truncate": false,
+  "dateformat": [
+    {
+      "field": "Datekey",
+      "format": "%Y%m%d"
+    }
+  ]
 }

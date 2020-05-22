@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS servicebc.call_centre_esb_data (
   "SkillGroup" VARCHAR(50) ENCODE ZSTD,
   "ContactReason" VARCHAR(50) ENCODE ZSTD,
   "ContactReasonDetail" VARCHAR(50) ENCODE ZSTD,
-  "DateKey" INTEGER ENCODE ZSTD,
+  "DateKey" DATE ENCODE ZSTD,
   "Interval" VARCHAR(5) ENCODE ZSTD,
   "AnsweredWithinServiceLevel" BOOLEAN ENCODE ZSTD,
   "CallPutOnHold" INTEGER ENCODE ZSTD,

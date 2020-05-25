@@ -24,7 +24,7 @@ The script contained in this folder is used to generate IAM Session Token from a
 ## Usage
 From bash shell,
 ```bash
-curl -so- https://raw.githubusercontent.com/bcgov/GDX-Analytics/generateMFASecurityToken/maintenance/generateMFASecurityToken/generateMFASecurityToken.sh | bash -s -- [-m <mfa_profile>] <base_profile> <token>
+curl -so- https://raw.githubusercontent.com/bcgov/GDX-Analytics/master/maintenance/generateMFASecurityToken/generateMFASecurityToken.sh | bash -s -- [-m <mfa_profile>] <base_profile> <token>
 ```
 where 
 * option *[-m \<mfa_profile\>]* is the mfa profile name to be created or updated. Default to *mfa*.
@@ -36,12 +36,12 @@ After execution, append *--profile \<mfa_profile\>* to every AWS CLI or SAM CLI 
 ## Examples
 * to create or update *mfa* profile based on *default* profile and MFA token code *12345*
   ```bash
-  curl -so- https://raw.githubusercontent.com/bcgov/GDX-Analytics/generateMFASecurityToken/maintenance/generateMFASecurityToken/generateMFASecurityToken.sh | bash -s -- default 12345
+  curl -so- https://raw.githubusercontent.com/bcgov/GDX-Analytics/master/maintenance/generateMFASecurityToken/generateMFASecurityToken.sh | bash -s -- default 12345
   ```
 
 * to create or update *non-prod-mfa* profile based on *non-prod* profile and MFA token code *54321*
 
   ```bash
-  curl -so- https://raw.githubusercontent.com/bcgov/GDX-Analytics/generateMFASecurityToken/maintenance/generateMFASecurityToken/generateMFASecurityToken.sh | bash -s -- -m non-prod-mfa non-prod 54321
+  curl -so- https://raw.githubusercontent.com/bcgov/GDX-Analytics/master/maintenance/generateMFASecurityToken/generateMFASecurityToken.sh | bash -s -- -m non-prod-mfa non-prod 54321
   ```
 

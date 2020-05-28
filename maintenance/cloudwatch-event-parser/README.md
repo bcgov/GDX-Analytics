@@ -66,17 +66,17 @@ set the rule target to this Lambda function.
 
    ```
    {
-      "JsonFormatterFunction": {
+      "AWSConfigMessageComposerFunction": {
          "TARGET_SNS_ARN": "<target_sns_arn>"
       }
    }
    ```
    Replace *\<target_sns_arn\>* with your target SNS ARN
 
-3. Invoke *JsonFormatterFunction* locally
+3. Invoke *AWSConfigMessageComposerFunction* locally
 
    ```
-   sam local invoke --event events/configItemUpdate.json --env-vars .env.json --profile <your-aws-cli-profile> JsonFormatterFunction
+   sam local invoke --event events/configItemUpdate.json --env-vars .env.json --profile <your-aws-cli-profile> AWSConfigMessageComposerFunction
    ```
 
 ### Step-through debugging with VS Code

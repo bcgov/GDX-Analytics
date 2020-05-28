@@ -3,21 +3,21 @@
 This project contains source code and supporting files for a serverless
 application to fomat incoming json object and publish to a SNS topic.
 
-## Why
+## Overview
 
 AWS Config sends detailed information about the configuration changes and
 notifications to Amazon CloudWatch Events. Rules can be defined in CloudWatch
 to filter the events and send to downstreams such as SNS. However, the
 filtered events is not properly formatted, making it less readable when received
 by SNS subscribers. This application adds the json formatting
-function to the event processing pipeline.
+function to the event processing pipeline. To further improve readability, for a selected few known event types, the app also sets a customized more specific subject and adds a summary paragragh at the beginning of the message body before the event.
 
 ## Components
 
 The project is built using [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html).
 It includes following files and folders
 
-- json_formatter - Code for the application's Lambda function.
+- AWSConfigMessageComposer - Code for the application's Lambda function.
 - events - Invocation events that you can use to invoke the function.
 - template.yaml - A template that defines the application's AWS resources.
 - samconfig.toml - sam deploy defaults
@@ -96,7 +96,7 @@ To enable step-through debugging,
     # ptvsd.wait_for_attach()
     ```
 
-3.  Set a breakpoint in json_formatter/app.py below the above uncommented lines
+3.  Set a breakpoint in AWSConfigMessageComposer/app.py below the above uncommented lines
 4.  Run
 
     ```

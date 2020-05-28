@@ -9,7 +9,7 @@
       "host": "localhost",
       "pathMappings": [
         {
-          "localRoot": "${workspaceFolder}/json_formatter",
+          "localRoot": "${workspaceFolder}/AWSConfigMessageComposer",
           "remoteRoot": "/var/task"
         }
       ]

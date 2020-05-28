@@ -1,0 +1,68 @@
+{
+  "version": "0",
+  "id": "a08660db-9731-da78-6cfb-6dabb21963cf",
+  "detail-type": "Config Configuration Item Change",
+  "source": "aws.config",
+  "account": "444682994021",
+  "time": "2020-05-28T20:47:18Z",
+  "region": "ca-central-1",
+  "resources": [
+    "arn:aws:iam::444682994021:role/GovBC-GDX-cloudwatch-even-AWSConfigMessageComposer-1J1AO43M6ESC2"
+  ],
+  "detail": {
+    "recordVersion": "1.3",
+    "messageType": "ConfigurationItemChangeNotification",
+    "configurationItemDiff": {
+      "changedProperties": {},
+      "changeType": "CREATE"
+    },
+    "notificationCreationTime": "2020-05-28T20:47:18.772Z",
+    "configurationItem": {
+      "relatedEvents": [],
+      "relationships": [],
+      "configuration": {
+        "path": "/",
+        "roleName": "GovBC-GDX-cloudwatch-even-AWSConfigMessageComposer-1J1AO43M6ESC2",
+        "roleId": "AROAWPCJMAFS4TOI4O4F6",
+        "arn": "arn:aws:iam::444682994021:role/GovBC-GDX-cloudwatch-even-AWSConfigMessageComposer-1J1AO43M6ESC2",
+        "createDate": "2020-05-28T20:35:17.000Z",
+        "assumeRolePolicyDocument": "%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22Service%22%3A%22lambda.amazonaws.com%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%7D%5D%7D",
+        "instanceProfileList": [],
+        "rolePolicyList": [],
+        "attachedManagedPolicies": [
+          {
+            "policyName": "AWSLambdaBasicExecutionRole",
+            "policyArn": "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          },
+          {
+            "policyName": "AmazonSNSFullAccess",
+            "policyArn": "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+          }
+        ],
+        "tags": [
+          {
+            "key": "lambda:createdBy",
+            "value": "SAM"
+          }
+        ]
+      },
+      "supplementaryConfiguration": {},
+      "tags": {
+        "lambda:createdBy": "SAM"
+      },
+      "configurationItemVersion": "1.3",
+      "configurationItemCaptureTime": "2020-05-28T20:47:15.686Z",
+      "configurationStateId": 1590698835686.0,
+      "awsAccountId": "444682994021",
+      "configurationItemStatus": "ResourceDiscovered",
+      "resourceType": "AWS::IAM::Role",
+      "resourceId": "AROAWPCJMAFS4TOI4O4F6",
+      "resourceName": "GovBC-GDX-cloudwatch-even-AWSConfigMessageComposer-1J1AO43M6ESC2",
+      "ARN": "arn:aws:iam::444682994021:role/GovBC-GDX-cloudwatch-even-AWSConfigMessageComposer-1J1AO43M6ESC2",
+      "awsRegion": "global",
+      "availabilityZone": "Not Applicable",
+      "configurationStateMd5Hash": "",
+      "resourceCreationTime": "2020-05-28T20:35:17.000Z"
+    }
+  }
+}

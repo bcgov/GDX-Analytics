@@ -15,9 +15,28 @@ def lambda_handler(event, context):
     print(f'env TARGET_SNS_ARN={targetSnsArn}')  # noqa: E999
     if targetSnsArn == 'changeMe' or targetSnsArn is None:
         return
+    resourceType = event.get("detail", {}).get(
+        "configurationItem", {}).get("resourceType")
+    resourceName = event.get("detail", {}).get(
+        "configurationItem", {}).get("resourceName")
+    changeType = event.get("detail", {}).get(
+        "configurationItemDiff", {}).get("changeType")
+    changeTypeMap = {'UPDATE': 'updated'}
+    changeTypeStr = changeTypeMap.get(changeType, changeType)
+    detailTypeMap = {'Config Configuration Item Change': {
+        'subject': 'AWS Config Item Change',
+        'summary': f'{resourceType} {resourceName} has been {changeTypeStr}.'}}
+    publishArgs = {'TargetArn': targetSnsArn, 'MessageStructure': 'json'}
+    detailTypeEntry = detailTypeMap.get(event.get('detail-type'), {})
+    subject = detailTypeEntry.get('subject')
+    if subject is not None:
+        publishArgs['Subject'] = subject
+    summary = detailTypeEntry.get('summary')
+    eventStr = json.dumps(event, indent=2)
+    msgString = eventStr
+    if summary is not None:
+        msgString = summary + '\n\n' + eventStr
+    message = json.dumps({'default': msgString})
+    publishArgs['Message'] = message
     client = boto3.client('sns')
-    client.publish(
-        TargetArn=targetSnsArn,
-        Message=json.dumps({'default': json.dumps(event, indent=2)}),
-        MessageStructure='json'
-    )
+    client.publish(**publishArgs)

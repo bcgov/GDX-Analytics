@@ -76,7 +76,7 @@ set the rule target to this Lambda function.
 3. Invoke *JsonFormatterFunction* locally
 
    ```
-   sam local invoke --event events/event.json --env-vars .env.json --profile <your-aws-cli-profile> JsonFormatterFunction
+   sam local invoke --event events/configItemUpdate.json --env-vars .env.json --profile <your-aws-cli-profile> JsonFormatterFunction
    ```
 
 ### Step-through debugging with VS Code

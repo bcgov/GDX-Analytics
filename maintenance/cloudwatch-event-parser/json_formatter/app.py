@@ -21,7 +21,7 @@ def lambda_handler(event, context):
         "configurationItem", {}).get("resourceName")
     changeType = event.get("detail", {}).get(
         "configurationItemDiff", {}).get("changeType")
-    changeTypeMap = {'UPDATE': 'updated'}
+    changeTypeMap = {'UPDATE': 'updated', 'CREATE': 'created'}
     changeTypeStr = changeTypeMap.get(changeType, changeType)
     detailTypeMap = {'Config Configuration Item Change': {
         'subject': 'AWS Config Item Change',

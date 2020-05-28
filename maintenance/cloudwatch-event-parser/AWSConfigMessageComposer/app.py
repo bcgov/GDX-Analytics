@@ -26,7 +26,8 @@ def lambda_handler(event, context):
     changeTypeStr = changeTypeMap.get(changeType, changeType)
     detailTypeMap = {'Config Configuration Item Change': {
         'subject': 'AWS Config Item Change',
-        'summary': f'{resourceType} {resourceName} has been {changeTypeStr}.'}}
+        'summary': f'{resourceType} {resourceName} has been {changeTypeStr}.'
+        + '\nSuggested action: none, unless the change is unauthorized.'}}
     publishArgs = {'TargetArn': targetSnsArn, 'MessageStructure': 'json'}
     detailTypeEntry = detailTypeMap.get(event.get('detail-type'), {})
     subject = detailTypeEntry.get('subject')

@@ -1,0 +1,72 @@
+{
+  "version": "0",
+  "id": "1c2c6dbf-e949-4f90-396a-db0f41f41bb5",
+  "detail-type": "Config Configuration Item Change",
+  "source": "aws.config",
+  "account": "444682994021",
+  "time": "2020-05-28T20:47:18Z",
+  "region": "ca-central-1",
+  "resources": [
+    "arn:aws:iam::444682994021:role/GovBC-GDX-cloudwatch-even-JsonFormatterFunctionRol-1B7RBS9BKDAI"
+  ],
+  "detail": {
+    "recordVersion": "1.3",
+    "messageType": "ConfigurationItemChangeNotification",
+    "configurationItemDiff": {
+      "changedProperties": {
+        "Configuration": {
+          "previousValue": {
+            "path": "/",
+            "roleName": "GovBC-GDX-cloudwatch-even-JsonFormatterFunctionRol-1B7RBS9BKDAI",
+            "roleId": "AROAWPCJMAFS6DJCRXGNH",
+            "arn": "arn:aws:iam::444682994021:role/GovBC-GDX-cloudwatch-even-JsonFormatterFunctionRol-1B7RBS9BKDAI",
+            "createDate": "2020-04-22T19:03:59.000Z",
+            "assumeRolePolicyDocument": "%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22Service%22%3A%22lambda.amazonaws.com%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%7D%5D%7D",
+            "instanceProfileList": [],
+            "rolePolicyList": [],
+            "attachedManagedPolicies": [
+              {
+                "policyName": "AWSLambdaBasicExecutionRole",
+                "policyArn": "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              },
+              {
+                "policyName": "AmazonSNSFullAccess",
+                "policyArn": "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+              }
+            ],
+            "tags": [
+              {
+                "key": "lambda:createdBy",
+                "value": "SAM"
+              }
+            ]
+          },
+          "changeType": "DELETE"
+        },
+        "Tags.0": {
+          "previousValue": "SAM",
+          "changeType": "DELETE"
+        }
+      },
+      "changeType": "DELETE"
+    },
+    "notificationCreationTime": "2020-05-28T20:47:18.754Z",
+    "configurationItem": {
+      "relatedEvents": [],
+      "relationships": [],
+      "supplementaryConfiguration": {},
+      "tags": {},
+      "configurationItemVersion": "1.3",
+      "configurationItemCaptureTime": "2020-05-28T20:47:15.678Z",
+      "configurationStateId": 1590698835678.0,
+      "awsAccountId": "444682994021",
+      "configurationItemStatus": "ResourceDeleted",
+      "resourceType": "AWS::IAM::Role",
+      "resourceId": "AROAWPCJMAFS6DJCRXGNH",
+      "resourceName": "GovBC-GDX-cloudwatch-even-JsonFormatterFunctionRol-1B7RBS9BKDAI",
+      "ARN": "arn:aws:iam::444682994021:role/GovBC-GDX-cloudwatch-even-JsonFormatterFunctionRol-1B7RBS9BKDAI",
+      "awsRegion": "global",
+      "configurationStateMd5Hash": ""
+    }
+  }
+}

@@ -11,7 +11,7 @@
  *               : set LOOKERKEY=<<Looker embed key>>      :: cmd
  *               : $env:LOOKERKEY = "<<Looker embed key>>" ## powershell 
  * 
- *Usage          : java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]
+ *Usage          : java looker_embed_generator <<environment>> -e <<embed_url>> -u [<<attribute>> <<filter>>]
  *               :
  *               : eg: java looker_embed_generator.java prod dashboards/18
  *               :     java looker_embed_generator.java prod looks/98 browser Chrome
@@ -43,6 +43,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Base64;
+import java.util.List;
+import java.util.Arrays;
 import java.io.*;
 
 import com.google.gson.Gson;
@@ -59,6 +61,9 @@ import java.nio.charset.StandardCharsets;
 public class looker_embed_generator {
 
     public static void main(String [] args){
+
+        // Get CMD Line Arguments as a List
+        List<String> arguments = Arrays.asList(args);
 
         // dev.analytics.gov
         String lookerURL = "";  // to be assigned by <<environment>> argument
@@ -98,33 +103,36 @@ public class looker_embed_generator {
         }
 
         // build query string from cmd line parameters
-        if ( args.length > 2 && args[2].length() != 0 ) {
-            try {
-                queryString = createQueryString(args[2]);
-            } catch (Exception e) {
-                System.out.println(e);
+        if (args.length > 2 && arguments.contains("-e")) {
+            // Check that the argument for the embed filter is non-zero length
+            if (args[arguments.indexOf("-e")+1].length() != 0) {
+                try {
+                    queryString = createQueryString(args[3]);
+                    embedURL = "/embed/" + args[1] + queryString + "&embed_domain=http://127.0.0.1:5000";
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             }
-        }
-
-        // An embed_url such as: dashboards/18 or looks/96
-        // add check for query string here //
-        if(queryString.isEmpty()) {
-            embedURL = "/embed/" + args[1] + "?embed_domain=http://127.0.0.1:5000";
         } else {
-            embedURL = "/embed/" + args[1] + queryString + "&embed_domain=http://127.0.0.1:5000";
+            // No query string to add, generate embedURL without it.
+            embedURL = "/embed/" + args[1] + "?embed_domain=http://127.0.0.1:5000";
         }
 
-        // adding a new attribute and filter value to the userAttributes JSON blob
-        /*if ( args.length > 2 && args[2].length() != 0 && args[3].length() != 0 ) {
-            try {
-                String attribute = ", \"" + args[2] + "\": \"" + args[3] + "\"";
-                StringBuilder newUserAttributes = new StringBuilder(userAttributes);
-                userAttributes = newUserAttributes.insert(userAttributes.length()-1, attribute).toString();
-            } catch (Exception e) {
-                System.out.println(e);
+        // Add the user attribute if that parameter is set in the arguments
+        if (args.length > 2 && arguments.contains("-u")) {
+            // Check that the argument for the user attribute is non-zero length
+            if (args[arguments.indexOf("-u")+1].length() != 0 ) { 
+                try {
+                    // adding a new attribute and filter value to the userAttributes JSON blob
+                    String attribute = ", \"" + args[arguments.indexOf("-u")+1] + "\": \"" + args[arguments.indexOf("-u")+2] + "\"";
+                    StringBuilder newUserAttributes = new StringBuilder(userAttributes);
+                    userAttributes = newUserAttributes.insert(userAttributes.length()-1, attribute).toString();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             }
         }
-        */
+
         try {
 
             String url = createURL(lookerURL, lookerKey, externalUserID, firstName, lastName, permissions, models,
@@ -238,21 +246,11 @@ public class looker_embed_generator {
     }
 }
 
+    public class Filter {
 
+        public static void main (String [] args) {}
 
-
-  public class Filter {
-
-        public static void main (String [] args) {
-            //Filter filter = new Filter();
-            System.out.println("testFilter");
-        }
-        
-        public static String getFilterName(Filter f) {
-            return f.filterName;
-        }
-
-        public String filterName = "";
         public String matchType = "";
+        public String filterName = "";
         public String matchValue = "";
-} 
+    } 

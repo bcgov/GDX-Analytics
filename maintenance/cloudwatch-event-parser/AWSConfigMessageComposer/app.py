@@ -29,8 +29,9 @@ def lambda_handler(event, context):
         'summary': f'{resourceType} {resourceName} has been {changeTypeStr}.'
         + '\nSuggested action: none, unless the change is unauthorized.'}}
     publishArgs = {'TargetArn': targetSnsArn, 'MessageStructure': 'json'}
-    detailTypeEntry = detailTypeMap.get(event.get('detail-type'), {})
-    subject = detailTypeEntry.get('subject')
+    evtDetailType = event.get('detail-type')
+    detailTypeEntry = detailTypeMap.get(evtDetailType, {})
+    subject = detailTypeEntry.get('subject', evtDetailType)
     if subject is not None:
         publishArgs['Subject'] = subject
     summary = detailTypeEntry.get('summary')

@@ -130,7 +130,6 @@ def build_filter_string(filter_values):
     for filter_value in filter_values:
         match_type = filter_value["matchtype"]
         value = parse_filter_value(filter_value["values"])
-        #value = filter_value["values"]
         filter_string += "%7B\"type\":\"" + match_type + \
             "\",\"values\":%5B%7B\"constant\":\"" + \
             value + "\"%7D,%7B%7D%5D%7D"

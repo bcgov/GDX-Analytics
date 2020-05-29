@@ -149,10 +149,12 @@ public class looker_embed_generator {
         Filter f = new Filter();
         Gson gson = new Gson();
         f = gson.fromJson(params, f.getClass());
-        String filterName = f.filterName;
         
+        String filterName = f.filterName;
+        String encodedFilterString = "";
+
         try {
-            String encodedFilterString =  URLEncoder.encode(f.matchValue, StandardCharsets.UTF_8);
+            encodedFilterString =  URLEncoder.encode(f.matchValue, StandardCharsets.UTF_8);
             encodedFilterString = encodedFilterString.replace("+", "%20");
             System.out.println(encodedFilterString);
         } catch(Exception e){
@@ -161,7 +163,7 @@ public class looker_embed_generator {
 
         String queryString =
             "?filter_config=%7B\"" + filterName +
-           // "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + encodedFilterString +
+            "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + encodedFilterString +
             "\"%7D,%7B%7D%5D,\"id\":456%7D%5D%7D";
 
         return queryString;

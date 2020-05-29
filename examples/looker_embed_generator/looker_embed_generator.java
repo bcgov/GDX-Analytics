@@ -106,9 +106,6 @@ public class looker_embed_generator {
             }
         }
 
-
-
-
         // An embed_url such as: dashboards/18 or looks/96
         // add check for query string here //
         if(queryString.isEmpty()) {
@@ -116,9 +113,6 @@ public class looker_embed_generator {
         } else {
             embedURL = "/embed/" + args[1] + queryString + "&embed_domain=http://127.0.0.1:5000";
         }
-
-
-
 
         // adding a new attribute and filter value to the userAttributes JSON blob
         /*if ( args.length > 2 && args[2].length() != 0 && args[3].length() != 0 ) {
@@ -151,20 +145,22 @@ public class looker_embed_generator {
         f = gson.fromJson(params, f.getClass());
         
         String filterName = f.filterName;
+        String matchType = f.matchType;
+        String matchValue = f.matchValue;
         String encodedFilterString = "";
 
         try {
+            // dont actually know if i need this
             encodedFilterString =  URLEncoder.encode(f.matchValue, StandardCharsets.UTF_8);
             encodedFilterString = encodedFilterString.replace("+", "%20");
-            System.out.println(encodedFilterString);
         } catch(Exception e){
             System.out.println(e);
         }
 
         String queryString =
-            "?filter_config=%7B\"" + filterName +
-            "\":%5B%7B\"type\":\"%3D\",\"values\":%5B%7B\"constant\":\"" + encodedFilterString +
-            "\"%7D,%7B%7D%5D,\"id\":456%7D%5D%7D";
+            "?filter_config={\"" + filterName +
+            "\":[{\"type\":\"" + f.matchType +  "\",\"values\":[{\"constant\":\"" + f.matchValue +
+            "\"},{}],\"id\":456}]}";
 
         return queryString;
     }

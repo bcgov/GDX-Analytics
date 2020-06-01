@@ -6,6 +6,12 @@
  * 
  *Requirements   : You must set the following environment variable
  *               : to establish credentials for the embed user:
+ *               : 
+ *               : This project also requires the use of google/GSON,
+ *               : a Java serialisation/deserialisation library. The
+ *               : github repo can be found here: 
+ *               :   https://github.com/google/gson
+ *               : 
  * 
  *               : export LOOKERKEY=<<Looker embed key>>   ## bash
  *               : set LOOKERKEY=<<Looker embed key>>      :: cmd
@@ -20,7 +26,7 @@
  *               : 1 Filter and 1 Value
  *               :
  *               : java looker_embed_generator.java prod dashboards/18
- *               :   '{"filter-name": "filtername-value",  "matchtype": "matchtype-value", 
+ *               :   '{"filter-name": "filtername-value",
  *               :     "matchtype": "matchtype-value", "values":"filter-value"}'
  *               :
  *               : eg: java looker_embed_generator.java prod dashboards/18

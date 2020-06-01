@@ -119,17 +119,18 @@ public class looker_embed_generator {
         }
 
         // Add the user attribute if that parameter is set in the arguments
-        if (args.length > 2 && arguments.contains("-u")) {
+        if (args.length > 2 && 
+            arguments.contains("-u") && 
+            args[arguments.indexOf("-u")+1].length() != 0) 
+        {
             // Check that the argument for the user attribute is non-zero length
-            if (args[arguments.indexOf("-u")+1].length() != 0 ) { 
-                try {
-                    // adding a new attribute and filter value to the userAttributes JSON blob
-                    String attribute = ", \"" + args[arguments.indexOf("-u")+1] + "\": \"" + args[arguments.indexOf("-u")+2] + "\"";
-                    StringBuilder newUserAttributes = new StringBuilder(userAttributes);
-                    userAttributes = newUserAttributes.insert(userAttributes.length()-1, attribute).toString();
-                } catch (Exception e) {
-                    System.out.println(e);
-                }
+            try {
+                // adding a new attribute and filter value to the userAttributes JSON blob
+                String attribute = ", \"" + args[arguments.indexOf("-u")+1] + "\": \"" + args[arguments.indexOf("-u")+2] + "\"";
+                StringBuilder newUserAttributes = new StringBuilder(userAttributes);
+                userAttributes = newUserAttributes.insert(userAttributes.length()-1, attribute).toString();
+            } catch (Exception e) {
+                System.out.println(e);
             }
         }
 

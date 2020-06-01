@@ -23,7 +23,13 @@
     "IncomingPhoneNumber"
   ],
   "no_header": true,
-  "dtype_dic_ints": ["DateKey","CallPutOnHold"],
+  "dtype_dic_ints": ["CallPutOnHold"],
   "delim": "|",
-  "truncate": false
+  "truncate": false,
+  "dateformat": [
+    {
+      "field": "DateKey",
+      "format": "%Y%m%d"
+    }
+  ]
 }

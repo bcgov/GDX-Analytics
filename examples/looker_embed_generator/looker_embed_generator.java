@@ -6,20 +6,38 @@
  * 
  *Requirements   : You must set the following environment variable
  *               : to establish credentials for the embed user:
+ *               : 
+ *               : This project also requires the use of google/GSON,
+ *               : a Java serialisation/deserialisation library. The
+ *               : github repo can be found here: 
+ *               :   https://github.com/google/gson
+ *               : 
  * 
  *               : export LOOKERKEY=<<Looker embed key>>   ## bash
  *               : set LOOKERKEY=<<Looker embed key>>      :: cmd
  *               : $env:LOOKERKEY = "<<Looker embed key>>" ## powershell 
  * 
- *Usage          : java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]
+ *Usage          : java looker_embed_generator.java <<environment>> -e <<embed_url>> -u [<<attribute>> <<filter>>]
  *               :
- *               : eg: java looker_embed_generator prod dashboards/18
- *               :     java looker_embed_generator prod looks/98 browser Chrome
+ *               : eg: java -cp ./gson.jar looker_embed_generator.java prod dashboards/18
+ *               :     java -cp ./gson.jar looker_embed_generator.java prod looks/98 browser Chrome
+ *               : To create an embed string with filter(s):
+ *               :
+ *               : 1 Filter and 1 Value
+ *               :
+ *               : java -cp ./gson.jar looker_embed_generator.java prod dashboards/18
+ *               :   '{"filter-name": "filtername-value",
+ *               :     "matchtype": "matchtype-value", "values":"filter-value"}'
+ *               :
+ *               : eg: java -cp ./gson.jar looker_embed_generator.java prod dashboards/18
+ *               :   '{"filterName":"City","matchType":"=","matchValue":"Metropolis"}'
+ *               :
  *               :
  *               : NOTE: The embed must be accessible to the 
  *               : Embed Shared Group.
  *               :
  *References     : https://github.com/looker/looker_embed_sso_examples
+
  *               : https://docs.looker.com/reference/embedding/sso-embed
  *               : https://docs.looker.com/reference/embedding/embed-javascript-events
  * 
@@ -31,13 +49,27 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Base64;
+import java.util.List;
+import java.util.Arrays;
+
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import java.net.URLEncoder;
+
+import java.nio.charset.StandardCharsets;
+
+
 public class looker_embed_generator {
 
     public static void main(String [] args){
+
+        // Get CMD Line Arguments as a List
+        List<String> arguments = Arrays.asList(args);
 
         // dev.analytics.gov
         String lookerURL = "";  // to be assigned by <<environment>> argument
@@ -54,6 +86,7 @@ public class looker_embed_generator {
         String forceLogoutLogin = "true"; // converted to JSON bool
         String accessFilters = ("{}");  // converted to JSON Object of Objects
         String userAttributes = "{\"can_see_sensitive_data\": \"YES\"}";  // A Map<String, String> converted to JSON object
+        String queryString = "";
 
         lookerKey = System.getenv("LOOKERKEY");
         if (lookerKey == null) {
@@ -75,13 +108,31 @@ public class looker_embed_generator {
             System.exit(1);
         }
 
-        // An embed_url such as: dashboards/18 or looks/96
-        embedURL = "/embed/" + args[1] + "?embed_domain=http://127.0.0.1:5000";
+        // build query string from cmd line parameters
+        if (args.length > 2 && arguments.contains("-e")) {
+            // Check that the argument for the embed filter is non-zero length
+            if (args[arguments.indexOf("-e")+1].length() != 0) {
+                try {
+                    queryString = createQueryString(args[3]);
+                    embedURL = "/embed/" + args[1] + queryString + "&embed_domain=http://127.0.0.1:5000";
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        } else {
+            // No query string to add, generate embedURL without it.
+            embedURL = "/embed/" + args[1] + "?embed_domain=http://127.0.0.1:5000";
+        }
 
-        // adding a new attribute and filter value to the userAttributes JSON blob
-        if ( args.length > 2 && args[2].length() != 0 && args[3].length() != 0 ) {
+        // Add the user attribute if that parameter is set in the arguments
+        if (args.length > 2 && 
+            arguments.contains("-u") && 
+            args[arguments.indexOf("-u")+1].length() != 0) 
+        {
+            // Check that the argument for the user attribute is non-zero length
             try {
-                String attribute = ", \"" + args[2] + "\": \"" + args[3] + "\"";
+                // adding a new attribute and filter value to the userAttributes JSON blob
+                String attribute = ", \"" + args[arguments.indexOf("-u")+1] + "\": \"" + args[arguments.indexOf("-u")+2] + "\"";
                 StringBuilder newUserAttributes = new StringBuilder(userAttributes);
                 userAttributes = newUserAttributes.insert(userAttributes.length()-1, attribute).toString();
             } catch (Exception e) {
@@ -101,12 +152,50 @@ public class looker_embed_generator {
         }
     }
 
+    // Takes filter parameters and creates a string to pass in with the embed string
+    public static String createQueryString(String params) {
+
+        Filter f = new Filter();
+        Gson gson = new Gson();
+        f = gson.fromJson(params, f.getClass());
+        
+        String filterName = f.filterName;
+        String matchType = f.matchType;
+        String matchValue = f.matchValue;
+        String encodedFilterString = "";
+
+        try {
+            // dont actually know if i need this
+            encodedFilterString =  URLEncoder.encode(f.matchValue, StandardCharsets.UTF_8);
+            encodedFilterString = encodedFilterString.replace("+", "%20");
+        } catch(Exception e){
+            System.out.println(e);
+        }
+
+        String queryString =
+            "?filter_config={\"" + filterName +
+            "\":[{\"type\":\"" + f.matchType +  "\",\"values\":[{\"constant\":\"" + f.matchValue +
+            "\"},{}],\"id\":456}]}";
+
+        return queryString;
+    }
+
     // builds the embed URL from the parameter
-    public static String createURL(String lookerURL, String lookerKey,
-                                   String userID, String firstName, String lastName, String userPermissions,
-                                   String userModels, String sessionLength, String accessFilters,
-                                   String embedURL, String forceLogoutLogin, String groupIDs,
-                                   String externalGroupID, String userAttributes) throws Exception {
+    public static String createURL(String lookerURL, 
+                                   String lookerKey,
+                                   String userID, 
+                                   String firstName, 
+                                   String lastName, 
+                                   String userPermissions,
+                                   String userModels, 
+                                   String sessionLength, 
+                                   String accessFilters,
+                                   String embedURL, 
+                                   String forceLogoutLogin, 
+                                   String groupIDs,
+                                   String externalGroupID, 
+                                   String userAttributes) 
+    throws Exception {
 
         String path = "/login/embed/" + java.net.URLEncoder.encode(embedURL, "UTF-8");
 
@@ -163,3 +252,12 @@ public class looker_embed_generator {
         return new String(rawHmac, "UTF-8");
     }
 }
+
+    public class Filter {
+
+        public static void main (String [] args) {}
+
+        public String matchType = "";
+        public String filterName = "";
+        public String matchValue = "";
+    } 

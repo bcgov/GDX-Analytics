@@ -72,6 +72,22 @@
     {
       "name": "https://www.careertrekbc.ca/",
       "start_date_default": "2020-04-23"
+    },
+    {
+      "name": "https://www.britishcolumbia.ca/",
+      "start_date_default": "2019-02-02"
+    },
+    {
+      "name": "https://www.britishcolumbia.kr/",
+      "start_date_default": "2019-02-02"
+    },
+    {
+      "name": "https://www.britishcolumbia.jp/",
+      "start_date_default": "2019-02-02"
+    },
+    {
+      "name": "https://www.british-columbia.cn/",
+      "start_date_default": "2019-02-02"
     }
   ]
 }

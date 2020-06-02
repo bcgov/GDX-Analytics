@@ -16,7 +16,7 @@ These are command line applications. `LOOKERKEY` must be set for this session.
 
 ### Running the Java version
 
-Requirements
+Requirements:
 The Java embed generator code requires the GSON library module.
 Download the GSON JAR file from: https://mvnrepository.com/artifact/com.google.code.gson/gson. 
 Version 2.8.6 has been tested to work.

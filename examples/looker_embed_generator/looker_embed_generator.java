@@ -17,19 +17,19 @@
  *               : set LOOKERKEY=<<Looker embed key>>      :: cmd
  *               : $env:LOOKERKEY = "<<Looker embed key>>" ## powershell 
  * 
- *Usage          : java looker_embed_generator <<environment>> -e <<embed_url>> -u [<<attribute>> <<filter>>]
+ *Usage          : java looker_embed_generator.java <<environment>> -e <<embed_url>> -u [<<attribute>> <<filter>>]
  *               :
- *               : eg: java looker_embed_generator.java prod dashboards/18
- *               :     java looker_embed_generator.java prod looks/98 browser Chrome
+ *               : eg: java -cp ./gson.jar looker_embed_generator.java prod dashboards/18
+ *               :     java -cp ./gson.jar looker_embed_generator.java prod looks/98 browser Chrome
  *               : To create an embed string with filter(s):
  *               :
  *               : 1 Filter and 1 Value
  *               :
- *               : java looker_embed_generator.java prod dashboards/18
+ *               : java -cp ./gson.jar looker_embed_generator.java prod dashboards/18
  *               :   '{"filter-name": "filtername-value",
  *               :     "matchtype": "matchtype-value", "values":"filter-value"}'
  *               :
- *               : eg: java looker_embed_generator.java prod dashboards/18
+ *               : eg: java -cp ./gson.jar looker_embed_generator.java prod dashboards/18
  *               :   '{"filterName":"City","matchType":"=","matchValue":"Metropolis"}'
  *               :
  *               :

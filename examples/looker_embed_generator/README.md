@@ -29,7 +29,7 @@ Parameters:
 The Java version accepts all optional attribute and filter parameters as follows:
 
 ```
-java looker_embed_generator -cp <<filepath>> <<environment>> -e  '{"filter-name":"filtername-value","matchtype":"matchtype-value","values":"filter-value"}' -u <<embed_url>> [<<attribute>> <<filter>>]
+java -cp <<filepath>> looker_embed_generator.java <<environment>> -e  '{"filter-name":"filtername-value","matchtype":"matchtype-value","values":"filter-value"}' -u <<embed_url>> [<<attribute>> <<filter>>]
 ```
 
 ### Running the Python version

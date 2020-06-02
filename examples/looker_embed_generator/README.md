@@ -16,16 +16,25 @@ These are command line applications. `LOOKERKEY` must be set for this session.
 
 ### Running the Java version
 
+Requirements:
+The Java embed generator code requires the GSON library module.
+Download the GSON JAR file from: https://mvnrepository.com/artifact/com.google.code.gson/gson. 
+Version 2.8.6 has been tested to work.
+
 Parameters:
+- `classpath` or `cp`: the file path to the GSON Library Jar file
 - `env`: the target Looker environment, e.g.: `prod` or `test`
 - `embed_url`: the target look or dashboard, e.g.: `looks/98`
+- `-e`: set the flag for optional embed filter
+- `embed filter jsons string`: a JSON string specifying the filter, e.g.: '{"filterName":"City","matchType":"=","matchValue":"Metropolis"}'
+- `-u`: set the flag for optional user-attribute
 - `attribute`: a User-Attribute to pass, e.g.: `browser`
 - `filter`: a filter on the passed User-Attribute, e.g.: `Chrome`
 
 The Java version accepts all optional attribute and filter parameters as follows:
 
 ```
-java looker_embed_generator <<environment>> <<embed_url>> [<<attribute>> <<filter>>]
+java -cp <<filepath>> looker_embed_generator.java <<environment>> -e  '{"filter-name":"filtername-value","matchtype":"matchtype-value","values":"filter-value"}' -u <<embed_url>> [<<attribute>> <<filter>>]
 ```
 
 ### Running the Python version

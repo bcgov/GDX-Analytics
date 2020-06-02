@@ -19,11 +19,11 @@
 #               : 1 Filter and 1 Value
 #               :
 #               : python looker_embed_generator.py <<embed url>>
-#               :   '{"filter-name": {"matchtype": "matchtype-value",
-#               :                     "values":"filter-value"}'
+#               :   '{"filter-name": [{"matchtype": "matchtype-value", 
+#               :                     "values":"filter-value"}]}'
 #               :
 #               : eg: python looker_embed_generator.py dashboards/18
-#               :   '{"City":["matchtype":"=", "values":"Metropolis"]}'
+#               :   '{"City":[{"matchtype":"=", "values":"Metropolis"}]}'
 #               :
 #               : or:
 #               :
@@ -166,6 +166,7 @@ if (len(sys.argv) < 2):  # Will be 1 if no arguments, 2 if one argument
 if (len(sys.argv) == 3):  # Will be 3 if passing in a json object of filters
     filtered = True
     filters = json.loads(sys.argv[2])
+    
 
 embed_url = '/embed/' + sys.argv[1]
 

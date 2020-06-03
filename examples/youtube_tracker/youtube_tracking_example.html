@@ -55,6 +55,8 @@
 
         // Creates new youtube player object when the API loads.
         function onYouTubeIframeAPIReady() {
+            // Create a new Player object for each Player iframe 
+            // passing in the unique identifier of the iFrame.
             player = new YT.Player('youtube_player', {
                 events: {
                     'onReady': onPlayerReady,

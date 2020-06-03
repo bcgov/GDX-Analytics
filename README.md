@@ -19,27 +19,27 @@ This project is currently under development and actively supported by the GDX An
 - The `s3-upload.sh` script, to upload files to S3 with standard Unix utilities, for example: to run as a cron job and load scheduled data dumps;
 - Snowplow schema files.
 
-#### [microservices/](./microservices/)
-
-- Microservices running on EC2 to perform automated data loads of well formed data into RedShift.
-
-#### [web_trackers/](./web_trackers)
-
-- Examples of the Javascript tracker used to push custom events to Snowplow;
-
-#### [testing/](./testing/)
-
-- Scripts automating the testing strategies of the WebTrends to Snowplow migration.
-
 #### [maintenance/](./maintenance/)
 
 - Scripts for internal use to assist in regular maintenance procedures on EC2 instances or other services.
 
+#### [microservices/](./microservices/)
+
+- Microservices running on EC2 to perform automated data loads of well formed data into RedShift.
+
+#### [operations/](./operations/)
+
+- scripts to perform one-off on-demand operational tasks.
+
+#### [testing/migration_tests/](./testing/migration_tests/)
+
+- Scripts to provide better automation and coverage on the testing strategy of the WebTrends to Snowplow migration.
+
+#### [web_trackers/](./web_trackers/)
+
+- Examples of the Javascript tracker used to push custom events to Snowplow;
+
 ## Relevant Repositories
-
-#### [GDX-Analytics-Looker-AWS-Cost-And-Usage/](https://github.com/bcgov/GDX-Analytics-Looker-AWS-Cost-And-Usage)
-
-Provides GDX Analytics with reporting to track AWS usage, estimated charges, and line items by AWS product, usage type, and operation.
 
 #### [GDX-Analytics-Looker-cfms_block/](https://github.com/bcgov/GDX-Analytics-Looker-cfms_block)
 
@@ -52,10 +52,6 @@ Provides a substitute for the AWS Console, helping users identify how tables are
 #### [GDX-Analytics-Looker-Snowplow-Web-Block/](https://github.com/bcgov/GDX-Analytics-Looker-Snowplow-Web-Block)
 
 Represents an instance of the Government of British Columbia’s Web Analytics [LookML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml) project.
-
-#### [GDX-Analytics-Looker-Webtrends-Testing-Block/](https://github.com/bcgov/GDX-Analytics-Looker-Webtrends-Testing-Block)
-
-Represents the testing related to migration of Government of British Columbia’s data from WebTrends to Looker/Snowplow using [LookML](https://docs.looker.com/data-modeling/learning-lookml/what-is-lookml).
 
 #### [GDX-Analytics-Looker-theq_sdpr_block/](https://github.com/bcgov/GDX-Analytics-Looker-theq_sdpr_block)
 
@@ -73,9 +69,9 @@ A Drupal 8 module that runs the GDX-Analytics Snowplow web trackers.
 
 This is for the Government of British Columbia’s instance their Google API LookML project. LookML is a language for describing dimensions, aggregates, calculations and data relationships in a SQL database
 
-## Getting Help
-
-For Web Analytics help, please contact the GDX Service Desk via [GCPE GDX Client Service Desk Portal](https://apps.gcpe.gov.bc.ca/jira/servicedesk/customer/portal/9). For inquiries about starting a new analytics account please contact the GDX Analytics Team.
+## Getting Help or Reporting an Issue
+ 
+For inquiries about starting a new analytics account please contact the GDX Analytics Team.
 
 ## Contributors
 

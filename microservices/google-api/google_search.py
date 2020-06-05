@@ -210,7 +210,7 @@ for site_item in config_sites:
 
     # Load 30 days at a time until the data in Redshift has
     # caught up to the most recently available data from Google
-    while last_loaded_date is None or last_loaded_date < latest_date:
+    while last_loaded_date is None or last_loaded_date <= latest_date:
 
         # if there isn't data in Redshift for this site,
         # start at the start_date_default set earlier

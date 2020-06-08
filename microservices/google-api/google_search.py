@@ -210,7 +210,7 @@ for site_item in config_sites:
 
     # Load 30 days at a time until the data in Redshift has
     # caught up to the most recently available data from Google
-    while last_loaded_date is None or last_loaded_date < latest_date:
+    while last_loaded_date is None or last_loaded_date <= latest_date:
 
         # if there isn't data in Redshift for this site,
         # start at the start_date_default set earlier
@@ -220,8 +220,8 @@ for site_item in config_sites:
         else:
             start_dt = last_loaded_date + timedelta(days=1)
 
-        # if the start_dt is the latest date, there is no new data: skip site
-        if start_dt == latest_date:
+        # the start_dt cannot exceed the latest date
+        if start_dt > latest_date:
             break
 
         # end_dt will be the lesser of:
@@ -230,7 +230,6 @@ for site_item in config_sites:
 
         # set the file name that will be written to S3
         site_clean = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
-        outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
         outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
         object_key = f"{config_source}/{config_directory}/{outfile}"
 
@@ -247,10 +246,12 @@ for site_item in config_sites:
         rowlimit = 20000
         index = 0
 
-        def daterange(date1, date2):
-            """yields a generator of all dates from date1 to date2"""
-            for n in range(int((date2 - date1).days)+1):
-                yield date1 + timedelta(n)
+        def daterange(startDate, endDate):
+            """yields a generator of all dates from startDate to endDate"""
+            logger.debug("daterange called with startDate: %s and endDate: %s", startDate, endDate)
+            assert endDate > startDate, 'startDate cannot exceed endDate in daterange generator'
+            for n in range(int((endDate - startDate).days)+1):
+                yield startDate + timedelta(n)
 
         search_analytics_response = ''
 

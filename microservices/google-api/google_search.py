@@ -249,7 +249,7 @@ for site_item in config_sites:
         def daterange(startDate, endDate):
             """yields a generator of all dates from startDate to endDate"""
             logger.debug("daterange called with startDate: %s and endDate: %s", startDate, endDate)
-            assert endDate > startDate, 'startDate cannot exceed endDate in daterange generator'
+            assert endDate >= startDate, 'startDate cannot exceed endDate in daterange generator'
             for n in range(int((endDate - startDate).days)+1):
                 yield startDate + timedelta(n)
 

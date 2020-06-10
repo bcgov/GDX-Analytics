@@ -46,29 +46,34 @@ The first command will build the source of your application. The second command 
 * **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modified IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
 * **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
 
-## Useage
+## Usage
 This Lambda function is designed to be used in a CloudWatch event rule. Just 
 set the rule target to this Lambda function.
 
 ## Use the SAM CLI to build and test locally
 
-Build your application 
+1. Build your application
 
-```bash
-cloudwatch-event-parser$ sam build
-```
+   ```bash
+   cloudwatch-event-parser$ sam build
+   ```
 
-The SAM CLI installs dependencies defined in `json_formatter/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+2. Create file */.env.json*
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+   ```
+   {
+      "JsonFormatterFunction": {
+         "TARGET_SNS_ARN": "<target_sns_arn>"
+      }
+   }
+   ```
+   Replace *\<target_sns_arn\>* with your target SNS ARN
 
-Run functions locally and invoke them with the `sam local invoke` command.
+3. Invoke *JsonFormatterFunction* locally
 
-```
-cloudwatch-event-parser$ sam local invoke JsonFormatterFunction --event events/event.json
-```
-Note: local invoke may not yield desired outcome due to inadequate permission 
-context support of SAM
+   ```
+   sam local invoke --event events/event.json --env-vars .env.json --profile <your-aws-cli-profile> JsonFormatterFunction
+   ```
 
 ### Step-through debugging with VS Code
 
@@ -80,10 +85,11 @@ All prerequisites listed in *Deploy the application* section above plus
 
 To enable step-through debugging, 
  1. Open [app.code-workspace](./app.code-workspace) in VS Code
- 2. uncomment following 3 lines in [json_formatter/app.py](./json_formatter/app.py#L7)
+ 2.  uncomment following 4 lines in [AWSConfigMessageComposer/app.py](./AWSConfigMessageComposer/app.py#L7)
 
     ```
     # import ptvsd
+    # print('Attach debugger to proceed...')
     # ptvsd.enable_attach(address=('0.0.0.0', 5890), redirect_output=True)
     # ptvsd.wait_for_attach()
     ```
@@ -92,9 +98,9 @@ To enable step-through debugging,
 
     ```
     sam build
-    sam local invoke -e events/event.json -d 5890 JsonFormatterFunction
+    sam local invoke -e events/event.json -d 5890 --env-vars .env.json JsonFormatterFunction
     ```
-    The last cmd will hung waiting for a debugger to be attached.
+    The last cmd will hung at the output `Attach debugger to proceed...` waiting for a debugger to be attached.
  5. Hit `F5` to start debugging using the *SAM CLI Python* launch config.
 
 ## Cleanup

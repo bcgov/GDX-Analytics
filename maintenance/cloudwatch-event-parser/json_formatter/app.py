@@ -3,8 +3,9 @@ import boto3
 import os
 
 # local invoke debug only
-# comment out following 3 lines when build for deploying
+# comment out following 4 lines when build for deploying
 # import ptvsd
+# print('Attach debugger to proceed...')
 # ptvsd.enable_attach(address=('0.0.0.0', 5890), redirect_output=True)
 # ptvsd.wait_for_attach()
 

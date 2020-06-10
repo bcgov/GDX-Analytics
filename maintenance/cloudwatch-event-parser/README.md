@@ -55,7 +55,7 @@ set the rule target to this Lambda function.
 1. Build your application
 
    ```bash
-   cloudwatch-event-parser$ sam build
+   sam build
    ```
 
 2. Create file */.env.json*

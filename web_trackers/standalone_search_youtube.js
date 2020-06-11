@@ -1,5 +1,6 @@
 // <!-- Snowplow starts plowing - Standalone vD.2.10.2 -->
 <script src="https://www.youtube.com/iframe_api"></script>
+<script>
 // Each iFrame must have the JS Api enabled by appending 
 // 'enablejsapi=1' to the src URL parameters. Ex:
 // "https://www.youtube.com/embed/G9NL-ED0xdQ?enablejsapi=1"
@@ -77,3 +78,4 @@ function track_youtube_player(player_info) {
   });
 }
 //  <!-- Snowplow stop plowing -->
+</script>

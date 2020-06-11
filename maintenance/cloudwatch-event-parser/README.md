@@ -49,8 +49,6 @@ The first command will build the source of your application. The second command 
 - **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
 
 ## Usage
-
-## Usage
 This Lambda function is designed to be used in a CloudWatch event rule. Just 
 set the rule target to this Lambda function.
 
@@ -87,21 +85,21 @@ All prerequisites listed in _Deploy the application_ section above plus
 
 To enable step-through debugging, 
  1. Open [app.code-workspace](./app.code-workspace) in VS Code
- 2.  uncomment following 4 lines in [AWSConfigMessageComposer/app.py](./AWSConfigMessageComposer/app.py#L7)
+ 2. uncomment following 4 lines in [AWSConfigMessageComposer/app.py](./AWSConfigMessageComposer/app.py#L7)
 
-    ```
-    # import ptvsd
-    # print('Attach debugger to proceed...')
-    # ptvsd.enable_attach(address=('0.0.0.0', 5890), redirect_output=True)
-    # ptvsd.wait_for_attach()
-    ```
+      ```
+      # import ptvsd
+      # print('Attach debugger to proceed...')
+      # ptvsd.enable_attach(address=('0.0.0.0', 5890), redirect_output=True)
+      # ptvsd.wait_for_attach()
+      ```
 
 3.  Set a breakpoint in AWSConfigMessageComposer/app.py below the above uncommented lines
 4.  Run
 
     ```
     sam build
-    sam local invoke -e events/event.json -d 5890 --env-vars .env.json JsonFormatterFunction
+    sam local invoke -e events/event.json -d 5890 --env-vars .env.json AWSConfigMessageComposerFunction
     ```
     The last cmd will hung at the output `Attach debugger to proceed...` waiting for a debugger to be attached.
  5. Hit `F5` to start debugging using the *SAM CLI Python* launch config.

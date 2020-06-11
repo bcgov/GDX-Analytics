@@ -67,7 +67,7 @@ function onPlayerReady(event) {
 // Sends snowplow event with youtube player state.
 function track_youtube_player(player_info) {
   window.snowplow('trackSelfDescribingEvent', {
-    schema: "iglu:ca.bc.gov.youtube/youtube_playerstate/jsonschema/1-0-1",
+    schema: "iglu:ca.bc.gov.youtube/youtube_playerstate/jsonschema/2-0-0",
     data: {
       status: player_info.status,
       video_src: player_info.video_src,

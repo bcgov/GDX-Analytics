@@ -1,30 +1,3 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Snowplow Youtube Example</title>
-    <script src="https://www2.gov.bc.ca/StaticWebResources/static/shared/scripts/jquery/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript">
-        ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
-        p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
-        };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
-        n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","https://sp-js.apps.gov.bc.ca/MDWay3UqFnIiGVLIo7aoMi4xMC4y.js","snowplow"));
-        var collector = 'spm.apps.gov.bc.ca';
-        window.snowplow('newTracker','rt',collector, {
-            appId: "Snowplow_standalone",
-            platform: 'web',
-            post: true,
-            forceSecureTracker: true,
-            contexts: {
-                webPage: true,
-                performanceTiming: true
-            }
-        });
-        window.snowplow('enableActivityTracking', 30, 30); // Ping every 30 seconds after 30 seconds
-        window.snowplow('enableLinkClickTracking');
-        window.snowplow('trackPageView');
-    </script>
-    
 <!-- Snowplow starts plowing - Standalone vD.2.10.2 -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
@@ -66,7 +39,7 @@ function onYouTubeIframeAPIReady() {
   
   // Retrieve each iFrame by classname.
   // Replace "class-name" with your iFrame classname.
-  var yt_players = Array.from(document.getElementsByClassName("youtube_player"));
+  var yt_players = Array.from(document.getElementsByClassName("class-name"));
   
   // Create a new Player object for each Player iframe 
   yt_players.forEach(function(item){
@@ -106,11 +79,4 @@ function track_youtube_player(player_info) {
 }
 </script>
 <!-- Snowplow stop plowing -->
-  </head>
-  <body>
-    <header>
-      <h3>Snowplow Youtube Example</h3>
-    </header>
-    <iframe id="youtube_player" width="560" height="315" src="https://www.youtube.com/embed/G9NL-ED0xdQ?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </body>
-</html>
+

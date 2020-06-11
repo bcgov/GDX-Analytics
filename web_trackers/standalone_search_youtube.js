@@ -56,7 +56,7 @@ function onYouTubeIframeAPIReady() {
 function onPlayerReady(event) {
   var player_info = {
     status: 'Ready', 
-    video_id: 'Not Available', // Video ID not available opn ready state
+    video_id: event.target.getVideoData().video_id,
     video_src: event.target.getVideoUrl(),
     title: event.target.getVideoData().title,
     author: event.target.getVideoData().author

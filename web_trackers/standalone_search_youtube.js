@@ -1,4 +1,9 @@
 // <!-- Snowplow starts plowing - Standalone vD.2.10.2 -->
+<script src="https://www.youtube.com/iframe_api"></script>
+// Each iFrame must have the JS Api enabled by appending 
+// 'enablejsapi=1' to the src URL parameters. Ex:
+// "https://www.youtube.com/embed/G9NL-ED0xdQ?enablejsapi=1"
+
 // Gets called when the youtube player changes state, and sends
 // and triggers a snowplow event with player status info.
 function onPlayerStateChange(event) {
@@ -9,7 +14,7 @@ function onPlayerStateChange(event) {
     title: event.target.getVideoData().title,
     author: event.target.getVideoData().author
   };
-            
+  
   switch(event.data) {
     case YT.PlayerState.PLAYING:
       player_info.status = 'Playing';
@@ -30,9 +35,12 @@ function onPlayerStateChange(event) {
 
 // Creates new youtube player object when the API loads.
 function onYouTubeIframeAPIReady() {
+  
+  // Retrieve each iFrame by classname.
+  // Replace "class-name" with your iFrame classname.
+  var yt_players = Array.from(document.getElementsByClassName("class-name"));
+  
   // Create a new Player object for each Player iframe 
-  // passing in the unique identifier of the iFrame.
-  var yt_players = Array.from(document.getElementsByClassName("youtube-player"));
   yt_players.forEach(function(item){
     player = new YT.Player(item.id, {
       events: {

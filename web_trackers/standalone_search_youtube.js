@@ -1,4 +1,4 @@
-// <!-- Snowplow starts plowing - Standalone vD.2.10.2 -->
+<!-- Snowplow starts plowing - Standalone vD.2.10.2 -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 // Each iFrame must have the JS Api enabled by appending 
@@ -77,5 +77,6 @@ function track_youtube_player(player_info) {
     }
   });
 }
-//  <!-- Snowplow stop plowing -->
 </script>
+<!-- Snowplow stop plowing -->
+

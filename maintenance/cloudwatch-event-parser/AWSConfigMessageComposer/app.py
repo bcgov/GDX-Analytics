@@ -25,7 +25,7 @@ def lambda_handler(event, context):
                      'CREATE': 'created', 'DELETE': 'deleted'}
     changeTypeStr = changeTypeMap.get(changeType, changeType)
     detailTypeMap = {'Config Configuration Item Change': {
-        'subject': 'AWS Config Item Change',
+        'subject': f'AWS Config Item Change: {resourceType} {changeTypeStr}',
         'summary': f'{resourceType} {resourceName} has been {changeTypeStr}.'
         + '\nSuggested action: none, unless the change is unauthorized.'}}
     publishArgs = {'TargetArn': targetSnsArn, 'MessageStructure': 'json'}

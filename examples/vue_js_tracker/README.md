@@ -22,9 +22,17 @@ See the official Vue.js installation documentation here: https://cli.vuejs.org/g
 
 ## To run this application
 
-From the root of the application, run the following command to serve the application using the vue-cli-service. This will serve the application from localhost.
+From the root of the application, run the following commands to install dependencies and serve the application using the vue-cli-service. This will serve the application from localhost.
+
+
+### Install the project dependencies in the node_modules folder
+
+```
+npm install
+```
 
 ### Compiles and hot-reloads for development
+
 ```
 npm run serve
 ```

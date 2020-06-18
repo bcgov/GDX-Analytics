@@ -8,7 +8,7 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project requires vue/cli and npm.
+This project requires vue/cli and npm. Vue CLI requires Node.js version 8.9 or above
 
 ## To run this application
 

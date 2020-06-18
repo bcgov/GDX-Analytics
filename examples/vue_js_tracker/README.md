@@ -10,13 +10,15 @@ This project is currently under development and actively supported by the GDX An
 
 This project requires vue/cli and npm.
 
+## To run this application
+
+From the root of the application, run the following command to serve the application using the vue-cli-service. This will serve the application from localhost.
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## Getting Help or Reporting an Issue
  

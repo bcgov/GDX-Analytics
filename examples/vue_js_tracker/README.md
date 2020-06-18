@@ -2,6 +2,12 @@
 
 This is an example Vue.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vA2.10.2 in the Vue.js framework.
 
+## Features
+
+This app contains the Snowplow Tracker Standalone va2.10.2, which is installed in the header
+section of index.html. It also leverages the Vue Router Add-on by calling the Snowplow 'trackpageview' function, whenever the Vue Router changes the navigation.
+
+
 ## Project Status 
 
 This project is currently under development and actively supported by the GDX Analytics Team.

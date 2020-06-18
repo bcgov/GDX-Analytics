@@ -8,7 +8,17 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project requires vue/cli and npm. Vue CLI requires Node.js version 8.9 or above
+This project requires Vue CLI and npm. Vue CLI requires Node.js version 8.9 or above. 
+
+### Installation instructions
+
+To install Vue CLI (globally)
+
+```
+npm install -g @vue/cli
+```
+
+See the official Vue.js installation documentation here: https://cli.vuejs.org/guide/installation.html
 
 ## To run this application
 

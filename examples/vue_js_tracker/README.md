@@ -14,7 +14,7 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project requires Vue CLI and npm. Vue CLI requires Node.js version 8.9 or above. 
+This project requires Vue CLI and npm v6 or higher. Vue CLI requires Node.js version 8.9 or higher. 
 
 ### Installation instructions
 
@@ -33,8 +33,10 @@ From the root of the application, run the following commands to install dependen
 
 ### Install the project dependencies in the node_modules folder
 
+This command respects versioning saved in package-lock.json when installing project dependencies. 
+
 ```
-npm install
+npm ci
 ```
 
 ### Compiles and hot-reloads for development

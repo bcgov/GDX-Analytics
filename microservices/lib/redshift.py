@@ -42,20 +42,34 @@ class RedShift:
                     curs.execute(query)
                 except psycopg2.Error as e:
                     self.logger.error(
-                        "Loading %s to RedShift failed.", self.batchfile)
+                        "Query on RedShift returned an error.")
+                    self.logger.error("%s", e.pgerror)
+                    return None
+                else:
+                    self.logger.info(
+                        "Query on RedShift was successful.")
+                    return curs.fetchall()
+
+    def copy_query(self, query, copyObj):
+        'Performs a query to copy an object'
+        with self.connection as conn:
+            with conn.cursor() as curs:
+                try:
+                    curs.execute(query)
+                except psycopg2.Error as e:
+                    self.logger.error(
+                        "Loading %s to RedShift failed.", copyObj)
                     self.logger.error("%s", e.pgerror)
                     return False
                 else:
                     self.logger.info(
-                        "Loaded %s to RedShift successfully", self.batchfile)
+                        "Loaded %s to RedShift successfully", copyObj)
                     return True
 
-    def __init__(self, batchfile, name=None, user=None, password=None):
+    def __init__(self, name=None, user=None, password=None):
         'The constructor opens a RedShift connection based on the arguments'
 
         self.logger = logging.getLogger(__name__)
-
-        self.batchfile = batchfile
 
         self.dbname = name
         self.host = HOST
@@ -68,7 +82,6 @@ class RedShift:
 
 
     @classmethod
-    def snowplow(cls, batchfile):
+    def snowplow(cls):
         'A factory constructor for the GDX Analytics Snowplow database'
-        return cls(
-            batchfile, 'snowplow', os.environ['pguser'], os.environ['pgpass'])
+        return cls('snowplow', os.environ['pguser'], os.environ['pgpass'])

@@ -401,8 +401,8 @@ COMMIT;
 
     # Execute the transaction against Redshift using local lib redshift module
     logger.debug(logquery)
-    spdb = RedShift.snowplow(batchfile)
-    if spdb.query(query):
+    spdb = RedShift.snowplow()
+    if spdb.copy_query(query, batchfile):
         outfile = goodfile
     else:
         outfile = badfile

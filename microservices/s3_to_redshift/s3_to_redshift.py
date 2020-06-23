@@ -27,7 +27,7 @@ import sys  # to read command line parameters
 import os.path  # file handling
 from ua_parser import user_agent_parser
 from referer_parser import Referer
-from lib.redshift import RedShift as Redshift
+from lib.redshift import RedShift
 import logging
 import lib.logs as log
 

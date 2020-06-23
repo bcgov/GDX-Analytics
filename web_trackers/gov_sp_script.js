@@ -16,24 +16,20 @@
      });
      window.snowplow('enableActivityTracking', 30, 30); // Ping every 30 seconds after 30 seconds
      window.snowplow('enableLinkClickTracking');
-     window.snowplow(
-    	'trackPageView',
-    	null,
-    	[{
-          schema: 'iglu:ca.bc.gov/meta_data/jsonschema/1-0-0',
-          data: {
-            node_id: idCheck()
-         }
-    	}]
-    )
-// This function checks if there is a current page id and if not send a null
-function idCheck(){
-  if (document.querySelector("meta[name='current_page_id']")) {
-    return document.querySelector("meta[name='current_page_id']").getAttribute("content");
-  }
-  else {
-    return "null";
-  }
-}
+     //This checks if there is a current page id and if not just do the basic trackPageView
+     if (document.querySelector("meta[name='current_page_id']")) {
+        window.snowplow(
+    	    'trackPageView',
+    	    null,
+    	    [{
+                schema: 'iglu:ca.bc.gov/meta_data/jsonschema/1-0-0',
+                data: {
+                    node_id: document.querySelector("meta[name='current_page_id']").getAttribute("content")
+                }
+    	    }]
+    )}
+    else {
+       window.snowplow('trackPageView');
+    }
 
 //  <!-- Snowplow stop plowing -->

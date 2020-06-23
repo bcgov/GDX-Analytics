@@ -48,7 +48,10 @@ class RedShift:
                 else:
                     self.logger.info(
                         "Query on RedShift was successful.")
-                    return curs.fetchall()
+                    if curs.description:
+                        return curs.fetchall()
+                    else:
+                        return None
 
     def copy_query(self, query, copyObj):
         'Performs a query to copy an object'

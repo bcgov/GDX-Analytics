@@ -5,7 +5,7 @@
      n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","https://sp-js.apps.gov.bc.ca/MDWay3UqFnIiGVLIo7aoMi4xMC4y.js","snowplow"));
      var collector = 'spm.apps.gov.bc.ca';
      window.snowplow('newTracker','rt',collector, {
-    	appId: "Snowplow_gov_Ryan",
+    	appId: "Snowplow_gov",
     	platform: 'web',
     	post: true,
     	forceSecureTracker: true,

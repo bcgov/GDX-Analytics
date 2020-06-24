@@ -27,7 +27,7 @@
                     node_id: document.querySelector("meta[name='current_page_id']").getAttribute("content")
                 }
     	    }]
-     )}
+     );}
      else {
        window.snowplow('trackPageView');
      }

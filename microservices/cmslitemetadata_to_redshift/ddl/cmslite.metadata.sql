@@ -1,8 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS cmslite;
 
--- LOOKUP TABLE FOR VALUES
-
--- SY: dbtables_dictionaries
+-- DICTIONARY TABLES
 
 CREATE TABLE IF NOT EXISTS cmslite.content_types (
     "id"      BIGINT		ENCODE LZO	NOT NULL,
@@ -28,34 +26,19 @@ CREATE TABLE IF NOT EXISTS cmslite.dcterms_languages (
 )  
 DISTSTYLE EVEN;
 
--- SY: Table no longer in cmslite schema
-/* CREATE TABLE IF NOT EXISTS cmslite.security_classifications (
-    "id"      BIGINT          NOT NULL,
-    "value"   VARCHAR(255)     NOT NULL
-); */
-
--- SY: Table no longer in cmslite schema
-/* CREATE TABLE IF NOT EXISTS cmslite.security_labels (
-    "id"      BIGINT          NOT NULL,
-    "value"   VARCHAR(255)     NOT NULL
-); */
-
 CREATE TABLE IF NOT EXISTS cmslite.audiences (
     "id"      BIGINT		ENCODE LZO	NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD	NOT NULL
 )  
 DISTSTYLE EVEN;
 
--- SY: Added this table to reflect cmslite_gdx.json
 CREATE TABLE IF NOT EXISTS cmslite.creators (
     "id"      BIGINT		ENCODE LZO	NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD	NOT NULL
 )  
 DISTSTYLE EVEN;
 
--- LOOKUP TABLES (MANY-TO-MANY)
-
--- SY: dbtables_metadata
+-- LOOKUP TABLES
 
 CREATE TABLE IF NOT EXISTS cmslite.metadata_content_types (
     "node_id"   VARCHAR(255)    ENCODE LZO		NOT NULL,
@@ -81,25 +64,12 @@ CREATE TABLE IF NOT EXISTS cmslite.metadata_languages (
 )  
 DISTSTYLE EVEN;
 
--- SY: Table no longer in cmslite schema
-/* CREATE TABLE IF NOT EXISTS cmslite.metadata_security_classifications (
-    "node_id"   VARCHAR(255)    NOT NULL,
-    "id"        BIGINT          NOT NULL
-); */
-
--- SY: Table no longer in cmslite schema
-/* CREATE TABLE IF NOT EXISTS cmslite.metadata_security_labels (
-    "node_id"   VARCHAR(255)    NOT NULL,
-    "id"        BIGINT          NOT NULL
-); */
-
 CREATE TABLE IF NOT EXISTS cmslite.metadata_audiences (
     "node_id"   VARCHAR(255)    ENCODE LZO		NOT NULL,
     "id"        BIGINT          ENCODE DELTA	NOT NULL
 )  
 DISTSTYLE EVEN;
 
--- SY: Added this table to reflect cmslite_gdx.json
 CREATE TABLE IF NOT EXISTS cmslite.metadata_creators (
     "node_id"   VARCHAR(255)    ENCODE LZO		NOT NULL,
     "id"        BIGINT          ENCODE DELTA	NOT NULL
@@ -107,26 +77,7 @@ CREATE TABLE IF NOT EXISTS cmslite.metadata_creators (
 DISTSTYLE EVEN;
 
 -- METADATA TABLE FOR NODE_ID RECORDS
--- NODE_ID should be primary key, however RedShift doesn't seem to enforce this.
 
--- SY: Old table
-/* CREATE TABLE IF NOT EXISTS cmslite.metadata (
-    "node_id"           VARCHAR(255)     NOT NULL,
-    "keywords"          VARCHAR(1000)   ,
-    "description"       VARCHAR(1000)   ,
-    "page_type"         VARCHAR(255)    ,
-    "synonyms"          VARCHAR(1000)   ,
-    "dcterms_creator"   VARCHAR(255)    ,
-    "publication_date"  DATE            ,
-    "modified_date"     TIMESTAMP       ,
-    "created_date"      TIMESTAMP       ,
-    "updated_date"      TIMESTAMP       ,
-    "published_date"    TIMESTAMP       
-); */
-
--- SY: New table
--- SY: Not sure if node_id needs NOT NULL but kept it as it was in the old table above
--- SY: sitekey in Looker but site_key in cmslite_gdx.json??
 CREATE TABLE IF NOT EXISTS cmslite.metadata (
 	"node_id"						VARCHAR(255)					ENCODE	LZO		NOT NULL,
 	"parent_node_id"				VARCHAR(255)					ENCODE	ZSTD,	

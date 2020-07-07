@@ -267,7 +267,7 @@ query = r'''
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
         OR (request_string LIKE '%getmedia%'
             AND asset_url LIKE 'https://www.workbc.ca%')
-        AND date_timestamp < '{lld}'
+        AND date_timestamp > '{lld}'
     );
     COMMIT;
 '''.format(schema_name=schema_name,

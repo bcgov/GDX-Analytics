@@ -79,8 +79,8 @@ def last_loaded():
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
-    q = f"""SELECT MAX(date_timestamp) FROM
-            {schema_name}.asset_downloads_derived"""
+    q = '''SELECT MAX(date_timestamp) FROM {schema_name}.asset_downloads_derived;
+        '''.format(schema_name=schema_name)
     cursor.execute(q)
     # get the last loaded date
     lld = (cursor.fetchall())[0][0]
@@ -222,7 +222,8 @@ query = r'''
         AS referrer_urlpath,
         CASE
             WHEN POSITION ('?' IN referrer) > 0
-            THEN SUBSTRING (referrer_urlpath,POSITION ('?' IN referrer_urlpath) +1)
+            THEN SUBSTRING (referrer_urlpath,
+                            POSITION ('?' IN referrer_urlpath) +1)
             ELSE ''
             END AS referrer_urlquery,
         SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
@@ -289,4 +290,3 @@ with psycopg2.connect(conn_string) as conn:
             logger.info(
                 ('Success: executed the transaction '
                  'to prepare the %s.asset_downloads_derived PDT'), schema_name)
-

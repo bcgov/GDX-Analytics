@@ -72,8 +72,6 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
 
-# Fetch last loaded date
-lld = last_loaded()
 
 query = r'''
     BEGIN;
@@ -253,8 +251,7 @@ query = r'''
 '''.format(schema_name=schema_name,
            asset_host=asset_host,
            asset_source=asset_source,
-           asset_scheme_and_authority=asset_scheme_and_authority,
-           lld=lld)
+           asset_scheme_and_authority=asset_scheme_and_authority)
 
 
 with psycopg2.connect(conn_string) as conn:

@@ -72,25 +72,6 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            user=os.environ['pguser'],
            password=os.environ['pgpass'])
 
-
-def last_loaded():
-    """Check for the last loaded assets date in Redshift"""
-    # Load the Redshift connection
-    con = psycopg2.connect(conn_string)
-    cursor = con.cursor()
-    # query the latest date for any search data on this site loaded to redshift
-    q = '''SELECT MAX(date_timestamp) FROM {schema_name}.asset_downloads_derived;
-        '''.format(schema_name=schema_name)
-    cursor.execute(q)
-    # get the last loaded date
-    lld = (cursor.fetchall())[0][0]
-    # close the redshift connection
-    cursor.close()
-    con.commit()
-    con.close()
-    return lld
-
-
 # Fetch last loaded date
 lld = last_loaded()
 
@@ -267,7 +248,6 @@ query = r'''
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
         OR (request_string LIKE '%getmedia%'
             AND asset_url LIKE 'https://www.workbc.ca%')
-        AND date_timestamp > '{lld}'
     );
     COMMIT;
 '''.format(schema_name=schema_name,

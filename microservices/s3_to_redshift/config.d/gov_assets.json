@@ -4,7 +4,7 @@
     "destination": "processed",
     "directory": "cmslite_gdx",
     "doc": "gov_assets.*",
-    "dbtable": "cmslite.asset_downloads",
+    "dbtable": "test.asset_downloads",
     "column_count": 16,
     "columns": [
       "ip",
@@ -35,7 +35,7 @@
       "Source Translated Port"
     ],
     "delim": "|",
-    "truncate": false,
+    "truncate": true,
     "dateformat": [
       {
         "field": "date/timestamp",
@@ -72,7 +72,6 @@
       "linefeed": "\r\n",
       "ua_parse": {}
     },
-    "schema_name": "cmslite",
     "asset_host": "www2.gov.bc.ca",
     "asset_source": "CMSLite",
     "asset_scheme_and_authority": "https://www2.gov.bc.ca"

@@ -58,7 +58,6 @@ if os.path.isfile(configfile) is False:
 with open(configfile) as f:
     data = json.load(f)
 
-schema_name = data['schema_name']
 asset_host = data['asset_host']
 asset_source = data['asset_source']
 asset_scheme_and_authority = data['asset_scheme_and_authority']
@@ -75,7 +74,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 
 query = r'''
     BEGIN;
-    SET SEARCH_PATH TO '{schema_name}';
+    SET SEARCH_PATH TO 'test';
     INSERT INTO asset_downloads_derived (
         SELECT '{asset_scheme_and_authority}' ||
             SPLIT_PART(assets.request_string, ' ',2)
@@ -240,7 +239,7 @@ query = r'''
                 '//$','/'),
             '%20',' ')
         AS truncated_asset_url_nopar_case_insensitive
-        FROM {schema_name}.asset_downloads AS assets
+        FROM test.asset_downloads AS assets
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
@@ -248,8 +247,7 @@ query = r'''
             AND asset_url LIKE 'https://www.workbc.ca%')
     );
     COMMIT;
-'''.format(schema_name=schema_name,
-           asset_host=asset_host,
+'''.format(asset_host=asset_host,
            asset_source=asset_source,
            asset_scheme_and_authority=asset_scheme_and_authority)
 
@@ -260,9 +258,9 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception(
-                ('Error: failed to execute the transaction '
-                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
+                'Error: failed to execute the transaction '
+                'to prepare the %s.asset_downloads_derived PDT')
         else:
             logger.info(
-                ('Success: executed the transaction '
-                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
+                'Success: executed the transaction '
+                'to prepare the %s.asset_downloads_derived PDT')

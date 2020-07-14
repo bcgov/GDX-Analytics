@@ -200,8 +200,8 @@ query = r'''
         AS referrer_urlpath,
         CASE
             WHEN POSITION ('?' IN referrer) > 0
-            THEN SUBSTRING (referrer_urlpath,
-                            POSITION ('?' IN referrer_urlpath) +1)
+            THEN SUBSTRING (referrer,
+                            POSITION ('?' IN referrer) +1)
             ELSE ''
             END AS referrer_urlquery,
         SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
@@ -240,7 +240,7 @@ query = r'''
                 '//$','/'),
             '%20',' ')
         AS truncated_asset_url_nopar_case_insensitive
-        FROM derived.asset_downloads AS assets
+         FROM {schema_name}.asset_downloads AS assets
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
@@ -248,7 +248,8 @@ query = r'''
             AND asset_url LIKE 'https://www.workbc.ca%')
     );
     COMMIT;
-'''.format(asset_host=asset_host,
+'''.format(schema_name=schema_name,
+           asset_host=asset_host,
            asset_source=asset_source,
            asset_scheme_and_authority=asset_scheme_and_authority)
 

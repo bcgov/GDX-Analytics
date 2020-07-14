@@ -72,6 +72,7 @@
       "linefeed": "\r\n",
       "ua_parse": {}
     },
+    "schema_name": "cmslite",
     "asset_host": "www2.gov.bc.ca",
     "asset_source": "CMSLite",
     "asset_scheme_and_authority": "https://www2.gov.bc.ca"

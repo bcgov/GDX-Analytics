@@ -58,6 +58,7 @@ if os.path.isfile(configfile) is False:
 with open(configfile) as f:
     data = json.load(f)
 
+schema_name = data['schema_name']
 asset_host = data['asset_host']
 asset_source = data['asset_source']
 asset_scheme_and_authority = data['asset_scheme_and_authority']
@@ -74,7 +75,7 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
 
 query = r'''
     BEGIN;
-    SET SEARCH_PATH TO 'test';
+    SET SEARCH_PATH TO '{schema_name}';
     INSERT INTO asset_downloads_derived (
         SELECT '{asset_scheme_and_authority}' ||
             SPLIT_PART(assets.request_string, ' ',2)
@@ -239,7 +240,7 @@ query = r'''
                 '//$','/'),
             '%20',' ')
         AS truncated_asset_url_nopar_case_insensitive
-        FROM test.asset_downloads AS assets
+        FROM derived.asset_downloads AS assets
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'

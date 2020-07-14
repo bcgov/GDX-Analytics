@@ -259,8 +259,8 @@ with psycopg2.connect(conn_string) as conn:
         except psycopg2.Error:
             logger.exception(
                 'Error: failed to execute the transaction '
-                'to prepare the %s.asset_downloads_derived PDT')
+                'to prepare the test.asset_downloads_derived PDT')
         else:
             logger.info(
                 'Success: executed the transaction '
-                'to prepare the %s.asset_downloads_derived PDT')
+                'to prepare the test.asset_downloads_derived PDT')

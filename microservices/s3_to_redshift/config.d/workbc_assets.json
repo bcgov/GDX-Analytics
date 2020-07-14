@@ -4,7 +4,7 @@
     "destination": "processed",
     "directory": "assets_workbc",
     "doc": "workbc_analytics.*",
-    "dbtable": "test.asset_downloads",
+    "dbtable": "workbc.asset_downloads",
     "column_count": 16,
     "columns": [
       "ip",

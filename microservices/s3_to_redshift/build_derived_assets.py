@@ -264,5 +264,5 @@ with psycopg2.connect(conn_string) as conn:
                  'to prepare the %s.asset_downloads_derived PDT'), schema_name)
         else:
             logger.info(
-                ('Error: failed to execute the transaction '
+                ('Success: executed the transaction '
                  'to prepare the %s.asset_downloads_derived PDT'), schema_name)

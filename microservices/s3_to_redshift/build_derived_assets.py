@@ -260,9 +260,9 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception(
-                'Error: failed to execute the transaction '
-                'to prepare the test.asset_downloads_derived PDT')
+                ('Error: failed to execute the transaction '
+                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
         else:
             logger.info(
-                'Success: executed the transaction '
-                'to prepare the test.asset_downloads_derived PDT')
+                ('Error: failed to execute the transaction '
+                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)

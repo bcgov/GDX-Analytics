@@ -341,7 +341,7 @@ for site_item in config_sites:
              "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
              "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
              "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
-             "NULL AS '-' ESCAPE;")
+             "NULL AS '-' ESCAPE TRUNCATECOLUMNS;")
         query = logquery.format(
             AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])

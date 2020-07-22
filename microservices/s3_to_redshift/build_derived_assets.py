@@ -73,27 +73,6 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            password=os.environ['pgpass'])
 
 
-def last_loaded():
-    """Check for the last loaded assets date in Redshift"""
-    # Load the Redshift connection
-    con = psycopg2.connect(conn_string)
-    cursor = con.cursor()
-    # query the latest date for any search data on this site loaded to redshift
-    q = '''SELECT MAX(date_timestamp) FROM {schema_name}.asset_downloads_derived;
-        '''.format(schema_name=schema_name)
-    cursor.execute(q)
-    # get the last loaded date
-    lld = (cursor.fetchall())[0][0]
-    # close the redshift connection
-    cursor.close()
-    con.commit()
-    con.close()
-    return lld
-
-
-# Fetch last loaded date
-lld = last_loaded()
-
 query = r'''
     BEGIN;
     SET SEARCH_PATH TO '{schema_name}';
@@ -221,8 +200,8 @@ query = r'''
         AS referrer_urlpath,
         CASE
             WHEN POSITION ('?' IN referrer) > 0
-            THEN SUBSTRING (referrer_urlpath,
-                            POSITION ('?' IN referrer_urlpath) +1)
+            THEN SUBSTRING (referrer,
+                            POSITION ('?' IN referrer) +1)
             ELSE ''
             END AS referrer_urlquery,
         SPLIT_PART(assets.referrer, ':', 1) AS referrer_urlscheme,
@@ -261,20 +240,18 @@ query = r'''
                 '//$','/'),
             '%20',' ')
         AS truncated_asset_url_nopar_case_insensitive
-        FROM {schema_name}.asset_downloads AS assets
+         FROM {schema_name}.asset_downloads AS assets
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
         OR (request_string LIKE '%getmedia%'
             AND asset_url LIKE 'https://www.workbc.ca%')
-        AND date_timestamp > '{lld}'
     );
     COMMIT;
 '''.format(schema_name=schema_name,
            asset_host=asset_host,
            asset_source=asset_source,
-           asset_scheme_and_authority=asset_scheme_and_authority,
-           lld=lld)
+           asset_scheme_and_authority=asset_scheme_and_authority)
 
 
 with psycopg2.connect(conn_string) as conn:

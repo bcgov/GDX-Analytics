@@ -1,6 +1,7 @@
 """GDX Analytics Redshift class forms part of the shared module
 """
 import os
+import sys
 import logging
 import psycopg2
 
@@ -10,6 +11,22 @@ PORT = 5439
 
 class RedShift:
     'Common microservice operations for RedShift'
+
+    def print_psycopg2_exception(err):
+        'handles and parses psycopg2 exceptions'
+        # get details about the exception
+        err_type, err_obj, traceback = sys.exc_info()
+
+        # get the line number when exception occured
+        line_num = traceback.tb_lineno
+
+        # print the connect() error
+        self.logger.error("psycopg2 ERROR: %s", err)
+        self.logger.debug("pgerror: %s", err.pgerror)
+        self.logger.debug("pgcode: %s", err.pgcode)
+        self.logger.deug("npsycopg2 error on line number: %s", line_num)
+        self.logger.deug("psycopg2 traceback: %s", traceback)
+        self.logger.deug("psycopg2 error type: %s", err_type)
 
     def open_connection(self):
         'opens a connection to the Redshift database using the provided'
@@ -25,8 +42,8 @@ class RedShift:
         try:
             conn = psycopg2.connect(dsn=connection_string)
             self.logger.debug(f'opened connection to {self.dbname}')
-        except:
-            self.logger.exception('psycopg2 threw an exception')
+        except psycopg2.Error as err:
+            print_psycopg2_exception(err)
         return conn
 
     def close_connection(self):
@@ -40,10 +57,10 @@ class RedShift:
             with conn.cursor() as curs:
                 try:
                     curs.execute(query)
-                except psycopg2.Error as e:
+                except psycopg2.Error as err:
                     self.logger.error(
                         "Loading %s to RedShift failed.", self.batchfile)
-                    self.logger.error("%s", e.pgerror)
+                    print_psycopg2_exception(err)
                     return False
                 else:
                     self.logger.info(

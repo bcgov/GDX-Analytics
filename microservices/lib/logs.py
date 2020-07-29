@@ -8,6 +8,25 @@ import os
 FILE_FORMAT = '%(levelname)s:%(name)s:%(asctime)s:%(message)s'
 CONS_FORMAT = '%(message)s'
 
+class CustomFileHandler(logging.FileHandler):
+    def __init__(self, file):
+        super(CustomFileHandler, self).__init__(file)
+
+    def emit(self, record):
+        messages = record.msg.split('\n')
+        for message in messages:
+            record.msg = message
+            super(CustomFileHandler, self).emit(record)
+
+class CustomStreamHandler(logging.StreamHandler):
+    def __init__(self):
+        super(CustomStreamHandler, self).__init__()
+
+    def emit(self, record):
+        messages = record.msg.split('\n')
+        for message in messages:
+            record.msg = message
+            super(CustomStreamHandler, self).emit(record)
 
 def setup(dir='logs', minLevel=logging.INFO):
     """ Set up dual logging to console and to logfile.
@@ -33,14 +52,14 @@ def setup(dir='logs', minLevel=logging.INFO):
     file_path = os.path.join(dir, file_name)
 
     # Set up logging to the logfile.
-    file_handler = logging.FileHandler(file_path)
+    file_handler = CustomFileHandler(file_path)
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(FILE_FORMAT)
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
     # Set up logging to the console.
-    stream_handler = logging.StreamHandler()
+    stream_handler = CustomStreamHandler()
     stream_handler.setLevel(minLevel)
     stream_formatter = logging.Formatter(CONS_FORMAT)
     stream_handler.setFormatter(stream_formatter)

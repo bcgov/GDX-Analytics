@@ -40,14 +40,14 @@ class RedShift:
             f"password={self.password}")
 
         connection_string_log = (
-            f"dbname='{self.dbname}' "
-            f"host='{self.host}' "
-            f"port='{self.port}' "
-            f"user='{self.user}' ")
+            "dbname='%s' host='%s' port='%s' user='%s'" % 
+            self.dbname,self.host,self.port,self.user)
 
         try:
             conn = psycopg2.connect(dsn=connection_string)
-            self.logger.debug('opened connection on connection string\n%s', connection_string_log)
+            self.logger.debug(
+                "opened connection on connection string\n%s",
+                connection_string_log)
         except psycopg2.Error as err:
             self.print_psycopg2_exception(err)
         return conn

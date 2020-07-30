@@ -12,7 +12,7 @@ PORT = 5439
 class RedShift:
     'Common microservice operations for RedShift'
 
-    def print_psycopg2_exception(err):
+    def print_psycopg2_exception(self, err):
         'handles and parses psycopg2 exceptions'
         # get details about the exception
         err_type, err_obj, traceback = sys.exc_info()

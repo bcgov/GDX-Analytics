@@ -24,7 +24,7 @@ class RedShift:
         self.logger.error("psycopg2 ERROR: %s", err)
         self.logger.debug("pgerror: %s", err.pgerror)
         self.logger.debug("pgcode: %s", err.pgcode)
-        self.logger.deug("npsycopg2 error on line number: %s", line_num)
+        self.logger.deug("psycopg2 error on line number: %s", line_num)
         self.logger.deug("psycopg2 traceback: %s", traceback)
         self.logger.deug("psycopg2 error type: %s", err_type)
 
@@ -39,11 +39,17 @@ class RedShift:
             f"user='{self.user}' "
             f"password={self.password}")
 
+        connection_string_log = (
+            f"dbname='{self.dbname}' "
+            f"host='{self.host}' "
+            f"port='{self.port}' "
+            f"user='{self.user}' ")
+
         try:
             conn = psycopg2.connect(dsn=connection_string)
-            self.logger.debug(f'opened connection to {self.dbname}')
+            self.logger.debug('opened connection on connection string\n%s', connection_string_log)
         except psycopg2.Error as err:
-            print_psycopg2_exception(err)
+            self.print_psycopg2_exception(err)
         return conn
 
     def close_connection(self):
@@ -60,7 +66,7 @@ class RedShift:
                 except psycopg2.Error as err:
                     self.logger.error(
                         "Loading %s to RedShift failed.", self.batchfile)
-                    print_psycopg2_exception(err)
+                    self.print_psycopg2_exception(err)
                     return False
                 else:
                     self.logger.info(

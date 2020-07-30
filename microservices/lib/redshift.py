@@ -41,7 +41,7 @@ class RedShift:
 
         connection_string_log = (
             "dbname='%s' host='%s' port='%s' user='%s'" % 
-            self.dbname,self.host,self.port,self.user)
+            (self.dbname,self.host,self.port,self.user))
 
         try:
             conn = psycopg2.connect(dsn=connection_string)

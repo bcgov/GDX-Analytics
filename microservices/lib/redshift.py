@@ -24,9 +24,9 @@ class RedShift:
         self.logger.error("psycopg2 ERROR: %s", err)
         self.logger.debug("pgerror: %s", err.pgerror)
         self.logger.debug("pgcode: %s", err.pgcode)
-        self.logger.deug("psycopg2 error on line number: %s", line_num)
-        self.logger.deug("psycopg2 traceback: %s", traceback)
-        self.logger.deug("psycopg2 error type: %s", err_type)
+        self.logger.debug("psycopg2 error on line number: %s", line_num)
+        self.logger.debug("psycopg2 traceback: %s", traceback)
+        self.logger.debug("psycopg2 error type: %s", err_type)
 
     def open_connection(self):
         'opens a connection to the Redshift database using the provided'

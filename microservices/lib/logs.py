@@ -2,6 +2,7 @@
 
 import inspect
 import logging
+import copy
 import os
 
 # Define the default logging message formats.
@@ -13,20 +14,26 @@ class CustomFileHandler(logging.FileHandler):
         super(CustomFileHandler, self).__init__(file)
 
     def emit(self, record):
-        messages = record.msg.split('\n')
+        fh_repack = copy.copy(record)
+        fh_repack.msg = fh_repack.getMessage()
+        fh_repack.args = ()
+        messages = fh_repack.msg.split('\n')
         for message in messages:
-            record.msg = message
-            super(CustomFileHandler, self).emit(record)
+            fh_repack.msg = message
+            super(CustomFileHandler, self).emit(fh_repack)
 
 class CustomStreamHandler(logging.StreamHandler):
     def __init__(self):
         super(CustomStreamHandler, self).__init__()
 
     def emit(self, record):
-        messages = record.msg.split('\n')
+        sh_repack = copy.copy(record)
+        sh_repack.msg = sh_repack.getMessage()
+        sh_repack.args = ()
+        messages = sh_repack.msg.split('\n')
         for message in messages:
-            record.msg = message
-            super(CustomStreamHandler, self).emit(record)
+            sh_repack.msg = message
+            super(CustomStreamHandler, self).emit(sh_repack)
 
 def setup(dir='logs', minLevel=logging.INFO):
     """ Set up dual logging to console and to logfile.

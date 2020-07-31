@@ -21,12 +21,19 @@ class RedShift:
         line_num = traceback.tb_lineno
 
         # print the connect() error
-        self.logger.error("psycopg2 ERROR: %s", err)
+        self.logger.error("psycopg2 %s: %s", err.__class__.__name__, err)
         self.logger.debug("pgerror: %s", err.pgerror)
         self.logger.debug("pgcode: %s", err.pgcode)
         self.logger.debug("psycopg2 error on line number: %s", line_num)
         self.logger.debug("psycopg2 traceback: %s", traceback)
         self.logger.debug("psycopg2 error type: %s", err_type)
+
+        if str(err.pgcode) == 'XX000':
+            self.logger.info(
+                "To begin investigating this database error, connect to the "
+                "%s database with adminitrative credentials, then execute:\n"
+                "> SELECT TOP 1 * FROM stl_load_errors WHERE filename LIKE "
+                "'%%%s%%';", self.dbname, self.batchfile)
 
     def open_connection(self):
         'opens a connection to the Redshift database using the provided'
@@ -40,15 +47,20 @@ class RedShift:
             f"password={self.password}")
 
         connection_string_log = (
-            "dbname='%s' host='%s' port='%s' user='%s'" % 
-            (self.dbname,self.host,self.port,self.user))
+            f"dbname='{self.dbname}' "
+            f"host='{self.host}' "
+            f"port='{self.port}' "
+            f"user='{self.user}'")
 
         try:
             conn = psycopg2.connect(dsn=connection_string)
             self.logger.debug(
-                "opened connection on connection string\n%s",
+                "Opened connection on connection string:\n%s",
                 connection_string_log)
         except psycopg2.Error as err:
+            self.logger.error(
+                "Failed to connect using connection string:\n%s",
+                connection_string_log)
             self.print_psycopg2_exception(err)
         return conn
 
@@ -87,7 +99,6 @@ class RedShift:
         self.password = password
 
         self.connection = self.open_connection()
-        self.logger.debug('connection to redshift initialized')
 
 
     @classmethod

@@ -409,112 +409,146 @@ query = """
 SET search_path TO {dbschema};
 TRUNCATE {dbschema}.themes;
 INSERT INTO {dbschema}.themes
-WITH ids AS (
-    SELECT cm.node_id,
-        cm.title,
-        cm.hr_url,
-        cm.parent_node_id,
-        cm_parent.title AS parent_title,
-        CASE
-            -- page is a home page either web or intranet home
-            WHEN cm.node_id IN (
-                'CA4CBBBB070F043ACF7FB35FE3FD1081',
-                'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL
-             -- page is a theme -- NOTE we call intranet "homes" as Themes
-            WHEN cm.parent_node_id IN (
-                'CA4CBBBB070F043ACF7FB35FE3FD1081',
-                'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN (
-                    'BC Gov Theme','Intranet Home') THEN cm.node_id
-            -- parent is a theme
-            WHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN (
-                'BC Gov Theme','Intranet Home') THEN cm.parent_node_id
-            -- take the second entry.
-            -- The first is always blank as the string has '|' on each end
-            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) <> '' THEN TRIM(
-                SPLIT_PART(cm.ancestor_nodes, '|', 2))
-            ELSE NULL
-        END AS theme_id,
-        CASE
-            -- page is a home page
-            WHEN cm.node_id IN (
-                'CA4CBBBB070F043ACF7FB35FE3FD1081',
-                'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL
-            -- page is a theme -- NOTE we call intranet "homes" as Themes
-            WHEN cm.parent_node_id IN (
-                'CA4CBBBB070F043ACF7FB35FE3FD1081',
-                'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN (
-                    'BC Gov Theme','Intranet Home') THEN NULL
-            -- parent is a theme, so this is a subtheme
-            WHEN cm.ancestor_nodes = '||' AND cm_parent.page_type IN (
-                'BC Gov Theme','Intranet Home') THEN cm.node_id
-            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = ''
-                THEN cm.parent_node_id -- the parent is a subtheme
-            -- take the third entry. The first is always blank as the string
-            -- has '|' on each end and the second is the theme,
-            -- the third is a subtheme
-            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) <> ''
-                THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3))
-            ELSE NULL
-        END AS subtheme_id,
-        CASE
-            -- page is a home page
-            WHEN cm.node_id IN (
-                'CA4CBBBB070F043ACF7FB35FE3FD1081',
-                'A9A4B738CE26466C92B45A66DD8C2AFC') THEN NULL
-            -- page is a theme
-            WHEN cm.parent_node_id IN (
-                'CA4CBBBB070F043ACF7FB35FE3FD1081',
-                'A9A4B738CE26466C92B45A66DD8C2AFC') AND cm.page_type IN (
-                    'BC Gov Theme','Intranet Home') THEN NULL
-            WHEN cm.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
-                OR cm_parent.node_id = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
-                THEN 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
-            -- the page's parent is a sub-theme and it is a topic page
-            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 3)) = ''
-                AND cm_parent.page_type IN ('BC Gov Theme','Intranet Theme')
-                AND cm.page_type = 'Topic' THEN cm.node_id
-            -- the page's parent is a topic
-            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) = ''
-                AND cm_parent.page_type = 'Topic' THEN cm.parent_node_id
-            -- take the fourth entry. The first is always blank as the
-            -- string has '|' on each end and the second is the theme,
-            -- third is sub-theme
-            WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4)) <> ''
-                THEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 4))
-            ELSE NULL
-        END AS topic_id
-        FROM {dbschema}.metadata AS cm
-        LEFT JOIN {dbschema}.metadata AS cm_parent
-            ON cm_parent.node_id = cm.parent_node_id
-    ),
-biglist AS (
-    SELECT
-        ROW_NUMBER () OVER ( PARTITION BY ids.node_id ) AS index,
-        ids.*,
-        cm_theme.title AS theme,
-        cm_sub_theme.title AS subtheme,
-        cm_topic.title AS topic
-        FROM ids
-        LEFT JOIN {dbschema}.metadata AS cm_theme
-            ON cm_theme.node_id = theme_id
-        LEFT JOIN {dbschema}.metadata AS cm_sub_theme
-            ON cm_sub_theme.node_id = subtheme_id
-        LEFT JOIN {dbschema}.metadata AS cm_topic
-            ON cm_topic.node_id = topic_id
-    )
+WITH ids
+AS (SELECT cm.node_id,
+      cm.title,
+      cm.hr_url,
+      cm.parent_node_id,
+      cm_parent.title AS parent_title,
+      cm.ancestor_nodes,
+      CASE
+        -- page is root: Gov, Intranet, ALC, MCFD or Training SITE
+        WHEN cm.node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081', 
+                            'A9A4B738CE26466C92B45A66DD8C2AFC', 
+                            '7B239105652B4EBDAB215C59B75A453B', 
+                            'AFE735F4ADA542ACA830EBC10D179FBE', 
+                            'D69135AB037140D880A4B0E725D15774') 
+          THEN '||'
+        -- parent page is root: Gov, Intranet, ALC, MCFD or Training SITE
+        WHEN cm.parent_node_id IN ('CA4CBBBB070F043ACF7FB35FE3FD1081', 
+                            'A9A4B738CE26466C92B45A66DD8C2AFC', 
+                            '7B239105652B4EBDAB215C59B75A453B', 
+                            'AFE735F4ADA542ACA830EBC10D179FBE', 
+                            'D69135AB037140D880A4B0E725D15774')
+          THEN '|' || cm.node_id || '|'
+        -- "first" page is root: Gov, Intranet, ALC, MCFD or Training SITE     
+        WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) IN ('CA4CBBBB070F043ACF7FB35FE3FD1081', 
+                            'A9A4B738CE26466C92B45A66DD8C2AFC', 
+                            '7B239105652B4EBDAB215C59B75A453B', 
+                            'AFE735F4ADA542ACA830EBC10D179FBE', 
+                            'D69135AB037140D880A4B0E725D15774')
+          THEN REPLACE(cm.ancestor_nodes, '|' || TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)), '') || cm.parent_node_id || '|' || cm.node_id || '|'  
+        -- an exception for assets, push the parent node to level2 and leave the node out of the hierarchy
+        WHEN cm.ancestor_nodes = '||' AND cm.page_type = 'ASSET' 
+          THEN cm.ancestor_nodes || cm.parent_node_id    
+        -- no ancestor nodes      
+        WHEN cm.ancestor_nodes = '||' 
+          THEN '|' || cm.parent_node_id || '|' || cm.node_id || '|'
+        ELSE cm.ancestor_nodes || cm.parent_node_id || '|' || cm.node_id || '|'    
+      END AS full_tree_nodes,
+      -- The first SPLIT_PART of full_tree_nodes is always blank as the string has '|' on each end
+      CASE 
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 2)) <> '' 
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 2))
+        ELSE NULL
+      END AS level1_id,
+      CASE 
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 3)) <> '' 
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 3))
+        ELSE NULL
+      END AS level2_id,
+      --  exception for Service BC pages: "promote" FD6DB5BA2A5248038EEF54D9F9F37C4D as a topic and raise up its children as sub-topics
+      CASE 
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' 
+          THEN 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 4)) <> ''
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 4))
+        ELSE NULL
+      END AS level3_id,
+      CASE 
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' 
+          AND TRIM(SPLIT_PART(full_tree_nodes, '|', 8)) <> '' 
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 8))
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D' 
+          AND TRIM(SPLIT_PART(full_tree_nodes, '|', 5)) <> '' 
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 5))
+        ELSE NULL
+      END AS level4_id,
+      CASE 
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D' 
+          AND TRIM(SPLIT_PART(full_tree_nodes, '|', 9)) <> '' 
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 9))
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D' 
+          AND TRIM(SPLIT_PART(full_tree_nodes, '|', 6)) <> '' 
+          THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 6))
+        ELSE NULL
+      END AS level5_id
+    FROM cmslite.metadata AS cm
+      LEFT JOIN cmslite.metadata AS cm_parent
+        ON cm_parent.node_id = cm.parent_node_id),
+biglist
+  AS (SELECT 
+    ROW_NUMBER () OVER ( PARTITION BY ids.node_id ) AS index,
+    ids.*,
+    l1.title AS theme,
+    l2.title AS subtheme,
+    l3.title AS topic,
+    l4.title AS subtopic,
+    l5.title AS subsubtopic,
+  CASE 
+    WHEN theme IS NOT NULL 
+      THEN level1_ID
+    ELSE NULL 
+  END AS theme_ID,
+  CASE 
+    WHEN subtheme IS NOT NULL 
+      THEN level2_ID
+    ELSE NULL 
+  END AS subtheme_ID,
+  CASE 
+    WHEN topic IS NOT NULL 
+      THEN level3_ID
+    ELSE NULL 
+  END AS topic_ID,
+  CASE 
+    WHEN subtopic IS NOT NULL 
+      THEN level4_ID
+    ELSE NULL 
+  END AS subtopic_ID,
+  CASE 
+    WHEN subsubtopic IS NOT NULL 
+      THEN level5_ID
+    ELSE NULL 
+  END AS subsubtopic_ID
+FROM ids 
+    LEFT JOIN cmslite.metadata AS l1
+      ON l1.node_id = ids.level1_id
+    LEFT JOIN cmslite.metadata AS l2
+      ON l2.node_id = ids.level2_id
+    LEFT JOIN cmslite.metadata AS l3
+      ON l3.node_id = ids.level3_id
+    LEFT JOIN cmslite.metadata AS l4
+      ON l4.node_id = ids.level4_id
+    LEFT JOIN cmslite.metadata AS l5
+      ON l5.node_id = ids.level5_id
+)
 SELECT node_id,
        title,
        hr_url,
        parent_node_id,
        parent_title,
        theme_id,
-       subtheme_id,
-       topic_id,
        theme,
+       subtheme_id,
        subtheme,
-       topic
-FROM   biglist
-WHERE  index = 1;
+       topic_id,
+       topic,
+       subtopic_id,
+       subtopic,
+       subsubtopic_id,
+       subsubtopic
+FROM biglist
+WHERE index = 1
 """.format(dbschema=dbschema)
 
 # Execute the query and log the outcome

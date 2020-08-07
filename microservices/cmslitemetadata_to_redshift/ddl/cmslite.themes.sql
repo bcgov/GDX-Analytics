@@ -7,9 +7,13 @@ CREATE TABLE IF NOT EXISTS cmslite.themes (
 	"theme_id"	VARCHAR(255),
 	"subtheme_id"	VARCHAR(255),
 	"topic_id"	VARCHAR(255),
+	"subtopic_id"	VARCHAR(255),
+	"subsubtopic_id" VARCHAR(255),
 	"theme"		VARCHAR(2047),
 	"subtheme"	VARCHAR(2047),
-	"topic"		VARCHAR(2047)
+	"topic"		VARCHAR(2047),
+	"subtopic"	VARCHAR(2047),
+	"subsubtopic"	VARCHAR(2047)
 );      
 ALTER TABLE cmslite.themes OWNER TO microservice;
 GRANT SELECT ON cmslite.themes TO looker;

@@ -538,14 +538,14 @@ SELECT node_id,
        parent_node_id,
        parent_title,
        theme_id,
-       theme,
        subtheme_id,
-       subtheme,
        topic_id,
-       topic,
        subtopic_id,
-       subtopic,
        subsubtopic_id,
+       theme,
+       subtheme,
+       topic,
+       subtopic,
        subsubtopic
 FROM biglist
 WHERE index = 1

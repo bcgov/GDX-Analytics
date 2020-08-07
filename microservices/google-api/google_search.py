@@ -398,9 +398,13 @@ CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
         "theme_id"      VARCHAR(255),
         "subtheme_id"   VARCHAR(255),
         "topic_id"      VARCHAR(255),
+        "subtopic_id"      VARCHAR(255),
+        "subsubtopic_id"      VARCHAR(255),
         "theme"         VARCHAR(2047),
         "subtheme"      VARCHAR(2047),
-        "topic"         VARCHAR(2047)
+        "topic"         VARCHAR(2047),
+        "subtopic"         VARCHAR(2047),
+        "subsubtopic"         VARCHAR(2047)
 );
 ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
 GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
@@ -410,7 +414,7 @@ INSERT INTO cmslite.google_pdt_scratch
           COALESCE(node_id,'') AS node_id,
           SPLIT_PART(page, '/',3) as page_urlhost,
           title,
-          theme_id, subtheme_id, topic_id, theme, subtheme, topic
+          theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme, subtheme, topic, subtopic, subsubtopic
       FROM google.googlesearch AS gs
       -- fix for misreporting of redirected front page URL in Google search
       LEFT JOIN cmslite.themes AS themes ON

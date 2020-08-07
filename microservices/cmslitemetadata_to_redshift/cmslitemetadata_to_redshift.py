@@ -483,8 +483,8 @@ AS (SELECT cm.node_id,
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 6))
         ELSE NULL
       END AS level5_id
-    FROM cmslite.metadata AS cm
-      LEFT JOIN cmslite.metadata AS cm_parent
+    FROM {dbschema}.metadata AS cm
+      LEFT JOIN {dbschema}.metadata AS cm_parent
         ON cm_parent.node_id = cm.parent_node_id),
 biglist
   AS (SELECT 
@@ -521,15 +521,15 @@ biglist
     ELSE NULL 
   END AS subsubtopic_ID
 FROM ids 
-    LEFT JOIN cmslite.metadata AS l1
+    LEFT JOIN {dbschema}.metadata AS l1
       ON l1.node_id = ids.level1_id
-    LEFT JOIN cmslite.metadata AS l2
+    LEFT JOIN {dbschema}.metadata AS l2
       ON l2.node_id = ids.level2_id
-    LEFT JOIN cmslite.metadata AS l3
+    LEFT JOIN {dbschema}.metadata AS l3
       ON l3.node_id = ids.level3_id
-    LEFT JOIN cmslite.metadata AS l4
+    LEFT JOIN {dbschema}.metadata AS l4
       ON l4.node_id = ids.level4_id
-    LEFT JOIN cmslite.metadata AS l5
+    LEFT JOIN {dbschema}.metadata AS l5
       ON l5.node_id = ids.level5_id
 )
 SELECT node_id,

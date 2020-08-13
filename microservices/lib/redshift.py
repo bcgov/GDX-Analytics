@@ -28,6 +28,23 @@ class RedShift:
         self.logger.debug("psycopg2 traceback: %s", traceback)
         self.logger.debug("psycopg2 error type: %s", err_type)
 
+        '''
+        XX000 is the code for an InternalError Exception in psycopg2.
+        It is raised when the database encounters an error due to some
+        operation that cannot be completed for some reason.
+        
+        In these microservices, this can occur when some content of a structured
+        file is S3 being loaded to a Redshift table is either mismatched with the
+        datatype in the destination table, or is otherwise misstructured.
+
+        When Redshift encounters a database load errors, a row is written to
+        stl_load_errors describing it's details. The output to INFO here gives
+        direction on how to query that table to extract the error of concern.
+
+        reference:
+        https://www.psycopg.org/docs/module.html?highlight=internalerror#psycopg2.InternalError
+        https://docs.aws.amazon.com/redshift/latest/dg/r_STL_LOAD_ERRORS.html
+        '''
         if str(err.pgcode) == 'XX000':
             self.logger.info(
                 "To begin investigating this database error, connect to the "

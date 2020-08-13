@@ -9,6 +9,22 @@ import os
 FILE_FORMAT = '%(levelname)s:%(name)s:%(asctime)s:%(message)s'
 CONS_FORMAT = '%(message)s'
 
+'''
+The Custom Handler classes below override logging File and Stream Handlers
+to allow log formatting on evert line of a log message, instead of only on
+the first line as is the default handling emit method of logging's handlers.
+
+Emit creates a copy of the LogRecord (a logged event), and sets the copy's
+message to getMessage() which is the argument-evaluated form of the message,
+it then sets the arguments to an empty tuple. the LogRecord's message is then
+split on each newline and each line gets emitted to the super class's emit().
+As a result, each line is treated as a new LogRecord with no arguments to be
+evaluated; so the Formatter formats each new line of logged messages.
+
+References:
+https://docs.python.org/3.7/library/logging.html#logging.LogRecord
+https://docs.python.org/3.7/library/logging.html#logging.LogRecord.getMessage
+'''
 class CustomFileHandler(logging.FileHandler):
     def __init__(self, file):
         super(CustomFileHandler, self).__init__(file)

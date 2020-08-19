@@ -41,7 +41,7 @@ This project is currently under development and actively supported by the GDX An
 
 ## Relevant Repositories
 
-All repositories that GDX Analytics are responsible or involved in can be found in the [bcgov](https://github.com/bcgov/) GitHub organization with the topic: [#gdx-analytics](https://github.com/topics/gdx-analytics).
+All GDX Analytics repositories can be found in the [bcgov](https://github.com/bcgov/) GitHub organization with the topic: [#gdx-analytics](https://github.com/topics/gdx-analytics).
 
 #### [GDX-Analytics-Looker-cfms_block/](https://github.com/bcgov/GDX-Analytics-Looker-cfms_block)
 

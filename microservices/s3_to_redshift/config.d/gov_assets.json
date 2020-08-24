@@ -4,7 +4,7 @@
     "destination": "processed",
     "directory": "cmslite_gdx",
     "doc": "gov_assets.*",
-    "dbtable": "test.asset_downloads",
+    "dbtable": "derived.asset_downloads",
     "column_count": 16,
     "columns": [
       "ip",
@@ -72,7 +72,7 @@
       "linefeed": "\r\n",
       "ua_parse": {}
     },
-    "schema_name": "test",
+    "schema_name": "derived",
     "asset_host": "www2.gov.bc.ca",
     "asset_source": "CMSLite",
     "asset_scheme_and_authority": "https://www2.gov.bc.ca"

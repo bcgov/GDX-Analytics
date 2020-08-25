@@ -4,7 +4,7 @@
     "destination": "processed",
     "directory": "assets_workbc",
     "doc": "workbc_analytics.*",
-    "dbtable": "derived.asset_downloads",
+    "dbtable": "microservice.asset_downloads",
     "column_count": 16,
     "columns": [
       "ip",
@@ -72,7 +72,7 @@
       "linefeed": "\r\n",
       "ua_parse": {}
     },
-    "schema_name": "derived",
+    "schema_name": "microservice",
     "asset_host": "www.workbc.ca",
     "asset_source": "WorkBC",
     "asset_scheme_and_authority": "https://www.workbc.ca"

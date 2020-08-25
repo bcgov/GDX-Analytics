@@ -1,6 +1,7 @@
 """GDX Analytics Redshift class forms part of the shared module
 """
 import os
+import sys
 import logging
 import psycopg2
 
@@ -10,6 +11,46 @@ PORT = 5439
 
 class RedShift:
     'Common microservice operations for RedShift'
+
+    def print_psycopg2_exception(self, err):
+        'handles and parses psycopg2 exceptions'
+        # get details about the exception
+        err_type, err_obj, traceback = sys.exc_info()
+
+        # get the line number when exception occured
+        line_num = traceback.tb_lineno
+
+        # print the connect() error
+        self.logger.error("psycopg2 %s: %s", err.__class__.__name__, err)
+        self.logger.debug("pgerror: %s", err.pgerror)
+        self.logger.debug("pgcode: %s", err.pgcode)
+        self.logger.debug("psycopg2 error on line number: %s", line_num)
+        self.logger.debug("psycopg2 traceback: %s", traceback)
+        self.logger.debug("psycopg2 error type: %s", err_type)
+
+        '''
+        XX000 is the code for an InternalError Exception in psycopg2.
+        It is raised when the database encounters an error due to some
+        operation that cannot be completed for some reason.
+        
+        In these microservices, this can occur when some content of a structured
+        file is S3 being loaded to a Redshift table is either mismatched with the
+        datatype in the destination table, or is otherwise misstructured.
+
+        When Redshift encounters a database load errors, a row is written to
+        stl_load_errors describing it's details. The output to INFO here gives
+        direction on how to query that table to extract the error of concern.
+
+        reference:
+        https://www.psycopg.org/docs/module.html?highlight=internalerror#psycopg2.InternalError
+        https://docs.aws.amazon.com/redshift/latest/dg/r_STL_LOAD_ERRORS.html
+        '''
+        if str(err.pgcode) == 'XX000':
+            self.logger.info(
+                "To begin investigating this database error, connect to the "
+                "%s database with adminitrative credentials, then execute:\n"
+                "> SELECT TOP 1 * FROM stl_load_errors WHERE filename LIKE "
+                "'%%%s%%';", self.dbname, self.batchfile)
 
     def open_connection(self):
         'opens a connection to the Redshift database using the provided'
@@ -22,11 +63,22 @@ class RedShift:
             f"user='{self.user}' "
             f"password={self.password}")
 
+        connection_string_log = (
+            f"dbname='{self.dbname}' "
+            f"host='{self.host}' "
+            f"port='{self.port}' "
+            f"user='{self.user}'")
+
         try:
             conn = psycopg2.connect(dsn=connection_string)
-            self.logger.debug(f'opened connection to {self.dbname}')
-        except:
-            self.logger.exception('psycopg2 threw an exception')
+            self.logger.debug(
+                "Opened connection on connection string:\n%s",
+                connection_string_log)
+        except psycopg2.Error as err:
+            self.logger.error(
+                "Failed to connect using connection string:\n%s",
+                connection_string_log)
+            self.print_psycopg2_exception(err)
         return conn
 
     def close_connection(self):
@@ -40,10 +92,10 @@ class RedShift:
             with conn.cursor() as curs:
                 try:
                     curs.execute(query)
-                except psycopg2.Error as e:
+                except psycopg2.Error as err:
                     self.logger.error(
                         "Loading %s to RedShift failed.", self.batchfile)
-                    self.logger.error("%s", e.pgerror)
+                    self.print_psycopg2_exception(err)
                     return False
                 else:
                     self.logger.info(
@@ -64,7 +116,6 @@ class RedShift:
         self.password = password
 
         self.connection = self.open_connection()
-        self.logger.debug('connection to redshift initialized')
 
 
     @classmethod

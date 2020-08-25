@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS derived.asset_downloads_derived
+CREATE TABLE IF NOT EXISTS microservice.asset_downloads_derived
 ( 
   "asset_url" VARCHAR(4200) ENCODE ZSTD,
   "date_timestamp" timestamp without time zone ENCODE ZSTD,
@@ -35,4 +35,4 @@ CREATE TABLE IF NOT EXISTS derived.asset_downloads_derived
   "truncated_asset_url_nopar_case_insensitive" VARCHAR(4095) ENCODE ZSTD
 );
 
-GRANT SELECT ON derived.asset_downloads_derived TO "looker";
+GRANT SELECT ON microservice.asset_downloads_derived TO "looker";

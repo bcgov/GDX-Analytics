@@ -4,7 +4,7 @@
     "destination": "processed",
     "directory": "brendan_test",
     "doc": "tibc-app.*",
-    "dbtable": "test.asset_downloads",
+    "dbtable": "microservice.asset_downloads",
     "column_count": 16,
     "columns": [
       "ip",
@@ -72,7 +72,7 @@
       "linefeed": "\r\n",
       "ua_parse": {}
     },
-    "schema_name": "test",
+    "schema_name": "microservice",
     "asset_host": "apps.britishcolumbia.ca",
     "asset_source": "TIBC",
     "asset_scheme_and_authority": "http://apps.britishcolumbia.ca/"

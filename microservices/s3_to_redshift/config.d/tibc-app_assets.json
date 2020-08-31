@@ -1,0 +1,79 @@
+{
+    "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+    "source": "client",
+    "destination": "processed",
+    "directory": "brendan_test",
+    "doc": "tibc-app.*",
+    "dbtable": "test.asset_downloads",
+    "column_count": 16,
+    "columns": [
+      "ip",
+      "id",
+      "uid",
+      "date/timestamp",
+      "request_string",
+      "status_code",
+      "return_size",
+      "referrer",
+      "user_agent_http_request_header",
+      "request_response_time",
+      "os_family",
+      "os_version",
+      "browser_family",
+      "browser_version",
+      "referrer_source",
+      "referrer_medium"
+    ],
+    "column_string_limit":{
+      "user_agent_http_request_header": 4095
+    },
+    "drop_columns": [
+      "id",
+      "uid"
+    ],
+    "dtype_dic_strings": [
+      "Source Translated Port"
+    ],
+    "delim": "|",
+    "truncate": true,
+    "dateformat": [
+      {
+        "field": "date/timestamp",
+        "format": "%d/%b/%Y:%H:%M:%S %z"
+      }
+    ],
+    "replace": [
+      {
+        "field": "request_string",
+        "old": "GET ",
+        "new": ""
+      },
+      {
+        "field": "request_string",
+        "old": " HTTP/1.0",
+        "new": ""
+      }
+    ],
+    "access_log_parse": {
+      "regexs": [
+        {
+          "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$",
+          "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|\\10"
+        },
+        {
+          "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\"$",
+          "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|"
+        }
+      ],
+      "string_repl": {
+        "pattern": "|",
+        "replace": "%7C"
+      },
+      "linefeed": "\r\n",
+      "ua_parse": {}
+    },
+    "schema_name": "test",
+    "asset_host": "apps.britishcolumbia.ca",
+    "asset_source": "TIBC",
+    "asset_scheme_and_authority": "http://apps.britishcolumbia.ca/"
+}

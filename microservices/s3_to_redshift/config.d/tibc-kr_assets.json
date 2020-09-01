@@ -2,7 +2,7 @@
     "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
     "source": "client",
     "destination": "processed",
-    "directory": "brendan_test",
+    "directory": "assets_tibc",
     "doc": "tibc-kr.*",
     "dbtable": "microservice.asset_downloads",
     "column_count": 16,

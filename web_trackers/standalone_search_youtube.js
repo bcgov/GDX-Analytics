@@ -70,9 +70,9 @@ function track_youtube_player(player_info) {
     schema: "iglu:ca.bc.gov.youtube/youtube_playerstate/jsonschema/2-0-0",
     data: {
       status: player_info.status,
-      video_src: player_info.video_src,
-      video_id: player_info.video_id,
-      title: player_info.title,
+      video_src: (player_info.video_src? player_info.video_src: ""),
+      video_id: (player_info.video_id? player_info.video_id: ""),
+      title: (player_info.title ? player_info.title : ""),
       author: player_info.author
     }
   });

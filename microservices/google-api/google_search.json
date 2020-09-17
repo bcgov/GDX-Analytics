@@ -88,6 +88,23 @@
     {
       "name": "https://energystepcode.ca/",
       "start_date_default": "2020-08-12"
+    },
+    {
+      "name": "https://www.justicebc.ca/",
+      "start_date_default": "2020-09-09"
+    },
+    {
+      "name": "https://www.bcmhrb.ca/",
+      "start_date_default": "2020-09-14"
+    },
+    {
+      "name": "https://iiobc.ca/",
+      "start_date_default": "2020-09-14"
+    },
+    {
+      "name": "https://professionalgovernancebc.ca/",
+      "start_date_default": "2020-09-14"
     }
+	
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+  "source": "client",
+  "destination": "processed",
+  "directory": "engage_des",
+  "doc": "limesurvey-analytics.*",
+  "dbtable": "microservice.limesurvey",
+  "column_count": 11,
+  "columns": [
+    "date",
+    "sid",
+    "active",
+    "expires",
+    "startdate",
+    "datecreated",
+    "survey_total",
+    "survey_completed",
+    "survey_uncompleted",
+    "survey_first_complete_date",
+    "survey_last_complete_date"
+  ],
+  "delim": ",",
+  "truncate": false
+}

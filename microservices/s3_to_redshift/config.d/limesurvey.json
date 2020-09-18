@@ -20,5 +20,5 @@
     "survey_last_complete_date"
   ],
   "delim": ",",
-  "truncate": true
+  "truncate": false
 }

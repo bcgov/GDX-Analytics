@@ -3,7 +3,7 @@
   "source": "client",
   "destination": "processed",
   "directory": "engage_des",
-  "doc": "limesurvey_analytics.*",
+  "doc": "limesurvey_analytics*",
   "dbtable": "microservice.limesurvey",
   "column_count": 11,
   "columns": [

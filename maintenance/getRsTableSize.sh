@@ -18,8 +18,8 @@
 ##################################################
 
 # uncomment the following shell options to expand aliases and source the current ~/.bashrc file if not running as cron
-# shopt -s expand_aliases
-# source ~/.bashrc
+shopt -s expand_aliases
+source ~/.bashrc
 
 # for no positional arguments return the full list of tables
 if [ $# -eq 0 ]

@@ -406,8 +406,31 @@ for object_summary in objects_to_process:
 
 # now we run the single-time load on the cmslite.themes
 query = """
+-- perform this as a transaction.
+-- Either the whole query completes, or it leaves the old table intact
+BEGIN;
 SET search_path TO {dbschema};
-TRUNCATE {dbschema}.themes;
+DROP TABLE IF EXISTS {dbschema}.themes;
+CREATE TABLE IF NOT EXISTS {dbschema}.themes (
+  "node_id"	       VARCHAR(255),
+  "title"		   VARCHAR(2047),
+  "hr_url"	       VARCHAR(2047),
+  "parent_node_id" VARCHAR(255),
+  "parent_title"   VARCHAR(2047),
+  "theme_id"	   VARCHAR(255),
+  "subtheme_id"	   VARCHAR(255),
+  "topic_id"	   VARCHAR(255),
+  "subtopic_id"	   VARCHAR(255),
+  "subsubtopic_id" VARCHAR(255),
+  "theme"		   VARCHAR(2047),
+  "subtheme"	   VARCHAR(2047),
+  "topic"		   VARCHAR(2047),
+  "subtopic"	   VARCHAR(2047),
+  "subsubtopic"	   VARCHAR(2047)
+);
+ALTER TABLE {dbschema}.themes OWNER TO microservice;
+GRANT SELECT ON {dbschema}.themes TO looker;
+
 INSERT INTO {dbschema}.themes
 WITH ids
 AS (SELECT cm.node_id,
@@ -561,6 +584,7 @@ SELECT node_id,
        subsubtopic
 FROM biglist
 WHERE index = 1
+COMMIT;
 """.format(dbschema=dbschema)
 
 # Execute the query and log the outcome

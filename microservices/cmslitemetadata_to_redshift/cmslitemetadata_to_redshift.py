@@ -583,7 +583,7 @@ SELECT node_id,
        subtopic,
        subsubtopic
 FROM biglist
-WHERE index = 1
+WHERE index = 1;
 COMMIT;
 """.format(dbschema=dbschema)
 

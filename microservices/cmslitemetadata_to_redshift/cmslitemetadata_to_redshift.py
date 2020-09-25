@@ -406,8 +406,31 @@ for object_summary in objects_to_process:
 
 # now we run the single-time load on the cmslite.themes
 query = """
+-- perform this as a transaction.
+-- Either the whole query completes, or it leaves the old table intact
+BEGIN;
 SET search_path TO {dbschema};
-TRUNCATE {dbschema}.themes;
+DROP TABLE IF EXISTS {dbschema}.themes;
+CREATE TABLE IF NOT EXISTS {dbschema}.themes (
+  "node_id"	       VARCHAR(255),
+  "title"		   VARCHAR(2047),
+  "hr_url"	       VARCHAR(2047),
+  "parent_node_id" VARCHAR(255),
+  "parent_title"   VARCHAR(2047),
+  "theme_id"	   VARCHAR(255),
+  "subtheme_id"	   VARCHAR(255),
+  "topic_id"	   VARCHAR(255),
+  "subtopic_id"	   VARCHAR(255),
+  "subsubtopic_id" VARCHAR(255),
+  "theme"		   VARCHAR(2047),
+  "subtheme"	   VARCHAR(2047),
+  "topic"		   VARCHAR(2047),
+  "subtopic"	   VARCHAR(2047),
+  "subsubtopic"	   VARCHAR(2047)
+);
+ALTER TABLE {dbschema}.themes OWNER TO microservice;
+GRANT SELECT ON {dbschema}.themes TO looker;
+
 INSERT INTO {dbschema}.themes
 WITH ids
 AS (SELECT cm.node_id,
@@ -432,13 +455,17 @@ AS (SELECT cm.node_id,
                             'D69135AB037140D880A4B0E725D15774')
           THEN '|' || cm.node_id || '|'
         -- "first" page is root: Gov, Intranet, ALC, MCFD or Training SITE
-        WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) IN ('CA4CBBBB070F043ACF7FB35FE3FD1081',
+        WHEN TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)) IN
+                           ('CA4CBBBB070F043ACF7FB35FE3FD1081',
                             'A9A4B738CE26466C92B45A66DD8C2AFC',
                             '7B239105652B4EBDAB215C59B75A453B',
                             'AFE735F4ADA542ACA830EBC10D179FBE',
                             'D69135AB037140D880A4B0E725D15774')
-          THEN REPLACE(cm.ancestor_nodes, '|' || TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)), '') || cm.parent_node_id || '|' || cm.node_id || '|'
-        -- an exception for assets, push the parent node to level2 and leave the node out of the hierarchy
+          THEN REPLACE(cm.ancestor_nodes, '|' ||
+            TRIM(SPLIT_PART(cm.ancestor_nodes, '|', 2)), '') ||
+            cm.parent_node_id || '|' || cm.node_id || '|'
+        -- an exception for assets, push the parent node to level2 and
+        -- leave the node out of the hierarchy
         WHEN cm.ancestor_nodes = '||' AND cm.page_type = 'ASSET'
           THEN cm.ancestor_nodes || cm.parent_node_id
         -- no ancestor nodes
@@ -446,7 +473,8 @@ AS (SELECT cm.node_id,
           THEN '|' || cm.parent_node_id || '|' || cm.node_id || '|'
         ELSE cm.ancestor_nodes || cm.parent_node_id || '|' || cm.node_id || '|'
       END AS full_tree_nodes,
-      -- The first SPLIT_PART of full_tree_nodes is always blank as the string has '|' on each end
+      -- The first SPLIT_PART of full_tree_nodes is always blank as the
+      -- string has '|' on each end
       CASE
         WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 2)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 2))
@@ -457,28 +485,35 @@ AS (SELECT cm.node_id,
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 3))
         ELSE NULL
       END AS level2_id,
-      --  exception for Service BC pages: "promote" FD6DB5BA2A5248038EEF54D9F9F37C4D as a topic and raise up its children as sub-topics
+      --  exception for Service BC pages:
+      -- "promote" FD6DB5BA2A5248038EEF54D9F9F37C4D as a topic and
+      -- raise up its children as sub-topics
       CASE
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) =
+          'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           THEN 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
         WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 4)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 4))
         ELSE NULL
       END AS level3_id,
       CASE
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 8)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 8))
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 5)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 5))
         ELSE NULL
       END AS level4_id,
       CASE
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 9)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 9))
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 6)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 6))
         ELSE NULL
@@ -548,7 +583,8 @@ SELECT node_id,
        subtopic,
        subsubtopic
 FROM biglist
-WHERE index = 1
+WHERE index = 1;
+COMMIT;
 """.format(dbschema=dbschema)
 
 # Execute the query and log the outcome

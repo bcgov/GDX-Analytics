@@ -498,7 +498,7 @@ AS (SELECT cm.node_id,
       END AS level3_id,
       CASE
         WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) =
-          'FD6DB5BA2A5248038EEF54D9F9F37C4D
+          'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 8)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 8))
         WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <

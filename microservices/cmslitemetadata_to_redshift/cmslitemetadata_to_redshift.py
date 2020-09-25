@@ -497,23 +497,23 @@ AS (SELECT cm.node_id,
         ELSE NULL
       END AS level3_id,
       CASE
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) =
-          'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 8)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 8))
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <
-          'FD6DB5BA2A5248038EEF54D9F9F37C4D'
-          AND TRIM(SPLIT_PART(full_tree_nodes, '|', 5)) <> '
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) < 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+          AND TRIM(SPLIT_PART(full_tree_nodes, '|', 5)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 5))
         ELSE NULL
       END AS level4_id,
       CASE
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) =
-          'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) = 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 9)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 9))
-        WHEN TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <>
-          'FD6DB5BA2A5248038EEF54D9F9F37C4D'
+        WHEN
+TRIM(SPLIT_PART(full_tree_nodes, '|', 7)) <> 'FD6DB5BA2A5248038EEF54D9F9F37C4D'
           AND TRIM(SPLIT_PART(full_tree_nodes, '|', 6)) <> ''
           THEN TRIM(SPLIT_PART(full_tree_nodes, '|', 6))
         ELSE NULL

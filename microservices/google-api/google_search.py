@@ -382,30 +382,31 @@ DROP TABLE IF EXISTS cmslite.google_pdt_scratch;
 DROP TABLE IF EXISTS cmslite.google_pdt_old;
 
 CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
-        "site"          VARCHAR(255),
-        "date"          date,
-        "query"         VARCHAR(2048),
-        "country"       VARCHAR(255),
-        "device"        VARCHAR(255),
-        "page"          VARCHAR(2047),
-        "position"      FLOAT,
-        "clicks"        DECIMAL,
-        "ctr"           FLOAT,
-        "impressions"   DECIMAL,
-        "node_id"       VARCHAR(255),
-        "page_urlhost"  VARCHAR(255),
-        "title"         VARCHAR(2047),
-        "theme_id"      VARCHAR(255),
-        "subtheme_id"   VARCHAR(255),
-        "topic_id"      VARCHAR(255),
-        "subtopic_id"      VARCHAR(255),
-        "subsubtopic_id"      VARCHAR(255),
-        "theme"         VARCHAR(2047),
-        "subtheme"      VARCHAR(2047),
-        "topic"         VARCHAR(2047),
-        "subtopic"         VARCHAR(2047),
-        "subsubtopic"         VARCHAR(2047)
-);
+        site              VARCHAR(255)    ENCODE ZSTD,
+        date              date            ENCODE AZ64,
+        query             VARCHAR(2048)   ENCODE ZSTD,
+        country           VARCHAR(255)    ENCODE ZSTD,
+        device            VARCHAR(255)    ENCODE ZSTD,
+        page              VARCHAR(2047)   ENCODE ZSTD,
+        position          FLOAT           ENCODE ZSTD,
+        clicks            DECIMAL         ENCODE ZSTD,
+        ctr               FLOAT           ENCODE ZSTD,
+        impressions       DECIMAL         ENCODE ZSTD,
+        node_id           VARCHAR(255)    ENCODE ZSTD,
+        page_urlhost      VARCHAR(255)    ENCODE ZSTD,
+        title             VARCHAR(2047)   ENCODE ZSTD,
+        theme_id          VARCHAR(255)    ENCODE ZSTD,
+        subtheme_id       VARCHAR(255)    ENCODE ZSTD,
+        topic_id          VARCHAR(255)    ENCODE ZSTD,
+        subtopic_id       VARCHAR(255)    ENCODE ZSTD,
+        subsubtopic_id    VARCHAR(255)    ENCODE ZSTD,
+        theme             VARCHAR(2047)   ENCODE ZSTD,
+        subtheme          VARCHAR(2047)   ENCODE ZSTD,
+        topic             VARCHAR(2047)   ENCODE ZSTD,
+        subtopic          VARCHAR(2047)   ENCODE ZSTD,
+        subsubtopic       VARCHAR(2047)   ENCODE ZSTD)
+        COMPOUND SORTKEY (date,page_urlhost,theme,node_id);
+
 ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
 GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
 

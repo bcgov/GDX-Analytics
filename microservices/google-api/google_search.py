@@ -378,10 +378,9 @@ query = """
 -- perform this as a transaction.
 -- Either the whole query completes, or it leaves the old table intact
 BEGIN;
-DROP TABLE IF EXISTS cmslite.google_pdt_scratch;
-DROP TABLE IF EXISTS cmslite.google_pdt_old;
+DROP TABLE IF EXISTS cmslite.google_pdt;
 
-CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
+CREATE TABLE IF NOT EXISTS cmslite.google_pdt (
         site              VARCHAR(255)    ENCODE ZSTD,
         date              date            ENCODE AZ64,
         query             VARCHAR(2048)   ENCODE ZSTD,
@@ -405,7 +404,7 @@ CREATE TABLE IF NOT EXISTS cmslite.google_pdt_scratch (
         topic             VARCHAR(2047)   ENCODE ZSTD,
         subtopic          VARCHAR(2047)   ENCODE ZSTD,
         subsubtopic       VARCHAR(2047)   ENCODE ZSTD)
-        COMPOUND SORTKEY (date,page_urlhost,theme,node_id);
+        COMPOUND SORTKEY (date,page_urlhost,theme,page,clicks);
 
 ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
 GRANT SELECT ON cmslite.google_pdt_scratch TO looker;

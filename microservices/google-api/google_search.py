@@ -406,10 +406,10 @@ CREATE TABLE IF NOT EXISTS cmslite.google_pdt (
         subsubtopic       VARCHAR(2047)   ENCODE ZSTD)
         COMPOUND SORTKEY (date,page_urlhost,theme,page,clicks);
 
-ALTER TABLE cmslite.google_pdt_scratch OWNER TO microservice;
-GRANT SELECT ON cmslite.google_pdt_scratch TO looker;
+ALTER TABLE cmslite.google_pdt OWNER TO microservice;
+GRANT SELECT ON cmslite.google_pdt TO looker;
 
-INSERT INTO cmslite.google_pdt_scratch
+INSERT INTO cmslite.google_pdt
       SELECT gs.*,
           COALESCE(node_id,'') AS node_id,
           SPLIT_PART(page, '/',3) as page_urlhost,
@@ -435,9 +435,6 @@ INSERT INTO cmslite.google_pdt_scratch
                 'bcforhighschool.gov.bc.ca')
             OR site = 'sc-domain:engage.gov.bc.ca';
 
-ALTER TABLE cmslite.google_pdt RENAME TO google_pdt_old;
-ALTER TABLE cmslite.google_pdt_scratch RENAME TO google_pdt;
-DROP TABLE cmslite.google_pdt_old;
 COMMIT;
 """
 

@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS google.googlesearch;
 CREATE TABLE IF NOT EXISTS google.googlesearch (
     site        VARCHAR(255)    ENCODE ZSTD,
     date        DATE            ENCODE AZ64,

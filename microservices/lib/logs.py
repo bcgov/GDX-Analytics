@@ -94,4 +94,5 @@ def setup(dir='logs', minLevel=logging.INFO):
     logging.getLogger("googleapiclient.discovery").setLevel(logging.WARNING)
     logging.getLogger("googleapiclient.discovery_cache").setLevel(
         logging.ERROR)
+    logging.getLogger("googleapiclient.http").setLevel(logging.ERROR)
     logging.getLogger("oauth2client.client").setLevel(logging.WARNING)

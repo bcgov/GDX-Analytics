@@ -62,6 +62,7 @@ import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
 import logging
+import signal
 import backoff
 import boto3     # For Amazon S3 IO
 import httplib2
@@ -76,9 +77,10 @@ import lib.logs as log
 
 
 # Ctrl+C
-def signal_handler(signal, frame):
+def signal_handler(sig, frame):
     logger.debug('Ctrl+C pressed!')
     sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler())
 
 
 logger = logging.getLogger(__name__)
@@ -358,10 +360,10 @@ for site_item in config_sites:
         # Prepare the Redshift COPY command.
         logquery = (
             f"copy {config_dbtable} FROM 's3://{config_bucket}/{object_key}' "
-             "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
-             "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
-             "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
-             "NULL AS '-' ESCAPE TRUNCATECOLUMNS;")
+            "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
+            "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
+            "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
+            "NULL AS '-' ESCAPE TRUNCATECOLUMNS;")
         query = logquery.format(
             AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])

@@ -62,6 +62,8 @@ import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
 import logging
+import signal
+import backoff
 import boto3     # For Amazon S3 IO
 import httplib2
 from oauth2client.client import HttpAccessTokenRefreshError
@@ -75,13 +77,34 @@ import lib.logs as log
 
 
 # Ctrl+C
-def signal_handler(signal, frame):
+def signal_handler(sig, frame):
     logger.debug('Ctrl+C pressed!')
     sys.exit(0)
 
 
+signal.signal(signal.SIGINT, signal_handler)
+
+
 logger = logging.getLogger(__name__)
 log.setup()
+
+
+# Custom backoff logging handlers
+def backoff_hdlr(details):
+    """Event handler for use in backoff decorators on_backoff kwarg"""
+    msg = "Backing off %s(...) for %.1fs after try %i"
+    log_args = [details['target'].__name__, details['wait'], details['tries']]
+    logger.debug(msg, *log_args)
+
+
+def giveup_hdlr(details):
+    """Event handler for for use backoff decorators on_giveup kwarg"""
+    msg = "Give up calling %s(...) after %.1fs elapsed over %i tries"
+    log_args = [details['target'].__name__, details['elapsed'],
+                details['tries']]
+    logger.error(msg, *log_args)
+    logger.info("exiting microservice")
+    sys.exit(1)
 
 
 def last_loaded(s):
@@ -149,14 +172,25 @@ if credentials is None or credentials.invalid:
 
 http = credentials.authorize(httplib2.Http())
 
-# disabling cache-discovery to suppress warnings on:
-# ImportError: file_cache is unavailable when using oauth2client >= 4.0.0
-# https://stackoverflow.com/questions/40154672/importerror-file-cache-is-unavailable-when-using-python-client-for-google-ser
-service = build(API_NAME,
+
+# discoveryServiceUrl can become unavailable: use backoff
+@backoff.on_exception(backoff.expo, GoogleHttpError,
+                      on_backoff=backoff_hdlr, on_giveup=giveup_hdlr,
+                      factor=0.5, max_tries=10, logger=None)
+def build_service():
+    """Consruct a resource to interact with the Search Console API service"""
+    # disabling cache-discovery to suppress warnings on:
+    # ImportError: file_cache is unavailable when using oauth2client >= 4.0.0
+    # https://stackoverflow.com/questions/40154672/importerror-file-cache-is-unavailable-when-using-python-client-for-google-ser
+    svc = build(API_NAME,
                 API_VERSION,
                 http=http,
                 discoveryServiceUrl=DISCOVERY_URI,
                 cache_discovery=False)
+    return svc
+
+
+service = build_service()
 
 # Read configuration file from env parameter
 with open(CONFIG) as f:
@@ -338,10 +372,10 @@ for site_item in config_sites:
         # Prepare the Redshift COPY command.
         logquery = (
             f"copy {config_dbtable} FROM 's3://{config_bucket}/{object_key}' "
-             "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
-             "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
-             "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
-             "NULL AS '-' ESCAPE TRUNCATECOLUMNS;")
+            "CREDENTIALS 'aws_access_key_id={AWS_ACCESS_KEY_ID};"
+            "aws_secret_access_key={AWS_SECRET_ACCESS_KEY}' "
+            "IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' "
+            "NULL AS '-' ESCAPE TRUNCATECOLUMNS;")
         query = logquery.format(
             AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID'],
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])

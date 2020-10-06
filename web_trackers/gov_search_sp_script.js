@@ -35,7 +35,7 @@
     	var vars = [];
         var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
         	if ( key === param ) {
-                vars = value.split('+')
+            vars = value.split('+')
                     .map(function(term){return decodeURIComponent(term)
                     .replace(/\+/g,'%2B')
                     .replace(',','');

@@ -62,6 +62,7 @@ import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
 import logging
+import backoff
 import boto3     # For Amazon S3 IO
 import httplib2
 from oauth2client.client import HttpAccessTokenRefreshError
@@ -83,6 +84,18 @@ def signal_handler(signal, frame):
 logger = logging.getLogger(__name__)
 log.setup()
 
+# Custom backoff logging handlers
+def backoff_hdlr(details):
+    """Event handler for use in backoff decorators on_backoff kwarg"""
+    logger.debug("Back off %(wait)2f seconds afters try %(tries)i ", \
+        "calling function %(target)s", details)
+
+def giveup_hdlr(details):
+    """Event handler for for use backoff decorators on_giveup kwarg"""
+    logger.error(
+        "Giving up after a total of %(elapsed)2f seconds over %(tries)i ", \
+        "to call function %(target)s", details)
+    sys.exit(1)
 
 def last_loaded(s):
     """Check for a sites last loaded date in Redshift"""
@@ -149,14 +162,21 @@ if credentials is None or credentials.invalid:
 
 http = credentials.authorize(httplib2.Http())
 
-# disabling cache-discovery to suppress warnings on:
-# ImportError: file_cache is unavailable when using oauth2client >= 4.0.0
-# https://stackoverflow.com/questions/40154672/importerror-file-cache-is-unavailable-when-using-python-client-for-google-ser
-service = build(API_NAME,
-                API_VERSION,
-                http=http,
-                discoveryServiceUrl=DISCOVERY_URI,
-                cache_discovery=False)
+# discoveryServiceUrl can become unavailable: use backoff
+@backoff.on_exception(backoff.expo, GoogleHttpError, factor=0.5, max_tries=10)
+def build_service():
+    """Consruct a resource to interact with the Search Console API service"""
+    # disabling cache-discovery to suppress warnings on:
+    # ImportError: file_cache is unavailable when using oauth2client >= 4.0.0
+    # https://stackoverflow.com/questions/40154672/importerror-file-cache-is-unavailable-when-using-python-client-for-google-ser
+    service = build(API_NAME,
+                    API_VERSION,
+                    http=http,
+                    discoveryServiceUrl=DISCOVERY_URI,
+                    cache_discovery=False)
+    return service
+
+service = build_service()
 
 # Read configuration file from env parameter
 with open(CONFIG) as f:

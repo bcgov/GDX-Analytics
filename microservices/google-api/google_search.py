@@ -80,24 +80,32 @@ import lib.logs as log
 def signal_handler(sig, frame):
     logger.debug('Ctrl+C pressed!')
     sys.exit(0)
+
+
 signal.signal(signal.SIGINT, signal_handler)
 
 
 logger = logging.getLogger(__name__)
 log.setup()
 
+
 # Custom backoff logging handlers
 def backoff_hdlr(details):
     """Event handler for use in backoff decorators on_backoff kwarg"""
-    logger.debug("Back off %(wait)2f seconds afters try %(tries)i ", \
-        "calling function %(target)s", details)
+    msg = "Backing off %s(...) for %.1fs after try %i"
+    log_args = [details['target'].__name__, details['wait'], details['tries']]
+    logger.debug(msg, *log_args)
+
 
 def giveup_hdlr(details):
     """Event handler for for use backoff decorators on_giveup kwarg"""
-    logger.error(
-        "Giving up after a total of %(elapsed)2f seconds over %(tries)i ", \
-        "to call function %(target)s", details)
+    msg = "Give up calling %s(...) after %.1fs elapsed over %i tries"
+    log_args = [details['target'].__name__, details['elapsed'],
+                details['tries']]
+    logger.error(msg, *log_args)
+    logger.info("exiting microservice")
     sys.exit(1)
+
 
 def last_loaded(s):
     """Check for a sites last loaded date in Redshift"""
@@ -164,19 +172,23 @@ if credentials is None or credentials.invalid:
 
 http = credentials.authorize(httplib2.Http())
 
+
 # discoveryServiceUrl can become unavailable: use backoff
-@backoff.on_exception(backoff.expo, GoogleHttpError, factor=0.5, max_tries=10)
+@backoff.on_exception(backoff.expo, GoogleHttpError,
+                      on_backoff=backoff_hdlr, on_giveup=giveup_hdlr,
+                      factor=0.5, max_tries=10, logger=None)
 def build_service():
     """Consruct a resource to interact with the Search Console API service"""
     # disabling cache-discovery to suppress warnings on:
     # ImportError: file_cache is unavailable when using oauth2client >= 4.0.0
     # https://stackoverflow.com/questions/40154672/importerror-file-cache-is-unavailable-when-using-python-client-for-google-ser
-    service = build(API_NAME,
-                    API_VERSION,
-                    http=http,
-                    discoveryServiceUrl=DISCOVERY_URI,
-                    cache_discovery=False)
-    return service
+    svc = build(API_NAME,
+                API_VERSION,
+                http=http,
+                discoveryServiceUrl=DISCOVERY_URI,
+                cache_discovery=False)
+    return svc
+
 
 service = build_service()
 

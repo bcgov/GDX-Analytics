@@ -363,13 +363,8 @@ for site_item in config_sites:
                         "Load success: %s index %s for %s. Object key %s.",
                         site_name, str(index), str(date_in_range),
                         object_key.split('/')[-1])
-        # if we didn't add any new rows, set last_loaded_date to latest_date to
-        # break the loop, otherwise, set it to the last loaded date
-        if last_loaded_date == last_loaded(site_name):
-            last_loaded_date = latest_date
-        else:
-            # refresh last_loaded with the most recent load date
-            last_loaded_date = last_loaded(site_name)
+        # set last_loaded_date to end_dt to iterate through the next month
+        last_loaded_date = end_dt
 
 
 # This query will INSERT data that is the result of a JOIN into

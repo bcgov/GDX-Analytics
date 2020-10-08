@@ -5,6 +5,7 @@ import { Route, Link, BrowserRouter as Router } from 'react-router-dom'
 import App from './App'
 import SecondPage from './SecondPage'
 import Thirdpage from './ThirdPage'
+import TrackPageView from './TrackPageView'
 
 const routing = (
   <Router>

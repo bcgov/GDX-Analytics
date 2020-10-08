@@ -6,16 +6,33 @@ This is an example React.js application to demonstrate how to install the the GD
 
 This project requires React, react-dom, react-router-dom. 
 
+To install the requisite global packages run:
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+npm install -g react react-dom react-router-dom
+```
 
+To install the application using package-lock.json, navigate to the project directory and run:
+
+```
+npm ci
+```
+
+To install and update the package-lock.json file, run:
+
+```
+npm install
+```
 
 ### Deployment
 
 In the project directory, you can run:
 
-### `npm start`
+```
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 
 ## Getting Help or Reporting an Issue
@@ -23,7 +40,7 @@ In the project directory, you can run:
 For inquiries about starting a new analytics account please contact the GDX Analytics Team.
 
 ## How to Contribute
- 
+
 If you would like to contribute to the guide, please see our [CONTRIBUTING](CONTRIBUTING.md) guideleines.
  
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.

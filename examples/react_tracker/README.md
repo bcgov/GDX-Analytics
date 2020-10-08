@@ -12,7 +12,13 @@ To install the requisite global packages run:
 npm install -g react react-dom react-router-dom
 ```
 
-To install the application package, navigate to the project directory and run:
+To install the application using package-lock.json, navigate to the project directory and run:
+
+```
+npm ci
+```
+
+To install and update the package-lock.json file, run:
 
 ```
 npm install

@@ -1,7 +1,10 @@
 import React from 'react'
 class SecondPage extends React.Component {
   render() {
-    return <h1>Second Page</h1>
+    // <!-- Snowplow Track Page View -->
+    window.snowplow('trackPageView');
+    
+    return <div><h1>Second Page</h1></div>
   }
 }
 export default SecondPage

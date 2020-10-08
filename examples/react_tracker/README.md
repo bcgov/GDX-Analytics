@@ -6,6 +6,11 @@ This is an example React.js application to demonstrate how to install the the GD
 
 This project requires React, react-dom, react-router-dom. 
 
+To install, you can run:
+
+
+### `npm install -g react react-dom react-router-dom`
+
 
 ### Deployment
 

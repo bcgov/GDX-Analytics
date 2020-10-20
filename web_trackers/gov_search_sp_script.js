@@ -26,14 +26,15 @@
         }
       }]
     );
-    window.snowplow('trackSiteSearch',
-    	getUrlParamArray('q','')
-    );
-
+    if (window.location.search.indexOf('q=') > -1) {
+        window.snowplow('trackSiteSearch',
+    	    getUrlParamArray('q','')
+        );
+    }
     function getUrlParamArray(param, defaultValue) {
     	var vars = [];
         var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        	if ( key === param ) {
+            if ( key === param ) {
         		vars.push(value);
         	}
         });

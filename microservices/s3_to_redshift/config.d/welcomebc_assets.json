@@ -3,7 +3,7 @@
     "source": "client",
     "destination": "processed",
     "directory": "assets_welcomebc",
-    "doc": "welcomebc_media.*",
+    "doc": "welcomebc-media.*",
     "dbtable": "microservice.asset_downloads",
     "column_count": 16,
     "columns": [

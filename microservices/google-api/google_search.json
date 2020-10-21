@@ -104,7 +104,11 @@
     {
       "name": "https://professionalgovernancebc.ca/",
       "start_date_default": "2020-09-14"
+    },
+    {
+      "name": "https://www.welcomebc.ca/",
+      "start_date_default": "2020-08-16"
     }
-	
+
   ]
 }

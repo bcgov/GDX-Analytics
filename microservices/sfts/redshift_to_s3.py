@@ -155,9 +155,12 @@ def get_date(date_selector):
     return return_query(select)
 
 
+def today():
+    return date.today().strftime("%Y%m%d")
+
 # set start and end dates, defaulting to min/max if not defined
-start_date = 'min' if 'start_date' not in config else config['start_date']
-end_date = 'max' if 'end_date' not in config else config['end_date']
+start_date = today() if 'start_date' not in config else config['start_date']
+end_date = today() if 'end_date' not in config else config['end_date']
 
 # set start_date if not a YYYYMMDD value
 if any(start_date == pick for pick in ['min', 'max']):

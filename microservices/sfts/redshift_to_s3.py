@@ -155,33 +155,54 @@ def get_date(date_selector):
     return return_query(select)
 
 
-def today():
-    return date.today().strftime("%Y%m%d")
+def object_key_builder(key_prefix, *args):
+    """Construct an Object Key string based on a prefix followed by any number
+    of optional positional arguemnts and suffixed by the localized timestamp.
 
-# set start and end dates, defaulting to min/max if not defined
-start_date = today() if 'start_date' not in config else config['start_date']
-end_date = today() if 'end_date' not in config else config['end_date']
+    Args:
+        key_prefix: A required prefix for this object's key
+        *args: Variable length argument list.
 
-# set start_date if not a YYYYMMDD value
-if any(start_date == pick for pick in ['min', 'max']):
-    start_date = get_date(start_date)
+    Returns:
+        The complete object key string.
+    """
+    nowtime = datetime.now().strftime('%Y%m%dT%H%M%S')
+    key_parts = [key_prefix]
+    if args:
+        key_parts.extend(list(args))
+    key_parts.append(nowtime)
+    object_key = '_'.join(str(part) for part in key_parts)
+    return object_key
 
-# determine unsent value for start date
-if start_date == 'unsent':
-    start_date = unsent()
-    logger.debug("unsent start date set to: %s", start_date)
+if 'start_date' in config and 'end_date' in config:
+    # set start and end dates, defaulting to min/max if not defined
+    start_date = config['start_date']
+    end_date = config['end_date']
 
-# set end_date if not a YYYYMMDD value
-if any(end_date == pick for pick in ['min', 'max', 'unsent']):
-    if end_date == 'unsent':
-        end_date = 'max'
-    end_date = get_date(end_date)
+    # set start_date if not a YYYYMMDD value
+    if any(start_date == pick for pick in ['min', 'max']):
+        start_date = get_date(start_date)
 
-if start_date > end_date:
-    logger.info(
-        'start_date: %s is greater than end_date: %s, giving up.',
-        start_date, end_date)
-    sys.exit(1)
+    # determine unsent value for start date
+    if start_date == 'unsent':
+        start_date = unsent()
+        logger.debug("unsent start date set to: %s", start_date)
+
+    # set end_date if not a YYYYMMDD value
+    if any(end_date == pick for pick in ['min', 'max', 'unsent']):
+        if end_date == 'unsent':
+            end_date = 'max'
+        end_date = get_date(end_date)
+
+    if start_date > end_date:
+        logger.info(
+            'start_date: %s is greater than end_date: %s, giving up.',
+            start_date, end_date)
+        sys.exit(1)
+    
+    object_key = object_key_builder(object_prefix,start_date,end_date)
+else:
+    object_key = object_key_builder(object_prefix)
 
 # the _substantive_ query, one that users expect to see as output in S3.
 request_query = open('dml/{}'.format(dml_file), 'r').read()
@@ -204,7 +225,6 @@ if sql_parse_key:
     # pass the keyword_dict to the request query formatter
     request_query = request_query.format(**keyword_dict)
 
-nowtime = datetime.now().strftime('%Y%m%dT%H%M%S')
 
 # The UNLOAD query to support S3 loading direct from a Redshift query
 # ref: https://docs.aws.amazon.com/redshift/latest/dg/r_UNLOAD.html
@@ -212,8 +232,7 @@ nowtime = datetime.now().strftime('%Y%m%dT%H%M%S')
 # SOURCE files into the SFTS, copying them to DESTINATION GOOD/BAD paths
 log_query = '''
 UNLOAD ('{request_query}')
-TO 's3://{bucket}/{source_prefix}/{object_prefix}_{start_date}_{end_date}_\
-{nowtime}_part'
+TO 's3://{bucket}/{source_prefix}/{object_key}_part'
 credentials 'aws_access_key_id={aws_access_key_id};\
 aws_secret_access_key={aws_secret_access_key}'
 {header}
@@ -222,13 +241,10 @@ PARALLEL OFF
     request_query=request_query,
     bucket=bucket,
     source_prefix=source_prefix,
-    object_prefix=object_prefix,
-    start_date=start_date,
-    nowtime=nowtime,
-    end_date=end_date,
-    header='HEADER' if header else '',
+    object_key=object_key,
     aws_access_key_id='{aws_access_key_id}',
-    aws_secret_access_key='{aws_secret_access_key}')
+    aws_secret_access_key='{aws_secret_access_key}',
+    header='HEADER' if header else '')
 
 query = log_query.format(
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
@@ -247,5 +263,5 @@ with psycopg2.connect(conn_string) as conn:
             sys.exit(1)
         else:
             logger.info(
-                'UNLOAD successful. Object prefix is %s/%s/%s_%s_%s',
-                bucket, source_prefix, object_prefix, start_date, end_date)
+                'UNLOAD successful. Object prefix is %s/%s/%s',
+                bucket, source_prefix, object_prefix)

@@ -264,4 +264,4 @@ with psycopg2.connect(conn_string) as conn:
         else:
             logger.info(
                 'UNLOAD successful. Object prefix is %s/%s/%s',
-                bucket, source_prefix, object_prefix)
+                bucket, source_prefix, object_key)

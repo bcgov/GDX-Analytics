@@ -1,0 +1,36 @@
+{
+  "description": "Schema to track interactions in the WorkBC Career Transition Tool",
+  "properties": {
+    "current": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Identifier for current career"
+    },
+    "option": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Identifier for future career option"
+    },
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Action taken"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "current",
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "careertransitiontool",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

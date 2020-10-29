@@ -73,7 +73,7 @@
       "ua_parse": {}
     },
     "schema_name": "microservice",
-    "asset_host": "britishcolumbia.jp",
+    "asset_host": "www.britishcolumbia.jp",
     "asset_source": "TIBC",
     "asset_scheme_and_authority": "https://www.britishcolumbia.jp"
 }

@@ -73,7 +73,7 @@
       "ua_parse": {}
     },
     "schema_name": "microservice",
-    "asset_host": "britishcolumbia.kr",
+    "asset_host": "www.britishcolumbia.kr",
     "asset_source": "TIBC",
     "asset_scheme_and_authority": "https://www.britishcolumbia.kr"
 }

@@ -349,7 +349,8 @@ def main():
                                 node_id = row.node_id
                                 # its dictionary index
                                 lookup_id = df_dictionary.loc[
-                                    df_dictionary[column] == lookup_entry].index[0]
+                                    df_dictionary[
+                                        column] == lookup_entry].index[0]
                                 # create the data frame to concat
                                 _d = pd.DataFrame(
                                     [[node_id, lookup_id]], columns=columnlist)
@@ -618,7 +619,8 @@ def main():
                     logger.exception(
                         "Failed to write to %s.microservice_log", dbschema)
                 else:
-                    logger.info("timestamp row added to microservice_log table")
+                    logger.info("timestamp row added to microservice_log \
+                                table")
                     logger.debug("start time: %s -- end time: %s",
                                  starttime, endtime)
 

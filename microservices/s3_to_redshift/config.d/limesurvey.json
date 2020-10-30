@@ -9,6 +9,8 @@
   "columns": [
     "date",
     "sid",
+    "surveyls_title",
+    "surveyls_language",
     "active",
     "expires",
     "startdate",

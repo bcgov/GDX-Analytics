@@ -5,10 +5,12 @@
   "directory": "engage_des",
   "doc": "limesurvey-analytics.*",
   "dbtable": "microservice.limesurvey",
-  "column_count": 11,
+  "column_count": 13,
   "columns": [
     "date",
     "sid",
+    "surveyls_title",
+    "surveyls_language",
     "active",
     "expires",
     "startdate",

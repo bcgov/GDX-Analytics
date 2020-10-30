@@ -2,6 +2,8 @@ CREATE TABLE IF NOT EXISTS microservice.limesurvey
 ( 
   "date" TIMESTAMP ENCODE ZSTD,
   "sid" BIGINT ENCODE ZSTD,
+  "surveyls_title" VARCHAR(255) ENCODE ZSTD NOT NULL,
+  "surveyls_language" VARCHAR(16) ENCODE ZSTD NOT NULL,
   "active" BOOLEAN ENCODE ZSTD,	
   "expires" TIMESTAMP ENCODE ZSTD,
   "startdate" TIMESTAMP ENCODE ZSTD,

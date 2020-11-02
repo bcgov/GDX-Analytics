@@ -15,27 +15,27 @@
 # Usage         : python s3_to_redshift.py configfile.json
 #
 
+import re  # regular expressions
+from io import StringIO
+import os  # to read environment variables
+import os.path  # file handling
+import json  # to read json config files
+import sys  # to read command line parameters
+import logging
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
 import pandas.errors
-import re  # regular expressions
-from io import StringIO
-import os  # to read environment variables
-import json  # to read json config files
-import sys  # to read command line parameters
-import os.path  # file handling
 from ua_parser import user_agent_parser
 from referer_parser import Referer
 from lib.redshift import RedShift
-import logging
 import lib.logs as log
 
 logger = logging.getLogger(__name__)
 log.setup()
 
 # check that configuration file was passed as argument
-if (len(sys.argv) != 2):
+if len(sys.argv) != 2:
     print('Usage: python s3_to_redshift.py config.json')
     sys.exit(1)
 configfile = sys.argv[1]
@@ -189,13 +189,13 @@ for object_summary in objects_to_process:
     if 'access_log_parse' in data:
         linefeed = ''
         parsed_list = []
-        if(data['access_log_parse']['string_repl']):
+        if data['access_log_parse']['string_repl']:
             inline_pattern = data['access_log_parse']['string_repl']['pattern']
             inline_replace = data['access_log_parse']['string_repl']['replace']
         body_stringified = body.read()
         # perform regex replacements by line
         for line in body_stringified.splitlines():
-            if(data['access_log_parse']['string_repl']):
+            if data['access_log_parse']['string_repl']:
                 line = line.replace(inline_pattern, inline_replace)
             for exp in data['access_log_parse']['regexs']:
                 parsed_line, num_subs = re.subn(
@@ -243,7 +243,7 @@ for object_summary in objects_to_process:
                         referrer_string += '|'
 
                     # use linefeed if defined in config, or default "/r/n"
-                    if(data['access_log_parse']['linefeed']):
+                    if data['access_log_parse']['linefeed']:
                         linefeed = data['access_log_parse']['linefeed']
                     else:
                         linefeed = '\r\n'
@@ -259,8 +259,8 @@ for object_summary in objects_to_process:
     # Check that the file decodes as UTF-8. If it fails move to bad and end
     try:
         csv_string = csv_string.decode('utf-8')
-    except UnicodeDecodeError as e:
-        e_object = e.object.splitlines()
+    except UnicodeDecodeError as _e:
+        e_object = _e.object.splitlines()
         logger.exception(
             ''.join((
                 "Decoding UTF-8 failed for file {0}\n"
@@ -273,8 +273,8 @@ for object_summary in objects_to_process:
                 Bucket="sp-ca-bc-gov-131565110619-12-microservices",
                 CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
                 + object_summary.key, Key=badfile)
-        except Exception as e:
-            logger.exception("S3 transfer failed. %s", str(e))
+        except Exception as _e:
+            logger.exception("S3 transfer failed. %s", str(_e))
         continue
 
     # Check for an empty file. If it's empty, accept it as good and skip
@@ -295,9 +295,9 @@ for object_summary in objects_to_process:
                 index_col=False,
                 dtype=dtype_dic,
                 usecols=range(column_count))
-    except pandas.errors.EmptyDataError as e:
+    except pandas.errors.EmptyDataError as _e:
         logger.exception('exception reading %s', object_summary.key)
-        if str(e) == "No columns to parse from file":
+        if str(_e) == "No columns to parse from file":
             logger.warning('%s is empty, keying to goodfile and proceeding.',
                            object_summary.key)
             outfile = goodfile
@@ -369,7 +369,7 @@ for object_summary in objects_to_process:
     # if truncate is set to true, perform a transaction that will
     # replace the existing table data with the new data in one commit
     # if truncate is not true then the query remains as just the copy command
-    if (truncate):
+    if truncate:
         scratch_start = """
 BEGIN;
 -- Clean up from last run if necessary

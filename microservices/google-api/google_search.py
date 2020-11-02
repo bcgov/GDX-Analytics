@@ -107,14 +107,14 @@ def giveup_hdlr(details):
     sys.exit(1)
 
 
-def last_loaded(s):
+def last_loaded(_s):
     """Check for a sites last loaded date in Redshift"""
     # Load the Redshift connection
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
-    q = f"SELECT MAX(DATE) FROM {config_dbtable} WHERE site = '{s}'"
-    cursor.execute(q)
+    _q = f"SELECT MAX(DATE) FROM {config_dbtable} WHERE site = '{_s}'"
+    cursor.execute(_q)
     # get the last loaded date
     lld = (cursor.fetchall())[0][0]
     # close the redshift connection
@@ -148,10 +148,10 @@ API_VERSION = 'v1'
 DISCOVERY_URI = ('https://www.googleapis.com/'
                  'discovery/v1/apis/webmasters/v3/rest')
 
-flow_scope = 'https://www.googleapis.com/auth/webmasters.readonly'
+FLOW_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
 flow = flow_from_clientsecrets(
     CLIENT_SECRET,
-    scope=flow_scope,
+    scope=FLOW_SCOPE,
     redirect_uri='urn:ietf:wg:oauth:2.0:oob')
 
 flow.params['access_type'] = 'offline'
@@ -280,12 +280,14 @@ for site_item in config_sites:
         rowlimit = 20000
         index = 0
 
-        def daterange(startDate, endDate):
+        def daterange(start_date, end_date):
             """yields a generator of all dates from startDate to endDate"""
-            logger.debug("daterange called with startDate: %s and endDate: %s", startDate, endDate)
-            assert endDate >= startDate, 'startDate cannot exceed endDate in daterange generator'
-            for n in range(int((endDate - startDate).days)+1):
-                yield startDate + timedelta(n)
+            logger.debug("daterange called with startDate: %s and endDate: %s",
+                         start_date, end_date)
+            assert end_date >= start_date, 'startDate cannot exceed endDate \
+             in daterange generator'
+            for _n in range(int((end_date - start_date).days)+1):
+                yield start_date + timedelta(_n)
 
         search_analytics_response = ''
 
@@ -443,7 +445,8 @@ INSERT INTO cmslite.google_pdt
           COALESCE(node_id,'') AS node_id,
           SPLIT_PART(page, '/',3) as page_urlhost,
           title,
-          theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme, subtheme, topic, subtopic, subsubtopic
+          theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme,
+          subtheme, topic, subtopic, subsubtopic
       FROM google.googlesearch AS gs
       -- fix for misreporting of redirected front page URL in Google search
       LEFT JOIN cmslite.themes AS themes ON

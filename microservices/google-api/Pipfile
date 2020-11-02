@@ -17,6 +17,8 @@ google-api-python-client = "*"
 oauth2client = "*"
 python-dateutil = "*"
 microservices = {editable = true,path = "./.."}
+flake8 = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.7"

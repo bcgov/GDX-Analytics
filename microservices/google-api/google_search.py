@@ -148,10 +148,10 @@ API_VERSION = 'v1'
 DISCOVERY_URI = ('https://www.googleapis.com/'
                  'discovery/v1/apis/webmasters/v3/rest')
 
-FLOW_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
+flow_scope = 'https://www.googleapis.com/auth/webmasters.readonly'
 flow = flow_from_clientsecrets(
     CLIENT_SECRET,
-    scope=FLOW_SCOPE,
+    scope=flow_scope,
     redirect_uri='urn:ietf:wg:oauth:2.0:oob')
 
 flow.params['access_type'] = 'offline'

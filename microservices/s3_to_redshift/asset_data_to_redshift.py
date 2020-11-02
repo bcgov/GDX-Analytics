@@ -283,6 +283,9 @@ for object_summary in objects_to_process:
                     # Add the parsed log entry line to the list
                     parsed_list.append(parsed_line)
 
+                    # Break after first match
+                    break
+
         # Concatenate all the parsed lines together with the end of line char
         csv_string = linefeed.join(parsed_list)
         logger.info(object_summary.key + " parsed successfully")

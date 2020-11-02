@@ -57,12 +57,12 @@
     "access_log_parse": {
       "regexs": [
         {
-          "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$",
-          "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|\\10"
-        },
-        {
           "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\"$",
           "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|"
+        },
+        {
+          "pattern": "^(.*) (.*) (.*) \\[(.*)\\] \\\"(.*)\\\" (.*) (.*) \\\"(.*)\\\" \\\"(.*)\\\" (.*)$",
+          "replace": "\\1|\\2|\\3|\\4|\\5|\\6|\\7|\\8|\\9|\\10"
         }
       ],
       "string_repl": {
@@ -73,7 +73,7 @@
       "ua_parse": {}
     },
     "schema_name": "microservice",
-    "asset_host": "britishcolumbia.kr",
+    "asset_host": "www.britishcolumbia.kr",
     "asset_source": "TIBC",
     "asset_scheme_and_authority": "https://www.britishcolumbia.kr"
 }

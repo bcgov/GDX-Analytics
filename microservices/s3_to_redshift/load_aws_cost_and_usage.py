@@ -37,7 +37,8 @@ logger.addHandler(handler)
 
 # create file handler for logs at the INFO level
 log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename), "a", encoding=None, delay="true")
+handler = logging.FileHandler(os.path.join(
+    'logs', log_filename), "a", encoding=None, delay="true")
 handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
@@ -61,9 +62,11 @@ my_bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
 key = ''
 
 # find the latest file matching "filename"
-for object_summary in sorted(my_bucket.objects.filter(Prefix=source),key=attrgetter('last_modified'),reverse=True):
+for object_summary in sorted(my_bucket.objects.filter(Prefix=source),
+                             key=attrgetter('last_modified'), reverse=True):
     if re.search(filename, object_summary.key):
-        logger.info('\nhttps://s3.console.aws.amazon.com/s3/object/sp-ca-bc-gov-131565110619-12-aws-cost-usage/'
+        logger.info('\nhttps://s3.console.aws.amazon.com/s3/object/\
+                    sp-ca-bc-gov-131565110619-12-aws-cost-usage/'
                     + object_summary.key
                     + '\n' + object_summary.last_modified
                     + '\n---')
@@ -75,9 +78,19 @@ body = obj['Body']
 query = body.read().decode('utf-8')
 
 # update SQL code to include correct credentials and region
-query = query.replace("'aws_iam_role=<AWS_ROLE>' region <S3_BUCKET_REGION>", "'aws_access_key_id=" + os.environ['AWS_ACCESS_KEY_ID'] + ";aws_secret_access_key=" + os.environ['AWS_SECRET_ACCESS_KEY'] + "' region 'ca-central-1'")
-query = query.replace("AWSBilling" + startmonth, "aws_cost_and_usage.AWSBilling" + startmonth)
-query = "DROP TABLE IF EXISTS aws_cost_and_usage.AWSBilling" + startmonth + "; DROP TABLE IF EXISTS aws_cost_and_usage.AWSBilling" + startmonth + "_tagmapping; \n" +  query + "\nGRANT SELECT ON aws_cost_and_usage.awsbilling" + startmonth + " TO looker; GRANT SELECT ON aws_cost_and_usage.awsbilling" + startmonth + "_tagmapping TO looker;"
+query = query.replace("'aws_iam_role=<AWS_ROLE>' region <S3_BUCKET_REGION>",
+                      "'aws_access_key_id=" + os.environ['AWS_ACCESS_KEY_ID']
+                      + ";aws_secret_access_key="
+                      + os.environ['AWS_SECRET_ACCESS_KEY']
+                      + "' region 'ca-central-1'")
+query = query.replace("AWSBilling" + startmonth,
+                      "aws_cost_and_usage.AWSBilling" + startmonth)
+query = "DROP TABLE IF EXISTS aws_cost_and_usage.AWSBilling" + startmonth
++ "; DROP TABLE IF EXISTS aws_cost_and_usage.AWSBilling" + startmonth
++ "_tagmapping; \n" + query
++ "\nGRANT SELECT ON aws_cost_and_usage.awsbilling"
++ startmonth + " TO looker; GRANT SELECT ON aws_cost_and_usage.awsbilling"
++ startmonth + "_tagmapping TO looker;"
 logger.debug(query)
 
 # prep database call to pull the batch file into redshift
@@ -93,7 +106,8 @@ with psycopg2.connect(conn_string) as conn:
     with conn.cursor() as curs:
         try:
             curs.execute(query)
-        except psycopg2.Error as e: # if the DB call fails, print error and place file in /bad
+        # if the DB call fails, print error and place file in /bad
+        except psycopg2.Error as e:
             logger.exception("Loading failed\n{0}".format(e.pgerror))
         else:
             logger.info("Loaded successfully")

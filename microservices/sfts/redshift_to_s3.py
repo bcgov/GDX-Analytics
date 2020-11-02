@@ -235,8 +235,8 @@ UNLOAD ('{request_query}')
 TO 's3://{bucket}/{source_prefix}/{object_key}_part'
 credentials 'aws_access_key_id={aws_access_key_id};\
 aws_secret_access_key={aws_secret_access_key}'
-{header}
 PARALLEL OFF
+{header}
 '''.format(
     request_query=request_query,
     bucket=bucket,

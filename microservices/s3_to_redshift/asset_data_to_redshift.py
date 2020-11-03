@@ -15,23 +15,23 @@
 # Usage         : python asset_data_to_redshift.py configfile.json
 #
 
-import boto3  # s3 access
-from botocore.exceptions import ClientError
-import pandas as pd  # data processing
 import re  # regular expressions
 from io import StringIO
 import os  # to read environment variables
-import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
+import psycopg2  # to connect to Redshift
+import boto3  # s3 access
+from botocore.exceptions import ClientError
+import pandas as pd  # data processing
 
 from ua_parser import user_agent_parser
 # ua_parser documentation: https://github.com/ua-parser/uap-python
 
 from referer_parser import Referer
-# referer_parser documentation: 
+# referer_parser documentation:
 # https://github.com/snowplow-referer-parser/referer-parser
 
 

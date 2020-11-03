@@ -1,0 +1,7 @@
+# Handles PyLint E1101 errors where googleapiclient.discovery
+# builds those members per Google's API Discovery URI
+[TYPECHECK]
+generated-members=searchanalytics
+
+[BASIC]
+good-names=flow_scope,dbname,host,port,outrow,rowlimit,index,search_analytics_response,wait_time,index,retry,wait_time,retry,index,query

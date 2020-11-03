@@ -78,7 +78,9 @@ import lib.logs as log
 
 # Ctrl+C
 def signal_handler(sig, frame):
-    logger.debug('Ctrl+C pressed!')
+    '''Ctrl+C signal handler'''
+    logger.debug('singal handler sig: %s frame: %s', sig, frame)
+    logger.info('Ctrl+C pressed!')
     sys.exit(0)
 
 
@@ -220,7 +222,7 @@ conn_string = (
     f"password={pgpass}")
 
 # each site in the config list of sites gets processed in this loop
-for site_item in config_sites:
+for site_item in config_sites:  # noqa: C901
     # read the config for the site name and default start date if specified
     site_name = site_item["name"]
 
@@ -286,12 +288,14 @@ for site_item in config_sites:
                          start_date, end_date)
             assert end_date >= start_date, 'startDate cannot exceed endDate \
              in daterange generator'
-            for _n in range(int((end_date - start_date).days)+1):
+            for _n in range(int((end_date - start_date).days) + 1):
                 yield start_date + timedelta(_n)
 
         search_analytics_response = ''
 
         # loops on each date from start date to the end date, inclusive
+        # initializing date_in_range avoids pylint [undefined-loop-variable]
+        date_in_range = ()
         for date_in_range in daterange(start_dt, end_dt):
             # A wait time of 250ms each query reduces chance of HTTP 429 error
             # "Rate Limit Exceeded", handled below
@@ -312,11 +316,9 @@ for site_item in config_sites:
                         "query",
                         "country",
                         "device",
-                        "page"
-                        ],
+                        "page"],
                     "rowLimit": rowlimit,
-                    "startRow": index * rowlimit
-                    }
+                    "startRow": index * rowlimit}
 
                 # This query to the Google Search API may eventually yield an
                 # HTTP response code of 429, "Rate Limit Exceeded".
@@ -328,7 +330,7 @@ for site_item in config_sites:
                 retry = 1
                 while True:
                     try:
-                        search_analytics_response = service.searchanalytics() \
+                        search_analytics_response = service.searchanalytics()\
                             .query(siteUrl=site_name, body=bodyvar).execute()
                     except GoogleHttpError:
                         if retry == 11:

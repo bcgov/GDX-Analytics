@@ -4,6 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+flake8 = "*"
+pylint = "*"
+python-language-server = {extras = ["all"],version = "*"}
 
 [packages]
 boto3 = "*"
@@ -12,7 +15,6 @@ botocore = "*"
 psycopg2-binary = "*"
 microservices = {editable = true,path = "./.."}
 numpy = "*"
-flake8 = "*"
 
 [requires]
 python_version = "3.7"

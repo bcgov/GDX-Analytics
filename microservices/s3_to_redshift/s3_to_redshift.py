@@ -1,3 +1,4 @@
+'''Microservice script to load a csv file from s3 and load it into Redshift'''
 ###################################################################
 # Script Name   : s3_to_redshift.py
 #
@@ -58,7 +59,7 @@ if 'dbschema' in data:
 else:
     dbschema = 'microservice'
 dbtable = data['dbtable']
-table_name = dbtable[dbtable.rfind(".")+1:]
+table_name = dbtable[dbtable.rfind(".") + 1:]
 column_count = data['column_count']
 columns = data['columns']
 dtype_dic = {}
@@ -98,43 +99,44 @@ dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
            password=os.environ['pgpass'])
 
 
-# Constructs the database copy query string
-def copy_query(dbtable, batchfile, log):
-    if log:
+def copy_query(this_table, this_batchfile, this_log):
+    '''Constructs the database copy query string'''
+    if this_log:
         aws_key = 'AWS_ACCESS_KEY_ID'
         aws_secret_key = 'AWS_SECRET_ACCESS_KEY'
     else:
         aws_key = os.environ['AWS_ACCESS_KEY_ID']
         aws_secret_key = os.environ['AWS_SECRET_ACCESS_KEY']
-    query = """
+    cp_query = """
 COPY {0}\nFROM 's3://{1}/{2}'\n\
 CREDENTIALS 'aws_access_key_id={3};aws_secret_access_key={4}'\n\
 IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;\n
-""".format(dbtable, bucket_name, batchfile, aws_key, aws_secret_key)
-    return query
+""".format(this_table, bucket_name, this_batchfile, aws_key, aws_secret_key)
+    return cp_query
 
 
-# Check to see if the file has been processed already
-def is_processed(object_summary):
-    key = object_summary.key
-    filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
-    goodfile = destination + "/good/" + key
-    badfile = destination + "/bad/" + key
+def is_processed(this_object_summary):
+    '''Check to see if the file has been processed already'''
+    this_key = this_object_summary.key
+    # get the filename (after the last '/')
+    this_filename = this_key[this_key.rfind('/') + 1:]
+    this_goodfile = destination + "/good/" + this_key
+    this_badfile = destination + "/bad/" + this_key
     try:
-        client.head_object(Bucket=bucket, Key=goodfile)
+        client.head_object(Bucket=bucket, Key=this_goodfile)
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
-        logger.debug('%s was processed as good already.', filename)
+        logger.debug('%s was processed as good already.', this_filename)
         return True
     try:
-        client.head_object(Bucket=bucket, Key=badfile)
+        client.head_object(Bucket=bucket, Key=this_badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:
-        logger.debug('%s was processed as bad already.', filename)
+        logger.debug('%s was processed as bad already.', this_filename)
         return True
-    logger.debug('%s has not been processed.', filename)
+    logger.debug('%s has not been processed.', this_filename)
     return False
 
 
@@ -148,29 +150,26 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
     # skip to next object if already processed
     if is_processed(object_summary):
         continue
-    else:
-        # only review those matching our configued 'doc' regex pattern
-        if re.search(doc + '$', key):
-            # under truncate = True, we will keep list length to 1
-            # only adding the most recently modified file to objects_to_process
-            if truncate:
-                if len(objects_to_process) == 0:
-                    objects_to_process.append(object_summary)
-                    continue
-                else:
-                    # compare last modified dates of the latest and current obj
-                    if (object_summary.last_modified
-                            > objects_to_process[0].last_modified):
-                        objects_to_process[0] = object_summary
-            else:
-                # no truncate, so the list may exceed 1 element
+    # only review those matching our configued 'doc' regex pattern
+    if re.search(doc + '$', key):
+        # under truncate = True, we will keep list length to 1
+        # only adding the most recently modified file to objects_to_process
+        if truncate:
+            if len(objects_to_process) == 0:
                 objects_to_process.append(object_summary)
+                continue
+            # compare last modified dates of the latest and current obj
+            if (object_summary.last_modified
+                    > objects_to_process[0].last_modified):
+                objects_to_process[0] = object_summary
+        else:
+            # no truncate, so the list may exceed 1 element
+            objects_to_process.append(object_summary)
 
 # an object exists to be processed as a truncate copy to the table
 if truncate and len(objects_to_process) == 1:
-    logger.info(
-        'truncate is set. processing only one file: {0} (modified {1})'.format(
-            objects_to_process[0].key, objects_to_process[0].last_modified))
+    logger.info('truncate is set. processing only one file: %s (modified %s)',
+                objects_to_process[0].key, objects_to_process[0].last_modified)
 
 # process the objects that were found during the earlier directory pass
 for object_summary in objects_to_process:
@@ -250,7 +249,7 @@ for object_summary in objects_to_process:
                     parsed_line += ua_string + referrer_string
                     parsed_list.append(parsed_line)
         csv_string = linefeed.join(parsed_list)
-        logger.info(object_summary.key + " parsed successfully")
+        logger.info("%s parsed successfully", object_summary.key)
 
     # This is not an apache access log
     if 'access_log_parse' not in data:
@@ -271,8 +270,11 @@ for object_summary in objects_to_process:
         try:
             client.copy_object(
                 Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-                + object_summary.key, Key=badfile)
+                CopySource=(
+                    "sp-ca-bc-gov-131565110619-12-microservices/"
+                    f"{object_summary.key}"
+                ),
+                Key=badfile)
         except Exception as _e:
             logger.exception("S3 transfer failed. %s", str(_e))
         continue
@@ -363,8 +365,8 @@ for object_summary in objects_to_process:
                                        Body=csv_buffer.getvalue())
 
     # prep database call to pull the batch file into redshift
-    query = copy_query(dbtable, batchfile, log=False)
-    logquery = copy_query(dbtable, batchfile, log=True)
+    query = copy_query(dbtable, batchfile, this_log=False)
+    logquery = copy_query(dbtable, batchfile, this_log=True)
 
     # if truncate is set to true, perform a transaction that will
     # replace the existing table data with the new data in one commit
@@ -384,9 +386,9 @@ GRANT SELECT ON {0}_scratch TO datamodeling;\n
 """.format(dbtable)
 
         scratch_copy = copy_query(
-            dbtable + "_scratch", batchfile, log=False)
+            dbtable + "_scratch", batchfile, this_log=False)
         scratch_copy_log = copy_query(
-            dbtable + "_scratch", batchfile, log=True)
+            dbtable + "_scratch", batchfile, this_log=True)
 
         scratch_cleanup = """
 -- Replace main table with scratch table, clean up the old table
@@ -412,8 +414,11 @@ COMMIT;
     try:
         client.copy_object(
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-            CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-            + object_summary.key, Key=outfile)
+            CopySource=(
+                "sp-ca-bc-gov-131565110619-12-microservices/"
+                f"{object_summary.key}"
+            ),
+            Key=outfile)
     except ClientError:
         logger.exception("S3 transfer failed")
 

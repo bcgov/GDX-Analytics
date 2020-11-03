@@ -335,7 +335,8 @@ def main():
 
                 # for each row in df
                 df_new = pd.DataFrame(columns=columnlist)
-                for index, row in _df.copy().iterrows():
+                for iterrows_tuple in _df.copy().iterrows():
+                    row = iterrows_tuple[1]
                     # iterate over the list of delimited terms
                     if row[column] is not np.nan:
                         # get the full string of delimited

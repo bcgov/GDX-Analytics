@@ -14,16 +14,15 @@
 # Usage         : python load_aws_cost_and_usage.py bucket yyyymm
 #
 
-import boto3  # s3 access
 import re  # regular expressions
 import os  # to read environment variables
-import psycopg2  # to connect to Redshift
+import logging
 import sys  # to read command line parameters
-
 from operator import attrgetter
+import psycopg2  # to connect to Redshift
+import boto3  # s3 access
 
 # set up logging
-import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -46,7 +45,7 @@ logger.addHandler(handler)
 
 # Take two arguments 1. bucket 2. month (eg. 201806)
 if (len(sys.argv) != 3):  # will be 1 if no arguments, 2 if one argument
-    print "Usage: python load_aws_cost_and_usage.py bucket yyyymm"
+    print("Usage: python load_aws_cost_and_usage.py bucket yyyymm")
     sys.exit(1)
 bucket = sys.argv[1]
 startmonth = sys.argv[2]
@@ -108,6 +107,6 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         # if the DB call fails, print error and place file in /bad
         except psycopg2.Error as e:
-            logger.exception("Loading failed\n{0}".format(e.pgerror))
+            logger.exception("Loading failed %s", e.pgerror)
         else:
             logger.info("Loaded successfully")

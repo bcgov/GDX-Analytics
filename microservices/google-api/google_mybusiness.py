@@ -270,7 +270,7 @@ for account in validated_accounts:
             start_date = last_loaded_date + timedelta(days=1)
             start_date = start_date.isoformat()
 
-        start_time = start_date + 'T00:00:00Z'
+        start_time = start_date + 'T01:00:00Z'
 
         # the most recently available data from the Google API is 2 days before
         # the query time. More details in the API reference at:

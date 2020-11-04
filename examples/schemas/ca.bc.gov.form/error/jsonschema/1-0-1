@@ -1,0 +1,62 @@
+{
+  "description": "Event to capture form validation errors",
+  "properties": {
+    "formid": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "fieldname": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "field_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "error_trigger": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1024
+    },
+    "error_index": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "formstage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "formid"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.form",
+    "name": "error",
+    "format": "jsonschema",
+    "version": "1-0-1"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

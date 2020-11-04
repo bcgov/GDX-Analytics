@@ -286,7 +286,7 @@ for account in validated_accounts:
                 "The end_date for location %s is more recent than 2 days ago.",
                 location_name)
 
-        end_time = end_date + 'T00:00:00Z'
+        end_time = end_date + 'T01:00:00Z'
 
         # if start and end times are same, then there's no new data
         if start_time == end_time:

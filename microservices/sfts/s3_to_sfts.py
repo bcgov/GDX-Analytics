@@ -109,8 +109,8 @@ def is_processed():
 # where the first date is the query start date, the second date is the query
 # end date, and the last timestamp is when the file was created.
 filename_regex = (
-    '^{object_prefix}_[0-9]{{4}}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])_'
-    '[0-9]{{4}}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])_'
+    '^{object_prefix}(_[0-9]{{4}}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])_'
+    '[0-9]{{4}}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1]))?_'
     '[0-9]{{4}}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])T'
     '(2[0-3]|[01][0-9])[0-5][0-9][0-6][0-9]_part[0-9]{{3}}$'
     .format(object_prefix=object_prefix))

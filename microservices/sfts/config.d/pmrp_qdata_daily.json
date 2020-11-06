@@ -6,6 +6,6 @@
   "object_prefix": "pmrp_qdata",
   "dml": "pmrp_qdata_daily.sql",
   "header": true,
-  "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN",
+  "sfts_path": "SBC/Shared/Secured/SS_BI/SS_GDX_IN/Q_data",
   "extension": ".csv"
 }

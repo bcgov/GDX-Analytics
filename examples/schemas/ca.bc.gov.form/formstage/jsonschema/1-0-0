@@ -1,11 +1,11 @@
 {
-  "description": "Event to capture form actions",
+  "description": "Event to capture form stages",
   "properties": {
-    "formid": {
+    "formstage": {
       "type": "string",
       "maxLength": 255
     },
-    "action": {
+    "formid": {
       "type": "string",
       "maxLength": 255
     },
@@ -15,24 +15,17 @@
         "null"
       ],
       "maxLength": 1024
-    },
-    "formstage": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "maxLength": 255
     }
   },
   "additionalProperties": false,
   "type": "object",
   "required": [
-    "formid",
-    "action"
+    "formstage",
+    "formid"
   ],
   "self": {
     "vendor": "ca.bc.gov.form",
-    "name": "action",
+    "name": "formstage",
     "format": "jsonschema",
     "version": "1-0-0"
   },

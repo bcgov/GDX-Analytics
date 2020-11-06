@@ -56,7 +56,7 @@
     "vendor": "ca.bc.gov.form",
     "name": "error",
     "format": "jsonschema",
-    "version": "1-0-0"
+    "version": "1-0-1"
   },
   "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
 }

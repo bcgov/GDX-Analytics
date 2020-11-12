@@ -78,7 +78,9 @@ import lib.logs as log
 
 # Ctrl+C
 def signal_handler(sig, frame):
-    logger.debug('Ctrl+C pressed!')
+    '''Ctrl+C signal handler'''
+    logger.debug('singal handler sig: %s frame: %s', sig, frame)
+    logger.info('Ctrl+C pressed!')
     sys.exit(0)
 
 
@@ -107,14 +109,14 @@ def giveup_hdlr(details):
     sys.exit(1)
 
 
-def last_loaded(s):
+def last_loaded(_s):
     """Check for a sites last loaded date in Redshift"""
     # Load the Redshift connection
     con = psycopg2.connect(conn_string)
     cursor = con.cursor()
     # query the latest date for any search data on this site loaded to redshift
-    q = f"SELECT MAX(DATE) FROM {config_dbtable} WHERE site = '{s}'"
-    cursor.execute(q)
+    _q = f"SELECT MAX(DATE) FROM {config_dbtable} WHERE site = '{_s}'"
+    cursor.execute(_q)
     # get the last loaded date
     lld = (cursor.fetchall())[0][0]
     # close the redshift connection
@@ -220,7 +222,7 @@ conn_string = (
     f"password={pgpass}")
 
 # each site in the config list of sites gets processed in this loop
-for site_item in config_sites:
+for site_item in config_sites:  # noqa: C901
     # read the config for the site name and default start date if specified
     site_name = site_item["name"]
 
@@ -280,16 +282,20 @@ for site_item in config_sites:
         rowlimit = 20000
         index = 0
 
-        def daterange(startDate, endDate):
+        def daterange(start_date, end_date):
             """yields a generator of all dates from startDate to endDate"""
-            logger.debug("daterange called with startDate: %s and endDate: %s", startDate, endDate)
-            assert endDate >= startDate, 'startDate cannot exceed endDate in daterange generator'
-            for n in range(int((endDate - startDate).days)+1):
-                yield startDate + timedelta(n)
+            logger.debug("daterange called with startDate: %s and endDate: %s",
+                         start_date, end_date)
+            assert end_date >= start_date, 'startDate cannot exceed endDate \
+             in daterange generator'
+            for _n in range(int((end_date - start_date).days) + 1):
+                yield start_date + timedelta(_n)
 
         search_analytics_response = ''
 
         # loops on each date from start date to the end date, inclusive
+        # initializing date_in_range avoids pylint [undefined-loop-variable]
+        date_in_range = ()
         for date_in_range in daterange(start_dt, end_dt):
             # A wait time of 250ms each query reduces chance of HTTP 429 error
             # "Rate Limit Exceeded", handled below
@@ -310,11 +316,9 @@ for site_item in config_sites:
                         "query",
                         "country",
                         "device",
-                        "page"
-                        ],
+                        "page"],
                     "rowLimit": rowlimit,
-                    "startRow": index * rowlimit
-                    }
+                    "startRow": index * rowlimit}
 
                 # This query to the Google Search API may eventually yield an
                 # HTTP response code of 429, "Rate Limit Exceeded".
@@ -326,7 +330,7 @@ for site_item in config_sites:
                 retry = 1
                 while True:
                     try:
-                        search_analytics_response = service.searchanalytics() \
+                        search_analytics_response = service.searchanalytics()\
                             .query(siteUrl=site_name, body=bodyvar).execute()
                     except GoogleHttpError:
                         if retry == 11:
@@ -443,7 +447,8 @@ INSERT INTO cmslite.google_pdt
           COALESCE(node_id,'') AS node_id,
           SPLIT_PART(page, '/',3) as page_urlhost,
           title,
-          theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme, subtheme, topic, subtopic, subsubtopic
+          theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme,
+          subtheme, topic, subtopic, subsubtopic
       FROM google.googlesearch AS gs
       -- fix for misreporting of redirected front page URL in Google search
       LEFT JOIN cmslite.themes AS themes ON

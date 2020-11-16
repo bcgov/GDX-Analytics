@@ -1,0 +1,14 @@
+{
+	"bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+	"source": "client",
+	"destination": "processed",
+	"directory": "cmslite_gdx",
+	"doc": "cms-analytics-csv.*",
+	"dbtable": {
+		"analytics_user_status": "microservice.cmslite_user_status",
+		"analytics_user_group": "microservice.cmslite_user_group",
+		"analytics_user_activity": "microservice.cmslite_user_activity",
+		"analytics_group": "microservice.cmslite_group"
+	},
+	"truncate": true
+}

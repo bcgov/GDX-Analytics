@@ -11,7 +11,7 @@
 #               : export pgpass=<<DB_PASSWD>>
 #
 #
-# Usage         : python cmslite_user_data_to_redshift.py 
+# Usage         : python cmslite_user_data_to_redshift.py configfile.json
 #
 
 import boto3  # s3 access
@@ -25,6 +25,7 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
+import tarfile
 
 
 # set up logging
@@ -65,14 +66,28 @@ bucket = data['bucket']
 source = data['source']
 destination = data['destination']
 directory = data['directory']
+prefix = source + "/" + directory + "/"
 doc = data['doc']
 truncate = data['truncate']
 
 # set up S3 connection
 client = boto3.client('s3')  # low-level functional API
 resource = boto3.resource('s3')  # high-level object-oriented API
-my_bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
-bucket_name = my_bucket.name
+bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
+bucket_name = bucket.name
+
+
+def download_object(o):
+    '''downloads object to a tmp directoy'''
+    dl_name = o.replace(prefix, '')
+    try:
+        bucket.download_file(o, './tmp/{0}'.format(dl_name))
+    except ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            logger.error("The object does not exist.")
+            logger.exception("ClientError 404:")
+        else:
+            raise
 
 
 # Check to see if the file has been processed already
@@ -103,7 +118,7 @@ def is_processed(object_summary):
 # objects_to_process will contain zero or one objects if truncate = True
 # objects_to_process will contain zero or more objects if truncate = False
 objects_to_process = []
-for object_summary in my_bucket.objects.filter(Prefix=source + "/"
+for object_summary in bucket.objects.filter(Prefix=source + "/"
                                                + directory + "/"):
     key = object_summary.key
     # skip to next object if already processed
@@ -132,13 +147,9 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
 # Download the tgz file, unpack it to a temp folder in the local working
 # directory, process the files, and then shift the data to redshift. Finally,
 # delete the temp folder. 
-for object_summary in objects_to_process:
-    batchfile = destination + "/batch/" + object_summary.key
-    goodfile = destination + "/good/" + object_summary.key
-    badfile = destination + "/bad/" + object_summary.key
 
-    # get the object from S3 and take its contents as body
-    obj = client.get_object(Bucket=bucket, Key=object_summary.key)
-    body = obj['Body']
-
-    print(body)
+# downloads go to a temporary folder: ./tmp
+if not os.path.exists('./tmp'):
+    os.makedirs('./tmp')
+for obj in objects_to_process:
+    download_object(obj.key)

@@ -97,14 +97,14 @@ def is_processed(object_summary):
     goodfile = destination + "/good/" + key
     badfile = destination + "/bad/" + key
     try:
-        client.head_object(Bucket=bucket, Key=goodfile)
+        client.head_object(Bucket=bucket.name, Key=goodfile)
     except ClientError:
         pass  # this object does not exist under the good destination path
     else:
         logger.debug("{0} was processed as good already.".format(filename))
         return True
     try:
-        client.head_object(Bucket=bucket, Key=badfile)
+        client.head_object(Bucket=bucket.name, Key=badfile)
     except ClientError:
         pass  # this object does not exist under the bad destination path
     else:

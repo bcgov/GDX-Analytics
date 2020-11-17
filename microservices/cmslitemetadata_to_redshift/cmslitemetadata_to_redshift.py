@@ -620,8 +620,8 @@ COMMIT;
                     logger.exception(
                         "Failed to write to %s.microservice_log", dbschema)
                 else:
-                    logger.info("timestamp row added to microservice_log \
-                                table")
+                    logger.info("timestamp row added to microservice_log "
+                                "table")
                     logger.debug("start time: %s -- end time: %s",
                                  starttime, endtime)
 

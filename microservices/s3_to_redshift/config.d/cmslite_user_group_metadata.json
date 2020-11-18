@@ -4,11 +4,25 @@
 	"destination": "processed",
 	"directory": "cmslite_gdx",
 	"doc": "cms-analytics-csv.*",
-	"dbtable": {
-		"analytics_user_status": "microservice.cmslite_user_status",
-		"analytics_user_group": "microservice.cmslite_user_group",
-		"analytics_user_activity": "microservice.cmslite_user_activity",
-		"analytics_group": "microservice.cmslite_group"
-	},
-	"truncate": true
+	"truncate": true,
+	"files": {
+		"analytics_user_group": {
+			"dbtable": "microservice.cmslite_user_group",
+			"column_count": 7
+
+		},
+		"analytics_group": {
+			"dbtable": "microservice.cmslite_group",
+			"column_count": 4
+		},
+		"analytics_user_activity": {
+			"dbtable": "microservice.cmslite_user_activity",
+			"column_count": 5
+		},
+		"analytics_user_status": {
+			"dbtable": "microservice.cmslite_user_status",
+			"column_count": 7
+		}
+
+	}
 }

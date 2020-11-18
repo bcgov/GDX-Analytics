@@ -25,7 +25,7 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
-import tarfile
+from shutil import unpack_archive
 
 
 # set up logging
@@ -144,12 +144,18 @@ for object_summary in bucket.objects.filter(Prefix=source + "/"
 
 
 # Process the objects that were found during the earlier directory pass.
-# Download the tgz file, unpack it to a temp folder in the local working
+# Download the tgz file, unpack it to a temp directory in the local working
 # directory, process the files, and then shift the data to redshift. Finally,
-# delete the temp folder. 
+# delete the temp directory. 
 
-# downloads go to a temporary folder: ./tmp
+# Download and unpack to a temporary folder: ./tmp
 if not os.path.exists('./tmp'):
     os.makedirs('./tmp')
 for obj in objects_to_process:
     download_object(obj.key)
+    filename = re.search("(cms-analytics-csv)(.)*tgz$", obj.key).group()
+
+    # Unpack the object in the tmp directory
+    unpack_archive('./tmp/' + filename, './tmp/')
+
+

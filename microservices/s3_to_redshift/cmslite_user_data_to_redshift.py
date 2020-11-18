@@ -26,6 +26,7 @@ import sys  # to read command line parameters
 import os.path  # file handling
 import logging
 from shutil import unpack_archive
+import csv
 
 
 # set up logging
@@ -148,14 +149,27 @@ for object_summary in bucket.objects.filter(Prefix=source + "/"
 # directory, process the files, and then shift the data to redshift. Finally,
 # delete the temp directory. 
 
-# Download and unpack to a temporary folder: ./tmp
 if not os.path.exists('./tmp'):
     os.makedirs('./tmp')
-for obj in objects_to_process:
-    download_object(obj.key)
-    filename = re.search("(cms-analytics-csv)(.)*tgz$", obj.key).group()
+
+for object_summary in objects_to_process:
+    batchfile = destination + "/batch/" + object_summary.key
+    goodfile = destination + "/good/" + object_summary.key
+    badfile = destination + "/bad/" + object_summary.key
+    
+    # Download and unpack to a temporary folder: ./tmp
+    download_object(object_summary.key)
+
+    # Get the filename from the full path in the object summary key
+    filename = re.search("(cms-analytics-csv)(.)*tgz$", object_summary.key).group()
 
     # Unpack the object in the tmp directory
     unpack_archive('./tmp/' + filename, './tmp/')
 
+    # process files for uplaod to batch folder on S3
+    for file in os.listdir("./tmp/" + filename.rstrip('.tgz')):
+        with open('./tmp/' + filename.rstrip('.tgz') + '/' + file, newline='') as csvfile:
+            csv_reader = csv.reader(csvfile)
+            for row in csv_reader:
+                # read lines parse files for upload to Batch dir in S3
 

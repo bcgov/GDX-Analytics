@@ -143,6 +143,10 @@ CLIENT_SECRET = flags.cred
 AUTHORIZATION = flags.auth
 CONFIG = flags.conf
 
+if CLIENT_SECRET is None or AUTHORIZATION is None or CONFIG is None:
+    logger.error('Missing one or more requied arguments.')
+    sys.exit(1)
+
 # calling the Google API. If credentials.dat is not yet generated
 # then brower based Google Account validation will be required
 API_NAME = 'searchconsole'
@@ -264,18 +268,9 @@ for site_item in config_sites:  # noqa: C901
         # (up to) 1 month ahead of start_dt OR (up to) two days before now.
         end_dt = min(start_dt + timedelta(days=30), latest_date)
 
-        # set the file name that will be written to S3
-        site_clean = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
-        outfile = f"googlesearch-{site_clean}-{start_dt}-{end_dt}.csv"
-        object_key = f"{config_source}/{config_directory}/{outfile}"
-
-        # prepare stream
-        stream = io.StringIO()
-
-        # site is prepended to the response from the Google Search API
-        outrow = (u"site|date|query|country|device|"
-                  "page|position|clicks|ctr|impressions\n")
-        stream.write(outrow)
+        # prepare stream with header
+        stream = io.StringIO("site|date|query|country|device|"
+                             "page|position|clicks|ctr|impressions\n")
 
         # Limit each query to 20000 rows. If there are more than 20000 rows
         # in a given day, it will split the query up.
@@ -286,8 +281,9 @@ for site_item in config_sites:  # noqa: C901
             """yields a generator of all dates from startDate to endDate"""
             logger.debug("daterange called with startDate: %s and endDate: %s",
                          start_date, end_date)
-            assert end_date >= start_date, 'startDate cannot exceed endDate \
-             in daterange generator'
+            assert end_date >= start_date, (f'start_date: {start_date} '
+                                            'cannot exceed end_date: '
+                                            f'{end_date} in daterange generator')
             for _n in range(int((end_date - start_date).days) + 1):
                 yield start_date + timedelta(_n)
 
@@ -296,6 +292,7 @@ for site_item in config_sites:  # noqa: C901
         # loops on each date from start date to the end date, inclusive
         # initializing date_in_range avoids pylint [undefined-loop-variable]
         date_in_range = ()
+        max_date_in_data = '0'
         for date_in_range in daterange(start_dt, end_dt):
             # A wait time of 250ms each query reduces chance of HTTP 429 error
             # "Rate Limit Exceeded", handled below
@@ -306,7 +303,11 @@ for site_item in config_sites:  # noqa: C901
             while (index == 0 or ('rows' in search_analytics_response)):
                 logger.debug('%s %s', str(date_in_range), index)
 
-                # The request body for the Google Search API query
+                # The order of the values in the dimensions[] block of this
+                #  Google Search API query determines the order of the keys[]
+                #  values in the response body.
+                # IMPORTANT: logic is tied to the current order; any change
+                #  to the current order will require refactoring this script.
                 bodyvar = {
                     "aggregationType": 'auto',
                     "startDate": str(date_in_range),
@@ -351,7 +352,11 @@ for site_item in config_sites:  # noqa: C901
                 if 'rows' in search_analytics_response:
                     for row in search_analytics_response['rows']:
                         outrow = site_name + "|"
-                        for key in row['keys']:
+                        for i, key in enumerate(row['keys']):
+                            # keys[0] contains the date value.
+                            if i == 0:
+                                # Find max date in data to use in filename.
+                                max_date_in_data = max(max_date_in_data, key)
                             # for now, we strip | from searches
                             key = re.sub(r'\|', '', key)
                             # for now, we strip \\ from searches
@@ -363,6 +368,26 @@ for site_item in config_sites:  # noqa: C901
                             str(row['ctr']) + "|" + \
                             re.sub(r'\.0', '', str(row['impressions'])) + "\n"
                         stream.write(outrow)
+        
+        # checks if only the header was written (68 bytes in stream)
+        if stream.tell() == 68:
+            logger.warning('No data retrieved for %s over date request range '
+                           '%s - %s. Skipping s3 object creatiton and '
+                           'Redshift load steps.',
+                           site_name, start_dt, end_dt)
+            # continue without writing a file.
+            continue
+        
+        if max_date_in_data < str(end_dt):
+            logger.warning('The date range in the request spanned %s - %s, '
+                           'but the max date in the data retrieved was: %s',
+                           str(start_dt),str(end_dt),str(max_date_in_data))
+
+        # set the file name that will be written to S3
+        # 
+        site_fqdn = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
+        outfile = f"googlesearch-{site_fqdn}-{start_dt}-{max_date_in_data}.csv"
+        object_key = f"{config_source}/{config_directory}/{outfile}"
 
         # Write the stream to an outfile in the S3 bucket with naming
         # like "googlesearch-sitename-startdate-enddate.csv"
@@ -393,14 +418,16 @@ for site_item in config_sites:  # noqa: C901
                 # if the DB call fails, print error and place file in /bad
                 except psycopg2.Error:
                     logger.exception(
-                        "Load failure: %s index %s for %s. Object key %s.",
-                        site_name, str(index), str(date_in_range),
-                        object_key.split('/')[-1])
+                        "FAILURE loading %s (%s index) over date range "
+                        "%s to %s into %s. Object key %s.", site_name,
+                        str(index), str(start_dt), str(end_dt),
+                        config_dbtable, object_key.split('/')[-1])
                 else:
                     logger.info(
-                        "Load success: %s index %s for %s. Object key %s.",
-                        site_name, str(index), str(date_in_range),
-                        object_key.split('/')[-1])
+                        "SUCCESS loading %s (%s index) over date range "
+                        "%s to %s into %s. Object key %s.", site_name,
+                        str(index), str(start_dt), str(end_dt),
+                        config_dbtable, object_key.split('/')[-1])
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt
 
@@ -480,5 +507,7 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception("Google Search PDT loading failed")
+            sys.exit(1)
         else:
             logger.info("Google Search PDT loaded successfully")
+            sys.exit(0)

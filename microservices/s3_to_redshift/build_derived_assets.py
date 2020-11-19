@@ -244,8 +244,9 @@ query = r'''
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
         WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
-        OR (request_string LIKE '%getmedia%'
-            AND asset_url LIKE 'https://www.workbc.ca%')
+        OR (request_string LIKE '%getmedia%' AND asset_url LIKE 'https://www.workbc.ca%')
+        OR (request_string LIKE '%getmedia%' AND asset_source LIKE 'TIBC')
+        OR (request_string LIKE '%TradeBCPortal/media%' AND asset_source LIKE 'TIBC')
     );
     COMMIT;
 '''.format(schema_name=schema_name,

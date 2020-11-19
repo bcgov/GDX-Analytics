@@ -243,13 +243,13 @@ query = r'''
          FROM {schema_name}.asset_downloads AS assets
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
-        WHERE {asset_scheme_and_authority} NOT IN (
+        WHERE '{asset_scheme_and_authority}' NOT IN (
             'https://www.workbc.ca',
             'http://apps.britishcolumbia.ca/',
             'https://www.britishcolumbia.ca',
             'https://www.hellobc.com.cn',
             'https://www.britishcolumbia.jp',
-            'https://www.britishcolumbia.kr'
+            'https://www.britishcolumbia.kr')
         OR (request_string LIKE '%getmedia%'
             AND asset_url LIKE 'https://www.workbc.ca%')
         OR (request_string LIKE '%getmedia%'

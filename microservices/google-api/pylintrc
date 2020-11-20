@@ -4,4 +4,4 @@
 generated-members=searchanalytics
 
 [BASIC]
-good-names=flow_scope,dbname,host,port,outrow,rowlimit,index,search_analytics_response,wait_time,index,retry,wait_time,retry,index,query
+good-names=flow_scope,dbname,host,port,outrow,rowlimit,index,search_analytics_response,wait_time,index,retry,wait_time,retry,index,query,max_date_in_data

@@ -243,9 +243,19 @@ query = r'''
          FROM {schema_name}.asset_downloads AS assets
         -- Asset files not in the getmedia folder for workbc must
         -- be filtered out
-        WHERE asset_url NOT LIKE 'https://www.workbc.ca%'
+        WHERE '{asset_scheme_and_authority}' NOT IN (
+            'https://www.workbc.ca',
+            'http://apps.britishcolumbia.ca/',
+            'https://www.britishcolumbia.ca',
+            'https://www.hellobc.com.cn',
+            'https://www.britishcolumbia.jp',
+            'https://www.britishcolumbia.kr')
         OR (request_string LIKE '%getmedia%'
             AND asset_url LIKE 'https://www.workbc.ca%')
+        OR (request_string LIKE '%getmedia%'
+            AND asset_source LIKE 'TIBC')
+        OR (request_string LIKE '%TradeBCPortal/media%'
+            AND asset_source LIKE 'TIBC')
     );
     COMMIT;
 '''.format(schema_name=schema_name,

@@ -34,6 +34,13 @@ import lib.logs as log
 logger = logging.getLogger(__name__)
 log.setup()
 
+
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
+
 # Command line arguments
 parser = argparse.ArgumentParser(
     description='GDX Analytics ETL utility for PRMP.')
@@ -76,8 +83,9 @@ def download_object(o):
         res_bucket.download_file(o, './tmp/{0}{1}'.format(dl_name, extension))
     except ClientError as e:
         if e.response['Error']['Code'] == "404":
-            logger.error("The object does not exist.")
+            logger.error("The object %s does not exist.", dl_name)
             logger.exception("ClientError 404:")
+            clean_exit(1, 'Expected object is missing on S3.')
         else:
             raise
 
@@ -120,8 +128,7 @@ for object_summary in res_bucket.objects.filter(Prefix=prefix):
         logger.debug('added %a for processing', filename)
 
 if not objects_to_process:
-    logger.debug('no files to process')
-    sys.exit(1)
+    clean_exit(1, 'Failing due to no files to process')
 
 # downloads go to a temporary folder: ./tmp
 if not os.path.exists('./tmp'):
@@ -192,3 +199,8 @@ try:
     shutil.rmtree('./tmp')
 except (os.error, OSError):
     logger.exception('Exception deleting temporary folder:')
+    clean_exit(1,'Could not delete tmp folder')
+
+if xfer_proc:
+    clean_exit(0,'Finished successfully.')
+clean_exit(1, 'Finished with a subroutine error.')

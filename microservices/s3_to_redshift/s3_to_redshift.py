@@ -35,15 +35,21 @@ import lib.logs as log
 logger = logging.getLogger(__name__)
 log.setup()
 
+
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
 # check that configuration file was passed as argument
 if len(sys.argv) != 2:
     print('Usage: python s3_to_redshift.py config.json')
-    sys.exit(1)
+    clean_exit(1,'Bad command use.')
 configfile = sys.argv[1]
 # confirm that the file exists
 if os.path.isfile(configfile) is False:
     print("Invalid file name {}".format(configfile))
-    sys.exit(1)
+    clean_exit(1,'Bad file name.')
 # open the confifile for reading
 with open(configfile) as f:
     data = json.load(f)
@@ -277,9 +283,10 @@ for object_summary in objects_to_process:
                 Key=badfile)
         except Exception as _e:
             logger.exception("S3 transfer failed. %s", str(_e))
-        continue
+        clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
 
-    # Check for an empty file. If it's empty, accept it as good and skip
+    # Check for an empty file. If it's empty, accept it as bad and skip
     # to the next object to process
     try:
         if no_header:
@@ -300,9 +307,9 @@ for object_summary in objects_to_process:
     except pandas.errors.EmptyDataError as _e:
         logger.exception('exception reading %s', object_summary.key)
         if str(_e) == "No columns to parse from file":
-            logger.warning('%s is empty, keying to goodfile and proceeding.',
+            logger.warning('%s is empty, keying to badfile and proceeding.',
                            object_summary.key)
-            outfile = goodfile
+            outfile = badfile
         else:
             logger.warning('%s not empty, keying to badfile and proceeding.',
                            object_summary.key)
@@ -313,7 +320,8 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
-        continue
+        clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
     except ValueError:
         logger.exception('ValueError exception reading %s', object_summary.key)
         logger.warning('Keying to badfile and proceeding.')
@@ -324,7 +332,8 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
-        continue
+        clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
 
     # map the dataframe column names to match the columns from the configuation
     df.columns = columns
@@ -422,4 +431,9 @@ COMMIT;
     except ClientError:
         logger.exception("S3 transfer failed")
 
-    logger.debug("finished")
+    if outfile == badfile:
+        clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
+    logger.debug("finished %s", object_summary.key)
+
+clean_exit(0, 'Finished all processing cleanly.')

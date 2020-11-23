@@ -91,6 +91,12 @@ logger = logging.getLogger(__name__)
 log.setup()
 
 
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
+
 # Custom backoff logging handlers
 def backoff_hdlr(details):
     """Event handler for use in backoff decorators on_backoff kwarg"""
@@ -105,8 +111,7 @@ def giveup_hdlr(details):
     log_args = [details['target'].__name__, details['elapsed'],
                 details['tries']]
     logger.error(msg, *log_args)
-    logger.info("exiting microservice")
-    sys.exit(1)
+    clean_exit(1,'could not reach Google Search Console after backoff.')
 
 
 def last_loaded(_s):
@@ -422,6 +427,7 @@ for site_item in config_sites:  # noqa: C901
                         "%s to %s into %s. Object key %s.", site_name,
                         str(index), str(start_dt), str(end_dt),
                         config_dbtable, object_key.split('/')[-1])
+                    clean_exit(1,'Could not load to redshift.')
                 else:
                     logger.info(
                         "SUCCESS loading %s (%s index) over date range "
@@ -507,7 +513,7 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception("Google Search PDT loading failed")
-            sys.exit(1)
+            clean_exit(1,'Could not rebuild PDT in Redshift.')
         else:
             logger.info("Google Search PDT loaded successfully")
-            sys.exit(0)
+            clean_exit(0,'Finished succesfully.')

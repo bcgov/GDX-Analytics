@@ -34,9 +34,16 @@ import lib.logs as log
 
 
 def main():
-    """Return the sum of x and y."""
+    """Process S3 loaded CMS Lite Metadata file to Redshift"""
+
     logger = logging.getLogger(__name__)
     log.setup()
+
+
+    def clean_exit(code, message):
+        """Exits with a logger message and code"""
+        logger.info('Exiting with code %s : %s', str(code), message)
+        sys.exit(code)
 
     # we will use this timestamp to write to the cmslite.microservice_log table
     # changes to that table trigger Looker cacheing.
@@ -48,11 +55,11 @@ def main():
     if len(sys.argv) != 2:  # will be 1 if no arguments, 2 if one argument
         logger.error(
             "Usage: python27 cmslitemetadata_to_redshift.py configfile.json")
-        sys.exit(1)
+        clean_exit(1, 'bad configuration')
     configfile = sys.argv[1]
     if os.path.isfile(configfile) is False:  # confirm that the file exists
         logger.error("Invalid file name %s", configfile)
-        sys.exit(1)
+        clean_exit(1, 'bad configuration')
     with open(configfile) as _f:
         data = json.load(_f)
 
@@ -243,24 +250,31 @@ def main():
         csv_string = csv_string.replace('	', ' ')
 
         # Check for an empty file. If it's empty, accept it as good and move on
+        _df = None
         try:
             _df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
                               dtype=dtype_dic, usecols=range(column_count))
         except pd.errors.EmptyDataError:
-            logger.debug("Empty file, proceeding")
-            outfile = goodfile
+            logger.exception("Empty file:")
+            outfile = badfile
+            client.copy_object(
+                Bucket=bucket,
+                CopySource=bucket + '/' + object_summary.key,
+                Key=outfile)
+            clean_exit(
+                1,
+                f'{object_summary.key} was empty and was tagged as bad.')
         except pd.errors.ParserError:
             logger.exception("Parse error:")
             outfile = badfile
 
-            # For the two exceptions cases, write to either the Good or
-            # Bad folder. Otherwise, continue to process the file.
             client.copy_object(
-                Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                CopySource=("sp-ca-bc-gov-131565110619-12-microservices/"
-                            f"{object_summary.key}"),
+                Bucket=bucket,
+                CopySource=bucket + '/' + object_summary.key,
                 Key=outfile)
-            continue
+            clean_exit(
+                1,
+                f'{object_summary.key} did not parse and was tagged as bad.')
 
         # set the data frame to use the columns listed in the .conf file.
         # Note that this overrides the columns in the file, and will give an
@@ -405,10 +419,20 @@ def main():
                     outfile = goodfile
 
         # Copies the uploaded file from client into processed/good or /bad
-        client.copy_object(
-            Bucket=f"{bucket}",
-            CopySource=f"{bucket}/{object_summary.key}",
-            Key=outfile)
+        try:
+            client.copy_object(
+                Bucket=bucket,
+                CopySource=bucket + '/' + object_summary.key,
+                Key=outfile)
+        except ClientError:
+            logger.exception("S3 transfer failed")
+            clean_exit(
+                1,
+                f'S3 transfer of {object_summary.key} to {outfile} failed.')
+
+        # exit with non-zero code if the file was keyed to bad
+        if outfile == badfile:
+            clean_exit(1,f'{object_summary.key} was processed as bad.')
 
     # now we run the single-time load on the cmslite.themes
     query = """
@@ -605,7 +629,8 @@ COMMIT;
                 curs.execute(query)
             # if the DB call fails, print error and place file in /bad
             except psycopg2.Error:
-                logger.exception("Themes table loading failed")
+                logger.exception("Psycopg2 error processing themes table")
+                clean_exit(1,'Failed to rebuild themes table.')
             # if the DB call succeed, place file in /good
             else:
                 logger.info("Themes table loaded successfully")
@@ -619,11 +644,17 @@ COMMIT;
                 except psycopg2.Error:  # if the DB call fails, print error
                     logger.exception(
                         "Failed to write to %s.microservice_log", dbschema)
+                    logger.debug("To manually update, use: "
+                                 "start time: %s -- end time: %s",
+                                 starttime, endtime)
+                    clean_exit(1,'microservice_log load failed.')
                 else:
                     logger.info("timestamp row added to microservice_log "
                                 "table")
                     logger.debug("start time: %s -- end time: %s",
                                  starttime, endtime)
+
+    clean_exit(0,'Succesfully finished cmslitemetadata_to_redshift.')
 
 
 if __name__ == '__main__':

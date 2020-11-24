@@ -258,9 +258,8 @@ def main():
             logger.exception("Empty file:")
             outfile = badfile
             client.copy_object(
-                Bucket=f"{bucket}",
-                CopySource=(f"{bucket}"
-                            f"{object_summary.key}"),
+                Bucket=bucket,
+                CopySource=bucket + '/' + object_summary.key,
                 Key=outfile)
             clean_exit(
                 1,
@@ -270,9 +269,8 @@ def main():
             outfile = badfile
 
             client.copy_object(
-                Bucket=f"{bucket}",
-                CopySource=(f"{bucket}"
-                            f"{object_summary.key}"),
+                Bucket=bucket,
+                CopySource=bucket + '/' + object_summary.key,
                 Key=outfile)
             clean_exit(
                 1,
@@ -423,8 +421,8 @@ def main():
         # Copies the uploaded file from client into processed/good or /bad
         try:
             client.copy_object(
-                Bucket=f"{bucket}",
-                CopySource=f"{bucket}/{object_summary.key}",
+                Bucket=bucket,
+                CopySource=bucket + '/' + object_summary.key,
                 Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")

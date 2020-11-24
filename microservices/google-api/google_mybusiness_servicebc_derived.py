@@ -15,6 +15,7 @@
 # Usage         : python google_mybusiness_servicebc_derived.py
 #
 import os
+import sys
 import logging
 import psycopg2
 import lib.logs as log
@@ -72,7 +73,9 @@ with psycopg2.connect(conn_string) as conn:
             logger.exception((
                 'Error: failed to execute the transaction '
                 'to prepare the google_mybusiness_servicebc_derived PDT'))
+            sys.exit(1)
         else:
             logger.info((
                 'Success: executed the transaction '
                 'to prepare the google_mybusiness_servicebc_derived PDT'))
+            sys.exit(0)

@@ -86,6 +86,12 @@ logger = logging.getLogger(__name__)
 log.setup()
 
 
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
+
 # Command line arguments
 parser = argparse.ArgumentParser(
     parents=[tools.argparser],
@@ -227,6 +233,7 @@ for loc in config_locations:
         continue
 
 # iterate over ever location of every account
+badfiles = 0
 for account in validated_accounts:
 
     dbtable = config_dbtable
@@ -410,6 +417,8 @@ for account in validated_accounts:
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])
         logger.debug(logquery)
 
+        goodfile = f"{config_destination}/good/{object_key}"
+        badfile = f"{config_destination}/bad/{object_key}"
         # Connect to Redshift and execute the query.
         with psycopg2.connect(conn_string) as conn:
             with conn.cursor() as curs:
@@ -420,13 +429,14 @@ for account in validated_accounts:
                         "Loading failed {0} with error:\n{1}"
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
-                    movefile = config_destination + "/bad/" + object_key
+                    movefile = badfile
+                    badfiles += 1
                 else:
                     logger.info("".join((
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
-                    movefile = config_destination + "/good/" + object_key
+                    movefile = goodfile
 
         # copy the object to the S3 outfile (processed/good/ or processed/bad/)
         try:
@@ -436,3 +446,8 @@ for account in validated_accounts:
                 .format(object_key), Key=movefile)
         except boto3.exceptions.ClientError:
             logger.exception("S3 transfer to %s failed", movefile)
+            clean_exit(1,f'S3 transfer of {object_key} to {movefile} failed.')
+
+if badfiles:
+    clean_exit(1,'A file was processed as bad on this run.')
+clean_exit(0,'Ran without errors.')

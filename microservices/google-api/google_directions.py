@@ -86,6 +86,12 @@ logger = logging.getLogger(__name__)
 log.setup()
 
 
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+    
+
 # Command line arguments
 parser = argparse.ArgumentParser(
     parents=[tools.argparser],
@@ -314,7 +320,7 @@ for account in validated_accounts:
             except googleapiclient.errors.HttpError:
                 logger.exception(
                     "Request contains an invalid argument. Skipping.")
-                continue
+                clean_exit(1,'Request to API caused an Error.')
 
             # stitch all responses responses for later iterative processing
             stitched_responses['locationDrivingDirectionMetrics'] += \
@@ -459,3 +465,8 @@ for account in validated_accounts:
     except boto3.exceptions.ClientError:
         logger.exception("S3 copy %s to %s location failed.",
                          object_summary.key, outfile=outfile)
+        clean_exit(1,'S3 transfer failed.')
+    if outfile == badfile:
+        clean_exit(1,'The output file was bad.')
+
+clean_exit(0,'Finished without errors.')

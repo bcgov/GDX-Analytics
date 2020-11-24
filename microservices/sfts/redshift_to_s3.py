@@ -26,6 +26,13 @@ import lib.logs as log
 logger = logging.getLogger(__name__)
 log.setup()
 
+
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
+
 # Get required environment variables
 pguser = os.environ['pguser']
 pgpass = os.environ['pgpass']
@@ -100,8 +107,8 @@ def return_query(local_query):
             try:
                 local_curs.execute(local_query)
             except psycopg2.Error:
-                logger.exception("Exiting with status code 1. psycopg2.Error:")
-                sys.exit(1)
+                logger.exception("psycopg2.Error:")
+                clean_exit(1, 'Failed psycopg2 query attempt.')
             else:
                 response = local_curs.fetchone()[0]
                 logger.debug("returned: %s", response)
@@ -195,11 +202,9 @@ if 'start_date' in config and 'end_date' in config:
         end_date = get_date(end_date)
 
     if start_date > end_date:
-        logger.info(
-            'start_date: %s is greater than end_date: %s, giving up.',
-            start_date, end_date)
-        sys.exit(1)
-    
+        clean_exit(1, f'Start_date: {start_date} cannot be greater '
+                   'than end_date: {end_date}.')
+
     object_key = object_key_builder(object_prefix,start_date,end_date)
 else:
     object_key = object_key_builder(object_prefix)
@@ -216,8 +221,7 @@ if sql_parse_key:
         sql_parse_value = SQLPARSE.get(
             sql_parse_key, lambda: raise_(Exception(LookupError)))()
     except KeyError:
-        logger.error('The SQL Parse Key configured has not been implemented.')
-        sys.exit(1)
+        clean_exit(1,'The SQL Parse Key configured has not been implemented.')
 
     # Set the config defined sql_parse_key value as the key
     # in a dict with the computed sql_parse_value as that key's value
@@ -260,8 +264,9 @@ with psycopg2.connect(conn_string) as conn:
             logger.exception("psycopg2.Error:")
             logger.error(('UNLOAD transaction on %s failed.'
                           'Quitting with error code 1'), dml_file)
-            sys.exit(1)
+            clean_exit(1,'Failed psycopg2 query attempt.')
         else:
             logger.info(
                 'UNLOAD successful. Object prefix is %s/%s/%s',
                 bucket, source_prefix, object_key)
+            clean_exit(0,'Finished succesfully.')

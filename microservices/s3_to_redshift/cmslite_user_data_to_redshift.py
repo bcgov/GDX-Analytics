@@ -17,16 +17,16 @@
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import pandas.errors
 import re  # regular expressions
 from io import StringIO
 import os  # to read environment variables
-import psycopg2  # to connect to Redshift
+# import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
 from shutil import unpack_archive
-import csv
 
 
 # set up logging
@@ -70,12 +70,38 @@ directory = data['directory']
 prefix = source + "/" + directory + "/"
 doc = data['doc']
 truncate = data['truncate']
+delim = data['delim']
 
 # set up S3 connection
 client = boto3.client('s3')  # low-level functional API
 resource = boto3.resource('s3')  # high-level object-oriented API
 bucket = resource.Bucket(bucket)  # subsitute this for your s3 bucket name.
 bucket_name = bucket.name
+
+# Database connection string
+conn_string = """
+dbname='{dbname}' host='{host}' port='{port}' user='{user}' password={password}
+""".format(dbname='snowplow',
+           host='redshift.analytics.gov.bc.ca',
+           port='5439',
+           user=os.environ['pguser'],
+           password=os.environ['pgpass'])
+
+
+# Constructs the database copy query string
+def copy_query(dbtable, batchfile, log):
+    if log:
+        aws_key = 'AWS_ACCESS_KEY_ID'
+        aws_secret_key = 'AWS_SECRET_ACCESS_KEY'
+    else:
+        aws_key = os.environ['AWS_ACCESS_KEY_ID']
+        aws_secret_key = os.environ['AWS_SECRET_ACCESS_KEY']
+    query = """
+COPY {0}\nFROM 's3://{1}/{2}'\n\
+CREDENTIALS 'aws_access_key_id={3};aws_secret_access_key={4}'\n\
+IGNOREHEADER AS 1 MAXERROR AS 0 DELIMITER '|' NULL AS '-' ESCAPE;\n
+""".format(dbtable, bucket_name, batchfile, aws_key, aws_secret_key)
+    return query
 
 
 def download_object(o):
@@ -120,7 +146,7 @@ def is_processed(object_summary):
 # objects_to_process will contain zero or more objects if truncate = False
 objects_to_process = []
 for object_summary in bucket.objects.filter(Prefix=source + "/"
-                                               + directory + "/"):
+                                            + directory + "/"):
     key = object_summary.key
     # skip to next object if already processed
     if is_processed(object_summary):
@@ -147,7 +173,7 @@ for object_summary in bucket.objects.filter(Prefix=source + "/"
 # Process the objects that were found during the earlier directory pass.
 # Download the tgz file, unpack it to a temp directory in the local working
 # directory, process the files, and then shift the data to redshift. Finally,
-# delete the temp directory. 
+# delete the temp directory.
 
 if not os.path.exists('./tmp'):
     os.makedirs('./tmp')
@@ -156,20 +182,80 @@ for object_summary in objects_to_process:
     batchfile = destination + "/batch/" + object_summary.key
     goodfile = destination + "/good/" + object_summary.key
     badfile = destination + "/bad/" + object_summary.key
-    
+
     # Download and unpack to a temporary folder: ./tmp
     download_object(object_summary.key)
 
     # Get the filename from the full path in the object summary key
-    filename = re.search("(cms-analytics-csv)(.)*tgz$", object_summary.key).group()
+    filename = re.search("(cms-analytics-csv)(.)*tgz$",
+                         object_summary.key).group()
 
     # Unpack the object in the tmp directory
     unpack_archive('./tmp/' + filename, './tmp/')
 
-    # process files for uplaod to batch folder on S3
-    for file in os.listdir("./tmp/" + filename.rstrip('.tgz')):
-        with open('./tmp/' + filename.rstrip('.tgz') + '/' + file, newline='') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            for row in csv_reader:
-                # read lines parse files for upload to Batch dir in S3
+    os.system('rm ./tmp/' + filename.rstrip('.tgz') + '/._*')
 
+    # process files for upload to batch folder on S3
+    for file in os.listdir('./tmp/' + filename.rstrip('.tgz')):
+
+        # Read config data for this file
+        file_config = data['files'][file.split('.')[0]]
+
+        # Read the file and build the parsed version
+        try:
+            df = pd.read_csv(
+                './tmp/' + filename.rstrip('.tgz') + '/' + file,
+                sep=delim,
+                usecols=range(file_config['column_count']),
+                header=None)
+        except pandas.errors.EmptyDataError as e:
+            logger.exception('exception reading %s', object_summary.key)
+            if str(e) == "No columns to parse from file":
+                logger.warning('%s is empty, keying to goodfile '
+                               'and proceeding.',
+                               object_summary.key)
+                outfile = goodfile
+            else:
+                logger.warning('%s not empty, keying to badfile '
+                               'and proceeding.',
+                               object_summary.key)
+                outfile = badfile
+            try:
+                client.copy_object(Bucket=f"{bucket}",
+                                   CopySource=f"{bucket}/{object_summary.key}",
+                                   Key=outfile)
+            except ClientError:
+                logger.exception("S3 transfer failed")
+            continue
+        except ValueError:
+            logger.exception('ValueError exception reading %s',
+                             object_summary.key)
+            logger.warning('Keying to badfile and proceeding.')
+            outfile = badfile
+            try:
+                client.copy_object(Bucket=f"{bucket}",
+                                   CopySource=f"{bucket}/{object_summary.key}",
+                                   Key=outfile)
+            except ClientError:
+                logger.exception("S3 transfer failed")
+            continue
+
+        # map the dataframe column names to match the columns
+        # from the configuration
+        df.columns = file_config['columns']
+
+        # Clean up date fields
+        # for each field listed in the dateformat
+        # array named "field" apply "format"
+        if 'dateformat' in data:
+            for thisfield in data['dateformat']:
+                df[thisfield['field']] = \
+                    pd.to_datetime(df[thisfield['field']],
+                                   format=thisfield['format'])
+
+    # Put the full data set into a buffer and write it
+    # to a "|" delimited file in the batch directory
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer, header=True, index=False, sep="|")
+    resource.Bucket(bucket).put_object(Key=batchfile,
+                                       Body=csv_buffer.getvalue())

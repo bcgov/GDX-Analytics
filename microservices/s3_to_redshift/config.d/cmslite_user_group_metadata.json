@@ -5,23 +5,70 @@
 	"directory": "cmslite_gdx",
 	"doc": "cms-analytics-csv.*",
 	"truncate": true,
+	"delim": "|",
 	"files": {
 		"analytics_user_group": {
 			"dbtable": "microservice.cmslite_user_group",
-			"column_count": 7
-
+			"column_count": 7,
+			"columns": [
+				"id",
+				"user_id",
+				"email",
+				"group_id",
+				"group_name",
+				"site_key",
+				"is_group_mgr"
+			  ]
 		},
 		"analytics_group": {
 			"dbtable": "microservice.cmslite_group",
-			"column_count": 4
+			"column_count": 4,
+			"columns": [
+				"id",
+				"name",
+				"active",
+				"site_key"
+			  ]
 		},
 		"analytics_user_activity": {
 			"dbtable": "microservice.cmslite_user_activity",
-			"column_count": 5
+			"column_count": 5,
+			"columns": [
+				"user_id",
+				"user_idir",
+				"activity_type",
+				"memo",
+				"activity_date"
+			],
+			"dateformat": [
+				{
+				  "field": "activity_type",
+				  "format": "%d/%b/%Y:%H:%M:%S %z"
+				},
+				{
+					"field": "activity_date",
+					"format": "%d/%b/%Y:%H:%M:%S %z"
+				  }
+			]
 		},
 		"analytics_user_status": {
 			"dbtable": "microservice.cmslite_user_status",
-			"column_count": 7
+			"column_count": 7,
+			"columns": [
+				"id",
+				"organization",
+				"user_id",
+				"user_name",
+				"email",
+				"created_dt",
+				"status"
+			  ],
+			  "dateformat": [
+				  {
+					"field": "created_dt",
+					"format": "%d/%b/%Y:%H:%M:%S %z"
+				  }
+			  ]
 		}
 
 	}

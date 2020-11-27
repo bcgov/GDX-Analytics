@@ -190,8 +190,6 @@ for object_summary in objects_to_process:
     # Unpack the object in the tmp directory
     unpack_archive('./tmp/' + filename, './tmp/')
 
-    os.system('rm ./tmp/' + filename.rstrip('.tgz') + '/._*')
-
     # process files for upload to batch folder on S3
     for file in os.listdir('./tmp/' + filename.rstrip('.tgz')):
         batchfile = destination + "/batch/client/" + directory + '/' + file
@@ -255,7 +253,7 @@ for object_summary in objects_to_process:
                     pd.to_datetime(df[thisfield['field']],
                                    format=thisfield['format'])
 
-    # Put the full data set into a buffer and write it
+        # Put the full data set into a buffer and write it
         # to a "|" delimited file in the batch directory
         csv_buffer = StringIO()
         df.to_csv(csv_buffer, header=True, index=False, sep="|")

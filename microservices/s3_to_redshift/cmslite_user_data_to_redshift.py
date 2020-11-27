@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : cmslite_user_data_to_redshift.py
 #
-# Description   : 
+# Description   :
 #
 # Requirements  : You must set the following environment variables
 #               : to establish credentials for the microservice user
@@ -179,9 +179,6 @@ if not os.path.exists('./tmp'):
     os.makedirs('./tmp')
 
 for object_summary in objects_to_process:
-    batchfile = destination + "/batch/" + object_summary.key
-    goodfile = destination + "/good/" + object_summary.key
-    badfile = destination + "/bad/" + object_summary.key
 
     # Download and unpack to a temporary folder: ./tmp
     download_object(object_summary.key)
@@ -197,17 +194,22 @@ for object_summary in objects_to_process:
 
     # process files for upload to batch folder on S3
     for file in os.listdir('./tmp/' + filename.rstrip('.tgz')):
+        batchfile = destination + "/batch/client/" + directory + '/' + file
+        goodfile = destination + "/good/client/" + directory + '/' + file
+        badfile = destination + "/bad/client/" + directory + '/' + file
 
         # Read config data for this file
         file_config = data['files'][file.split('.')[0]]
 
+        file_obj = open('./tmp/' + filename.rstrip('.tgz') + '/' + file,
+                        "r",
+                        encoding="utf-8")
+
         # Read the file and build the parsed version
         try:
             df = pd.read_csv(
-                './tmp/' + filename.rstrip('.tgz') + '/' + file,
-                sep=delim,
-                usecols=range(file_config['column_count']),
-                header=None)
+                file_obj,
+                usecols=range(file_config['column_count']))
         except pandas.errors.EmptyDataError as e:
             logger.exception('exception reading %s', object_summary.key)
             if str(e) == "No columns to parse from file":
@@ -240,7 +242,7 @@ for object_summary in objects_to_process:
                 logger.exception("S3 transfer failed")
             continue
 
-        # map the dataframe column names to match the columns
+        # Map the dataframe column names to match the columns
         # from the configuration
         df.columns = file_config['columns']
 
@@ -254,8 +256,8 @@ for object_summary in objects_to_process:
                                    format=thisfield['format'])
 
     # Put the full data set into a buffer and write it
-    # to a "|" delimited file in the batch directory
-    csv_buffer = StringIO()
-    df.to_csv(csv_buffer, header=True, index=False, sep="|")
-    resource.Bucket(bucket).put_object(Key=batchfile,
-                                       Body=csv_buffer.getvalue())
+        # to a "|" delimited file in the batch directory
+        csv_buffer = StringIO()
+        df.to_csv(csv_buffer, header=True, index=False, sep="|")
+        resource.Bucket(bucket.name).put_object(Key=batchfile,
+                                                Body=csv_buffer.getvalue())

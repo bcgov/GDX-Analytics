@@ -190,7 +190,7 @@ for object_summary in objects_to_process:
                          object_summary.key).group()
 
     # Unpack the object in the tmp directory
-    unpack_archive('./tmp/' + filename, './tmp/')
+    unpack_archive('./tmp/' + filename, './tmp/' + filename.rstrip('.tgz'))
 
     # process files for upload to batch folder on S3
     for file in os.listdir('./tmp/' + filename.rstrip('.tgz')):

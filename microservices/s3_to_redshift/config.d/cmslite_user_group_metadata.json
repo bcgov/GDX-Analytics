@@ -43,10 +43,6 @@
 			],
 			"dateformat": [
 				{
-				  "field": "activity_type",
-				  "format": "%d/%b/%Y:%H:%M:%S %z"
-				},
-				{
 					"field": "activity_date",
 					"format": "%d/%b/%Y:%H:%M:%S %z"
 				  }

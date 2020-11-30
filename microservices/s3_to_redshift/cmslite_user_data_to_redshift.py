@@ -213,16 +213,16 @@ for object_summary in objects_to_process:
                 file_obj,
                 usecols=range(file_config['column_count']))
         except pandas.errors.EmptyDataError as e:
-            logger.exception('exception reading %s', object_summary.key)
+            logger.exception('exception reading %s', file)
             if str(e) == "No columns to parse from file":
                 logger.warning('%s is empty, keying to goodfile '
                                'and proceeding.',
-                               object_summary.key)
+                               file)
                 outfile = goodfile
             else:
                 logger.warning('%s not empty, keying to badfile '
                                'and proceeding.',
-                               object_summary.key)
+                               file)
                 outfile = badfile
             try:
                 client.copy_object(Bucket=f"{bucket}",
@@ -233,7 +233,7 @@ for object_summary in objects_to_process:
             continue
         except ValueError:
             logger.exception('ValueError exception reading %s',
-                             object_summary.key)
+                             file)
             logger.warning('Keying to badfile and proceeding.')
             outfile = badfile
             try:
@@ -251,8 +251,8 @@ for object_summary in objects_to_process:
         # Clean up date fields
         # for each field listed in the dateformat
         # array named "field" apply "format"
-        if 'dateformat' in data:
-            for thisfield in data['dateformat']:
+        if 'dateformat' in file_config:
+            for thisfield in file_config['dateformat']:
                 df[thisfield['field']] = \
                     pd.to_datetime(df[thisfield['field']],
                                    format=thisfield['format'])

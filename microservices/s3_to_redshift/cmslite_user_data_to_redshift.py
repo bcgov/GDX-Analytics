@@ -281,7 +281,7 @@ for object_summary in objects_to_process:
         client.copy_object(
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
             CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-            + object_summary.key, Key=outfile)
+            + object_summary.key, Key=filename)
     except ClientError:
         logger.exception("S3 transfer failed")
     logger.debug("finished")

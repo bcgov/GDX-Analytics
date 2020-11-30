@@ -276,12 +276,12 @@ for object_summary in objects_to_process:
             outfile = badfile
         spdb.close_connection()
 
-# copy the object to the S3 outfile (processed/good/ or processed/bad/)
-try:
-    client.copy_object(
-        Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-        CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-        + object_summary.key, Key=outfile)
-except ClientError:
-    logger.exception("S3 transfer failed")
-logger.debug("finished")
+    # copy the object to the S3 outfile (processed/good/ or processed/bad/)
+    try:
+        client.copy_object(
+            Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+            CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
+            + object_summary.key, Key=outfile)
+    except ClientError:
+        logger.exception("S3 transfer failed")
+    logger.debug("finished")

@@ -24,6 +24,7 @@ import os  # to read environment variables
 # import psycopg2  # to connect to Redshift
 import json  # to read json config files
 import sys  # to read command line parameters
+from lib.redshift import RedShift
 import os.path  # file handling
 import logging
 from shutil import unpack_archive
@@ -69,6 +70,7 @@ destination = data['destination']
 directory = data['directory']
 prefix = source + "/" + directory + "/"
 doc = data['doc']
+dbschema = data['schema']
 truncate = data['truncate']
 delim = data['delim']
 
@@ -198,6 +200,8 @@ for object_summary in objects_to_process:
 
         # Read config data for this file
         file_config = data['files'][file.split('.')[0]]
+        dbtable = file_config['dbtable']
+        table_name = dbtable[dbtable.rfind(".")+1:]
 
         file_obj = open('./tmp/' + filename.rstrip('.tgz') + '/' + file,
                         "r",
@@ -259,3 +263,59 @@ for object_summary in objects_to_process:
         df.to_csv(csv_buffer, header=True, index=False, sep="|")
         resource.Bucket(bucket.name).put_object(Key=batchfile,
                                                 Body=csv_buffer.getvalue())
+
+        # prep database call to pull the batch file into redshift
+        query = copy_query(file_config['dbtable'], batchfile, log=False)
+        logquery = copy_query(file_config['dbtable'], batchfile, log=True)
+
+    # If truncate is set to true, perform a transaction that will
+    # replace the existing table data with the new data in one commit
+    # if truncate is not true then the query remains as just the copy command
+    if (truncate):
+        scratch_start = """
+BEGIN;
+-- Clean up from last run if necessary
+DROP TABLE IF EXISTS {0}_scratch;
+DROP TABLE IF EXISTS {0}_old;
+-- Create scratch table to copy new data into
+CREATE TABLE {0}_scratch (LIKE {0});
+ALTER TABLE {0}_scratch OWNER TO microservice;
+-- Grant access to Looker and to Snowplow pipeline users
+GRANT SELECT ON {0}_scratch TO looker;\n
+GRANT SELECT ON {0}_scratch TO datamodeling;\n
+""".format(dbtable)
+
+        scratch_copy = copy_query(
+            dbtable + "_scratch", batchfile, log=False)
+        scratch_copy_log = copy_query(
+            dbtable + "_scratch", batchfile, log=True)
+
+        scratch_cleanup = """
+-- Replace main table with scratch table, clean up the old table
+ALTER TABLE {0} RENAME TO {1}_old;
+ALTER TABLE {0}_scratch RENAME TO {1};
+DROP TABLE {0}_old;
+COMMIT;
+""".format(dbtable, table_name)
+
+        query = scratch_start + scratch_copy + scratch_cleanup
+        logquery = scratch_start + scratch_copy_log + scratch_cleanup
+
+    # Execute the transaction against Redshift using local lib redshift module
+    logger.debug(logquery)
+    spdb = RedShift.snowplow(batchfile)
+    if spdb.query(query):
+        outfile = goodfile
+    else:
+        outfile = badfile
+    spdb.close_connection()
+
+# copy the object to the S3 outfile (processed/good/ or processed/bad/)
+try:
+    client.copy_object(
+        Bucket="sp-ca-bc-gov-131565110619-12-microservices",
+        CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
+        + object_summary.key, Key=outfile)
+except ClientError:
+    logger.exception("S3 transfer failed")
+logger.debug("finished")

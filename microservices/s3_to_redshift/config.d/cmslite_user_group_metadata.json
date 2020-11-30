@@ -4,7 +4,8 @@
 	"destination": "processed",
 	"directory": "cmslite_gdx",
 	"doc": "cms-analytics-csv.*",
-	"truncate": true,
+	"schema": "cmslite",
+	"truncate": false,
 	"delim": "|",
 	"files": {
 		"analytics_user_group": {

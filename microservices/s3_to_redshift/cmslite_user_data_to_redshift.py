@@ -257,26 +257,24 @@ for object_summary in objects_to_process:
                     pd.to_datetime(df[thisfield['field']],
                                    format=thisfield['format'])
 
-        # Put the full data set into a buffer and write it
-        # to a "|" delimited file in the batch directory
-        csv_buffer = StringIO()
-        df.to_csv(csv_buffer, header=True, index=False, sep="|")
-        resource.Bucket(bucket.name).put_object(Key=batchfile,
-                                                Body=csv_buffer.getvalue())
-
-        # prep database call to pull the batch file into redshift
-        query = copy_query(dbtable, batchfile, log=False)
-        logquery = copy_query(dbtable, batchfile, log=True)
-
-        # Execute the transaction against Redshift using local lib
-        # redshift module
-        logger.debug(logquery)
-        spdb = RedShift.snowplow(batchfile)
-        if spdb.query(query):
-            outfile = goodfile
-        else:
-            outfile = badfile
-        spdb.close_connection()
+    # Put the full data set into a buffer and write it
+    # to a "|" delimited file in the batch directory
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer, header=True, index=False, sep="|")
+    resource.Bucket(bucket.name).put_object(Key=batchfile,
+                                            Body=csv_buffer.getvalue())
+    # prep database call to pull the batch file into redshift
+    query = copy_query(dbtable, batchfile, log=False)
+    logquery = copy_query(dbtable, batchfile, log=True)
+    # Execute the transaction against Redshift using local lib
+    # redshift module
+    logger.debug(logquery)
+    spdb = RedShift.snowplow(batchfile)
+    if spdb.query(query):
+        outfile = goodfile
+    else:
+        outfile = badfile
+    spdb.close_connection()
 
 # copy the object to the S3 outfile (processed/good/ or processed/bad/)
 try:

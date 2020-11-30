@@ -9,7 +9,7 @@
 	"delim": "|",
 	"files": {
 		"analytics_user_group": {
-			"dbtable": "microservice.cmslite_user_group",
+			"dbtable": "cmslite_user_group",
 			"column_count": 7,
 			"columns": [
 				"id",
@@ -22,7 +22,7 @@
 			  ]
 		},
 		"analytics_group": {
-			"dbtable": "microservice.cmslite_group",
+			"dbtable": "cmslite_group",
 			"column_count": 4,
 			"columns": [
 				"id",
@@ -32,7 +32,7 @@
 			  ]
 		},
 		"analytics_user_activity": {
-			"dbtable": "microservice.cmslite_user_activity",
+			"dbtable": "cmslite_user_activity",
 			"column_count": 5,
 			"columns": [
 				"user_id",
@@ -53,7 +53,7 @@
 			]
 		},
 		"analytics_user_status": {
-			"dbtable": "microservice.cmslite_user_status",
+			"dbtable": "cmslite_user_status",
 			"column_count": 7,
 			"columns": [
 				"id",

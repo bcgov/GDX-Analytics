@@ -200,7 +200,7 @@ for object_summary in objects_to_process:
 
         # Read config data for this file
         file_config = data['files'][file.split('.')[0]]
-        dbtable = file_config['schema'] + '.' + file_config['dbtable']
+        dbtable = data['schema'] + '.' + file_config['dbtable']
         table_name = file_config['dbtable']
 
         file_obj = open('./tmp/' + filename.rstrip('.tgz') + '/' + file,

@@ -1,0 +1,51 @@
+{
+  "description": "Schema for Youtube Player State",
+  "properties": {
+    "status": {
+      "type": [
+        "string"
+      ],
+      "maxLength": 255
+    },
+    "video_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "video_src": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "author": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "status"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.youtube",
+    "name": "youtube_playerstate",
+    "format": "jsonschema",
+    "version": "3-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

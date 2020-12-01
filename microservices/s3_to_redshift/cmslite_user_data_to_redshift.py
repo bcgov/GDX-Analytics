@@ -271,9 +271,9 @@ for object_summary in objects_to_process:
         logger.debug(logquery)
         spdb = RedShift.snowplow(batchfile)
         if spdb.query(query):
-            outfile = goodfile
+            outfile = destination + "/good/" + object_summary.key
         else:
-            outfile = badfile
+            outfile = destination + "/bad/" + object_summary.key
         spdb.close_connection()
 
     # copy the object to the S3 outfile (processed/good/ or processed/bad/)
@@ -281,7 +281,7 @@ for object_summary in objects_to_process:
         client.copy_object(
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
             CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-            + object_summary.key, Key=outfile + '.tgz')
+            + object_summary.key, Key=outfile)
     except ClientError:
         logger.exception("S3 transfer failed")
     logger.debug("finished")

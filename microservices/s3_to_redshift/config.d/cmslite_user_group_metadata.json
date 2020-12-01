@@ -1,0 +1,72 @@
+{
+	"bucket": "sp-ca-bc-gov-131565110619-12-microservices",
+	"source": "client",
+	"destination": "processed",
+	"directory": "cmslite_gdx",
+	"doc": "cms-analytics-csv.*",
+	"schema": "cmslite",
+	"truncate": false,
+	"delim": "|",
+	"files": {
+		"analytics_user_group": {
+			"dbtable": "user_group",
+			"column_count": 7,
+			"columns": [
+				"id",
+				"user_id",
+				"email",
+				"group_id",
+				"group_name",
+				"site_key",
+				"is_group_mgr"
+			  ]
+		},
+		"analytics_group": {
+			"dbtable": "group",
+			"column_count": 4,
+			"columns": [
+				"id",
+				"name",
+				"active",
+				"site_key"
+			  ]
+		},
+		"analytics_user_activity": {
+			"dbtable": "user_activity",
+			"column_count": 5,
+			"columns": [
+				"user_id",
+				"user_idir",
+				"activity_type",
+				"memo",
+				"activity_date"
+			],
+			"dateformat": [
+				{
+					"field": "activity_date",
+					"format": "%Y-%m-%d %H:%M:%S"
+				  }
+			]
+		},
+		"analytics_user_status": {
+			"dbtable": "user_status",
+			"column_count": 7,
+			"columns": [
+				"id",
+				"organization",
+				"user_id",
+				"user_name",
+				"email",
+				"created_dt",
+				"status"
+			  ],
+			  "dateformat": [
+				  {
+					"field": "created_dt",
+					"format": "%Y-%m-%d %H:%M:%S"
+				  }
+			  ]
+		}
+
+	}
+}

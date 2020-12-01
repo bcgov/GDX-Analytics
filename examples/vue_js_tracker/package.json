@@ -7,17 +7,17 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "copy-webpack-plugin": "^6.0.3",
+    "copy-webpack-plugin": "^6.3.2",
     "lodash": "^4.17.20",
     "vue": "^2.6.12",
-    "vue-router": "^3.4.3"
+    "vue-router": "^3.4.9"
   },
   "resolutions": {
     "serialize-javascript": "3.1.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-router": "^4.5.4",
-    "@vue/cli-service": "^4.5.4",
+    "@vue/cli-plugin-router": "^4.5.9",
+    "@vue/cli-service": "^4.5.9",
     "vue-template-compiler": "^2.6.12"
   },
   "browserslist": [

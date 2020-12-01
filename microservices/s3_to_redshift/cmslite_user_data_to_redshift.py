@@ -51,15 +51,23 @@ formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
+# Handle exit code
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
+
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):
     print('Usage: python cmslite_user_data_to_redshift.py config.json')
-    sys.exit(1)
+    clean_exit(1, 'Bad command use.')
 configfile = sys.argv[1]
 # confirm that the file exists
 if os.path.isfile(configfile) is False:
     print("Invalid file name {}".format(configfile))
-    sys.exit(1)
+    clean_exit(1, 'Bad file name.')
 # open the confifile for reading
 with open(configfile) as f:
     data = json.load(f)
@@ -230,6 +238,8 @@ for object_summary in objects_to_process:
                                    Key=outfile)
             except ClientError:
                 logger.exception("S3 transfer failed")
+                clean_exit(1, f'Bad file {object_summary.key} in objects to '
+                           'process,no further processing.')
             continue
         except ValueError:
             logger.exception('ValueError exception reading %s',
@@ -242,6 +252,8 @@ for object_summary in objects_to_process:
                                    Key=outfile)
             except ClientError:
                 logger.exception("S3 transfer failed")
+                clean_exit(1, f'Bad file {object_summary.key} in objects to '
+                           'process,no further processing.')
             continue
 
         # Map the dataframe column names to match the columns
@@ -280,8 +292,17 @@ for object_summary in objects_to_process:
     try:
         client.copy_object(
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-            CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
-            + object_summary.key, Key=outfile)
+            CopySource=(
+                "sp-ca-bc-gov-131565110619-12-microservices/"
+                f"{object_summary.key}"
+            ),
+            Key=outfile)
     except ClientError:
         logger.exception("S3 transfer failed")
-    logger.debug("finished")
+
+    if outfile == badfile:
+        clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
+    logger.debug("finished %s", object_summary.key)
+
+clean_exit(0, 'Finished all processing cleanly.')

@@ -22,10 +22,11 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
-import psycopg2  # to connect to Redshift
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import pandas.errors
+from lib.redshift import RedShift
 
 from ua_parser import user_agent_parser
 # ua_parser documentation: https://github.com/ua-parser/uap-python
@@ -56,15 +57,22 @@ formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.info('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
+
 # check that configuration file was passed as argument
 if (len(sys.argv) != 2):
     print('Usage: python asset_data_to_redshift.py config.json')
-    sys.exit(1)
+    clean_exit(1, 'Bad command use.')
 configfile = sys.argv[1]
 # confirm that the file exists
 if os.path.isfile(configfile) is False:
     print("Invalid file name {}".format(configfile))
-    sys.exit(1)
+    clean_exit(1, 'Bad file name.')
 # open the confifile for reading
 with open(configfile) as f:
     data = json.load(f)
@@ -319,11 +327,15 @@ for object_summary in objects_to_process:
     # Check for an empty file. If it's empty, accept it as good and skip
     # to the next object to process
     try:
-        df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
-                         dtype=dtype_dic, usecols=range(column_count))
-    except Exception as e:
+        df = pd.read_csv(
+            StringIO(csv_string),
+            sep=delim,
+            index_col=False,
+            dtype=dtype_dic,
+            usecols=range(column_count))
+    except pandas.errors.EmptyDataError as _e:
         logger.exception('exception reading {0}'.format(object_summary.key))
-        if (str(e) == "No columns to parse from file"):
+        if (str(_e) == "No columns to parse from file"):
             logger.warning('File is empty, keying to goodfile \
                            and proceeding.')
             outfile = goodfile
@@ -331,11 +343,27 @@ for object_summary in objects_to_process:
             logger.warning('File not empty, keying to badfile \
                            and proceeding.')
             outfile = badfile
-        client.copy_object(Bucket="sp-ca-bc-gov-131565110619-12-microservices",
-                           CopySource="sp-ca-bc-gov-\
-                           131565110619-12-microservices/"
-                           + object_summary.key, Key=outfile)
-        continue
+
+        try:
+            client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+        except ClientError:
+            logger.exception("S3 transfer failed")
+        clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
+    except ValueError:
+        logger.exception('ValueError exception reading %s', object_summary.key)
+        logger.warning('Keying to badfile and proceeding.')
+        outfile = badfile
+        try:
+            client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+        except ClientError:
+            logger.exception("S3 transfer failed")
+        clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
 
     # map the dataframe column names to match the columns from the configuation
     df.columns = columns
@@ -360,8 +388,8 @@ for object_summary in objects_to_process:
     if 'dateformat' in data:
         for thisfield in data['dateformat']:
             df[thisfield['field']] = \
-                pd.to_datetime(df[thisfield['field']],
-                               format=thisfield['format'])
+                pandas.to_datetime(df[thisfield['field']],
+                                   format=thisfield['format'])
 
     # Put the full data set into a buffer and write it
     # to a "|" delimited file in the batch directory
@@ -409,20 +437,12 @@ COMMIT;
 
     # Execute the transaction against Redshift using the psycopg2 library
     logger.debug(logquery)
-    with psycopg2.connect(conn_string) as conn:
-        with conn.cursor() as curs:
-            try:
-                curs.execute(query)
-            # if the DB call fails, print error and place file in /bad
-            except psycopg2.Error as e:
-                logger.error("Loading {0} to RedShift failed\n{1}"
-                             .format(batchfile, e.pgerror))
-                outfile = badfile
-            # if the DB call succeed, place file in /good
-            else:
-                logger.info("Loaded {0} to RedShift successfully"
-                            .format(batchfile))
-                outfile = goodfile
+    spdb = RedShift.snowplow(batchfile)
+    if spdb.query(query):
+        outfile = goodfile
+    else:
+        outfile = badfile
+    spdb.close_connection()
 
     # copy the object to the S3 outfile (processed/good/ or processed/bad/)
     try:
@@ -430,5 +450,11 @@ COMMIT;
             Bucket="sp-ca-bc-gov-131565110619-12-microservices",
             CopySource="sp-ca-bc-gov-131565110619-12-microservices/"
             + object_summary.key, Key=outfile)
-    except boto3.exceptions.ClientError:
+    except ClientError:
         logger.exception("S3 transfer failed")
+    if outfile == badfile:
+        clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
+                   'no further processing.')
+    logger.debug("finished %s", object_summary.key)
+
+clean_exit(0, 'Finished all processing cleanly.')

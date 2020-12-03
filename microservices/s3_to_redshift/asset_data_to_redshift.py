@@ -203,6 +203,21 @@ for object_summary in objects_to_process:
 
     # get the object from S3 and take its contents as body
     obj = client.get_object(Bucket=bucket, Key=object_summary.key)
+
+    # The file is an empty upload. Key to goodfile and continue
+    if(obj['ContentLength'] == 0):
+        logger.info('%s is empty, keying to goodfile and proceeding.',
+                    object_summary.key)
+        outfile = goodfile
+        try:
+            client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+        except ClientError:
+            logger.exception("S3 transfer failed")
+        clean_exit(0, f'Goodfile {object_summary.key} in objects to process, '
+                   'no further processing.')
+
     body = obj['Body']
 
     # Create an object to hold the data while parsing
@@ -324,7 +339,7 @@ for object_summary in objects_to_process:
                 logger.exception("S3 transfer failed.\n{0}".format(e.message))
             continue
 
-    # Check for an empty file. If it's empty, accept it as good and skip
+    # Check for an empty file. If it's empty, accept it as bad and skip
     # to the next object to process
     try:
         df = pd.read_csv(
@@ -336,9 +351,9 @@ for object_summary in objects_to_process:
     except pandas.errors.EmptyDataError as _e:
         logger.exception('exception reading {0}'.format(object_summary.key))
         if (str(_e) == "No columns to parse from file"):
-            logger.warning('File is empty, keying to goodfile \
+            logger.warning('File is empty, keying to badfile \
                            and proceeding.')
-            outfile = goodfile
+            outfile = badfile
         else:
             logger.warning('File not empty, keying to badfile \
                            and proceeding.')

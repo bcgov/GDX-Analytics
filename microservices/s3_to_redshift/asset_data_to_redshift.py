@@ -60,7 +60,7 @@ logger.addHandler(handler)
 
 def clean_exit(code, message):
     """Exits with a logger message and code"""
-    logger.info('Exiting with code %s : %s', str(code), message)
+    logger.debug('Exiting with code %s : %s', str(code), message)
     sys.exit(code)
 
 
@@ -403,7 +403,7 @@ for object_summary in objects_to_process:
     if 'dateformat' in data:
         for thisfield in data['dateformat']:
             df[thisfield['field']] = \
-                pandas.to_datetime(df[thisfield['field']],
+                pd.to_datetime(df[thisfield['field']],
                                    format=thisfield['format'])
 
     # Put the full data set into a buffer and write it

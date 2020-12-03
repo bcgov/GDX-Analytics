@@ -24,6 +24,9 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import logging
 import time
+from datetime import datetime
+from tzlocal import get_localzone
+from pytz import timezone
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
@@ -33,10 +36,15 @@ from referer_parser import Referer
 from lib.redshift import RedShift
 import lib.logs as log
 
-start_time = time.time()
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+    .normalize(datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 logger = logging.getLogger(__name__)
 log.setup()
+logging.getLogger("RedShift").setLevel(logging.WARNING)
 
 def clean_exit(code, message):
     """Exits with a logger message and code"""
@@ -152,7 +160,7 @@ def is_processed(this_object_summary):
 def report(data):
     '''reports out the data from the main program loop'''
     print(f'report {__file__}:')
-    print(f'Objects to process: {len.objects_to_process}')
+    print(f'\nObjects to process: {len(objects_to_process)}')
     print(f'Objects successfully processed: {data["processed"]}')
     print(f'Objects that failed to process: {data["failed"]}')
     print(f'Objects output to \'processed/good\': {data["good"]}')
@@ -161,16 +169,30 @@ def report(data):
     print(
         "\nList of objects successfully fully ingested from S3, processed, "
         "loaded to S3 ('good'), and copied to Redshift:")
-    for i, meta in enumerate(data['good_list']):
-        print(f"{i}: {meta.key}")
+    if data['good_list']:
+        for i, meta in enumerate(data['good_list']):
+            print(f"{i}: {meta.key}")
+    else: print('None')
     print('\nList of objects that failed to process:')
-    for i, meta in enumerate(data['bad_list']):
-        print(f"{i}: {meta.key}")
+    if data['bad_list']:
+        for i, meta in enumerate(data['bad_list']):
+            print(f"{i}: {meta.key}")
+    else: print('None')
     print('\nList of objects that were not processed due to early exit:')
-    for i, meta in enumerate(data['incomplete_list']):
-        print(f"{i}: {meta.key}")
-    f'Microservice started at: {start_time}, ended at: {time.time()}, '
-    f'taking: {time.time() - start_time}')
+    if data['incomplete_list']:
+        for i, meta in enumerate(data['incomplete_list']):
+            print(f"{i}: {meta.key}")
+    else: print("None")
+
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+        .normalize(datetime.now(local_tz)
+        .astimezone(yvr_tz)))
+    print(
+        '\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
 
 # This bucket scan will find unprocessed objects.
 # objects_to_process will contain zero or one objects if truncate = True
@@ -199,8 +221,6 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
             # no truncate, so the list may exceed 1 element
             objects_to_process.append(object_summary)
 
-report['objects'] = len.objects_to_process
-
 # an object exists to be processed as a truncate copy to the table
 if truncate and len(objects_to_process) == 1:
     logger.debug(
@@ -220,7 +240,8 @@ report_stats = {
     'incomplete_list':[]
 }
 
-report_stats['incomplete_list'] = objects_to_process
+report_stats['objects'] = len(objects_to_process)
+report_stats['incomplete_list'] = objects_to_process.copy()
 
 # process the objects that were found during the earlier directory pass
 for object_summary in objects_to_process:
@@ -475,7 +496,7 @@ COMMIT;
     spdb = RedShift.snowplow(batchfile)
     if spdb.query(query):
         outfile = goodfile
-        report['loaded'] += 1
+        report_stats['loaded'] += 1
     else:
         outfile = badfile
     spdb.close_connection()
@@ -500,7 +521,8 @@ COMMIT;
         clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
                    'no further processing.')
     
-    report_stats['success_count'] += 1
+    report_stats['good'] += 1
+    report_stats['good_list'].append(object_summary)
     report_stats['incomplete_list'].remove(object_summary)
     logger.debug("finished %s", object_summary.key)
 

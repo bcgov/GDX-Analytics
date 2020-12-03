@@ -88,7 +88,7 @@ log.setup()
 
 def clean_exit(code, message):
     """Exits with a logger message and code"""
-    logger.info('Exiting with code %s : %s', str(code), message)
+    logger.debug('Exiting with code %s : %s', str(code), message)
     sys.exit(code)
     
 

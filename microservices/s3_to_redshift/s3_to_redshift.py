@@ -159,8 +159,11 @@ def is_processed(this_object_summary):
 
 def report(data):
     '''reports out the data from the main program loop'''
+    # if no objects were processed; do not print a report
+    if data["objects"] == 0:
+        return
     print(f'report {__file__}:')
-    print(f'\nObjects to process: {len(objects_to_process)}')
+    print(f'\nObjects to process: {data["objects"]}')
     print(f'Objects successfully processed: {data["processed"]}')
     print(f'Objects that failed to process: {data["failed"]}')
     print(f'Objects output to \'processed/good\': {data["good"]}')
@@ -520,7 +523,7 @@ COMMIT;
         report_stats['incomplete_list'].remove(object_summary)
         clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
                    'no further processing.')
-    
+
     report_stats['good'] += 1
     report_stats['good_list'].append(object_summary)
     report_stats['incomplete_list'].remove(object_summary)

@@ -5,7 +5,7 @@
 	"directory": "cmslite_gdx",
 	"doc": "cms-analytics-csv.*",
 	"schema": "cmslite",
-	"truncate": false,
+	"truncate": true,
 	"delim": "|",
 	"files": {
 		"analytics_user_group": {
@@ -22,7 +22,7 @@
 			  ]
 		},
 		"analytics_group": {
-			"dbtable": "group",
+			"dbtable": "cms_group",
 			"column_count": 4,
 			"columns": [
 				"id",

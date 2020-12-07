@@ -22,7 +22,7 @@
 			  ]
 		},
 		"analytics_group": {
-			"dbtable": "group",
+			"dbtable": "cms_group",
 			"column_count": 4,
 			"columns": [
 				"id",

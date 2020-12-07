@@ -316,7 +316,7 @@ COMMIT;
 
             query = scratch_start + scratch_copy + scratch_cleanup
             logquery = scratch_start + scratch_copy_log + scratch_cleanup
-       
+
         # Execute the transaction against Redshift using local lib
         # redshift module
         logger.debug(logquery)

@@ -269,6 +269,11 @@ for object_summary in objects_to_process:
                     pd.to_datetime(df[thisfield['field']],
                                    format=thisfield['format'])
 
+        # Parse group name from memo field in user activity table
+        if file_config['dbtable'] == 'user_activity':
+            group_name = df.memo.str.split('-').str[1]
+            df['group_name'] = group_name
+        
         # Put the full data set into a buffer and write it
         # to a "|" delimited file in the batch directory
         csv_buffer = StringIO()

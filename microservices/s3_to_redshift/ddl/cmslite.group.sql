@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS cmslite.group
+CREATE TABLE IF NOT EXISTS test.cms_group
 ( 
   "id" VARCHAR(255) ENCODE ZSTD NOT NULL,
   "name" VARCHAR(255) ENCODE ZSTD,
@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS cmslite.group
   "site_key" VARCHAR(64) ENCODE ZSTD
 );
 
-GRANT SELECT ON cmslite.group TO "looker";
+GRANT SELECT ON test.cms_group TO "looker";

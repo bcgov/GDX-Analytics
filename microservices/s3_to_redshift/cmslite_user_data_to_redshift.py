@@ -271,7 +271,7 @@ for object_summary in objects_to_process:
 
         # Parse group name from memo field in user activity table
         if file_config['dbtable'] == 'user_activity':
-            group_name = df.memo.str.split('-').str[1]
+            group_name = df.memo.str.split(' - ').str[1]
             df['group_name'] = group_name
         
         # Put the full data set into a buffer and write it

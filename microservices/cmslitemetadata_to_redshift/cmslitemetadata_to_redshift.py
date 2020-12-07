@@ -42,7 +42,7 @@ def main():
 
     def clean_exit(code, message):
         """Exits with a logger message and code"""
-        logger.info('Exiting with code %s : %s', str(code), message)
+        logger.debug('Exiting with code %s : %s', str(code), message)
         sys.exit(code)
 
     # we will use this timestamp to write to the cmslite.microservice_log table

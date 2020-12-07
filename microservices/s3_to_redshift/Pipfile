@@ -9,8 +9,10 @@ pylint = "*"
 python-language-server = {extras = ["all"],version = "*"}
 
 [packages]
+pytz = "*"
 boto3 = "*"
 pandas = "*"
+tzlocal = "*"
 botocore = "*"
 ua-parser = "*"
 referer-parser = "*"

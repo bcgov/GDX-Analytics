@@ -301,12 +301,12 @@ GRANT SELECT ON {0}_scratch TO looker;\n
 GRANT SELECT ON {0}_scratch TO datamodeling;\n
 """.format(dbtable)
 
-        scratch_copy = copy_query(
-            dbtable + "_scratch", batchfile, log=False)
-        scratch_copy_log = copy_query(
-            dbtable + "_scratch", batchfile, log=True)
+            scratch_copy = copy_query(
+                dbtable + "_scratch", batchfile, log=False)
+            scratch_copy_log = copy_query(
+                dbtable + "_scratch", batchfile, log=True)
 
-        scratch_cleanup = """
+            scratch_cleanup = """
 -- Replace main table with scratch table, clean up the old table
 ALTER TABLE {0} RENAME TO {1}_old;
 ALTER TABLE {0}_scratch RENAME TO {1};
@@ -316,7 +316,7 @@ COMMIT;
 
             query = scratch_start + scratch_copy + scratch_cleanup
             logquery = scratch_start + scratch_copy_log + scratch_cleanup
-            
+       
         # Execute the transaction against Redshift using local lib
         # redshift module
         logger.debug(logquery)

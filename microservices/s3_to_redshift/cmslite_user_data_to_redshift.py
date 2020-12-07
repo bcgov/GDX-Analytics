@@ -283,6 +283,40 @@ for object_summary in objects_to_process:
         # prep database call to pull the batch file into redshift
         query = copy_query(dbtable, batchfile, log=False)
         logquery = copy_query(dbtable, batchfile, log=True)
+
+        # if truncate is set to true, perform a transaction that will
+        # replace the existing table data with the new data in one commit
+        # if truncate is not true then the query remains as just the copy command
+        if (truncate):
+            scratch_start = """
+BEGIN;
+-- Clean up from last run if necessary
+DROP TABLE IF EXISTS {0}_scratch;
+DROP TABLE IF EXISTS {0}_old;
+-- Create scratch table to copy new data into
+CREATE TABLE {0}_scratch (LIKE {0});
+ALTER TABLE {0}_scratch OWNER TO microservice;
+-- Grant access to Looker and to Snowplow pipeline users
+GRANT SELECT ON {0}_scratch TO looker;\n
+GRANT SELECT ON {0}_scratch TO datamodeling;\n
+""".format(dbtable)
+
+        scratch_copy = copy_query(
+            dbtable + "_scratch", batchfile, log=False)
+        scratch_copy_log = copy_query(
+            dbtable + "_scratch", batchfile, log=True)
+
+        scratch_cleanup = """
+-- Replace main table with scratch table, clean up the old table
+ALTER TABLE {0} RENAME TO {1}_old;
+ALTER TABLE {0}_scratch RENAME TO {1};
+DROP TABLE {0}_old;
+COMMIT;
+""".format(dbtable, table_name)
+
+            query = scratch_start + scratch_copy + scratch_cleanup
+            logquery = scratch_start + scratch_copy_log + scratch_cleanup
+            
         # Execute the transaction against Redshift using local lib
         # redshift module
         logger.debug(logquery)

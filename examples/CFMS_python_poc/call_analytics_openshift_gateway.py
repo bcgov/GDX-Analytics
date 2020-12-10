@@ -66,6 +66,7 @@ logger.addHandler(handler)
 
 # Ctrl+C
 def signal_handler(signal, frame):
+    '''A function to handle the signal'''
     logger.info('Ctrl+C pressed. Exiting.')
     sys.exit(0)
 
@@ -81,13 +82,14 @@ endpoint = args.endpoint
 
 # make the POST call that contains the event data
 def post_event(json_event):
-    logger.debug("posting json:\n{}".format(json_event))
+    """A function that posts an event"""
+    logger.debug("posting json:\n%s", json_event)
     # Make the connection
     if args.insecure:
-        logger.info("Preparing insecure connection http://{}".format(hostname))
+        logger.info("Preparing insecure connection http://%s", hostname)
         conn = http.client.HTTPConnection(hostname)
     else:
-        logger.info("Preparing secure connection https://{}".format(hostname))
+        logger.info("Preparing secure connection https://%s", hostname)
         conn = http.client.HTTPSConnection(
             hostname, context=ssl._create_unverified_context())
     conn.port = hostport
@@ -111,14 +113,16 @@ def post_event(json_event):
         logger.exception("ResponseNotReady Exception")
         sys.exit(1)
     # Print the response
-    logger.info('status: {} reason: {}'.format(
-        response.status, response.reason))
+    logger.info(
+        'status: %s reason: %s',
+        response.status, response.reason)
 
 
 # schema is a string to the iglu:ca.bc.gov schema for this event
 # context is the list of contexts as dictionaries for this event
 # data is a dictionary describing this events data
 def event(schema, contexts, data):
+    """A function that builds the event"""
     post_body = configuration
     post_body['dvce_created_tstamp'] = event_timestamp()
     post_body['event_data_json'] = {
@@ -130,11 +134,13 @@ def event(schema, contexts, data):
 
 # time of event as an epoch timestamp in milliseconds
 def event_timestamp():
+    """Getting the event timestamp"""
     # time.time() returns the time in seconds with 6 decimal places
     return int(round(time.time() * 1000))
 
 
 def get_citizen(client_id, service_count, quick_txn, schema):
+    """A function that gets the citizen infomation"""
     # Set up the citizen context.
     citizen = {
         'data': {
@@ -146,6 +152,7 @@ def get_citizen(client_id, service_count, quick_txn, schema):
 
 
 def get_office(office_id, office_type, schema):
+    """A function to get the office information"""
     # Set up the office context.
     office = {
         'data': {
@@ -156,6 +163,7 @@ def get_office(office_id, office_type, schema):
 
 
 def get_agent(agent_id, role, quick_txn, schema):
+    """A function to get the agent information"""
     # Set up the service context.
     agent = {
         'data': {
@@ -175,49 +183,49 @@ configuration = {
 # Example values contexts
 # citizen
 citizen_schema = 'iglu:ca.bc.gov.cfmspoc/citizen/jsonschema/3-0-0'
-client_id = 283732
-service_count = 15
-quick_txn = False
+example_client_id = 283732
+example_service_count = 15
+example_quick_txn = False
 # office
 office_schema = 'iglu:ca.bc.gov.cfmspoc/office/jsonschema/1-0-0'
-office_id = 14
-office_type = 'reception'
+example_office_id = 14
+example_office_type = 'reception'
 # agent
 agent_schema = 'iglu:ca.bc.gov.cfmspoc/agent/jsonschema/2-0-0'
-agent_id = 99
-role = 'CSR'
-quick_txn = False
+example_agent_id = 99
+example_role = 'CSR'
+example_quick_txn = False
 
-citizen = get_citizen(
-    client_id=client_id,
-    service_count=service_count,
-    quick_txn=quick_txn,
+example_citizen = get_citizen(
+    client_id=example_client_id,
+    service_count=example_service_count,
+    quick_txn=example_quick_txn,
     schema=citizen_schema)
 
-office = get_office(
-    office_id=office_id,
-    office_type=office_type,
+example_office = get_office(
+    office_id=example_office_id,
+    office_type=example_office_type,
     schema=office_schema)
 
-agent = get_agent(
-    agent_id=agent_id,
-    role=role,
-    quick_txn=quick_txn,
+example_agent = get_agent(
+    agent_id=example_agent_id,
+    role=example_role,
+    quick_txn=example_quick_txn,
     schema=agent_schema)
 
-contexts = [citizen, office, agent]
+example_contexts = [example_citizen, example_office, example_agent]
 
 # Example schema and data for a 'finish' event
-schema = 'iglu:ca.bc.gov.cfmspoc/finish/jsonschema/2-0-0'
-data = {
+example_schema = 'iglu:ca.bc.gov.cfmspoc/finish/jsonschema/2-0-0'
+example_data = {
     'inaccurate_time': False,
     'quantity': 66}
 
 # create example event
-example_event = event(schema, contexts, data)
+example_event = event(example_schema, example_contexts, example_data)
 
 # Create a JSON object from the event dictionary
-json_event = json.dumps(example_event)
+main_json_event = json.dumps(example_event)
 
 # POST the event to the Analytics service
-post_event(json_event)
+post_event(main_json_event)

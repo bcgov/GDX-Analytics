@@ -71,10 +71,7 @@ def report(data):
         return
     print(f'report {__file__}:')
     print(f'\nObjects to process: {data["objects"]}')
-    print(f'Objects successfully processed: {data["processed"]}')
     print(f'Objects that failed to process: {data["failed"]}')
-    print(f'Objects output to \'processed/good\': {data["good"]}')
-    print(f'Objects output to \'processed/bad\': {data["bad"]}')
     print(f'Objects loaded to Redshift: {data["loaded"]}')
     print(
         "\nList of objects successfully fully ingested from S3, processed, "
@@ -315,11 +312,8 @@ query = r'''
 
 # Reporting variables
 report_stats = {
-    'objects': 0,
-    'processed': 0,
+    'objects': 1,
     'failed': 0,
-    'good': 0,
-    'bad': 0,
     'loaded': 0,
     'good_list': [],
     'bad_list': [],

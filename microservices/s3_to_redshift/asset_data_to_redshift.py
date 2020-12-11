@@ -45,7 +45,6 @@ yvr_dt_start = (yvr_tz
                 .normalize(datetime.now(local_tz)
                            .astimezone(yvr_tz)))
 
-
 logger = logging.getLogger(__name__)
 log.setup()
 logging.getLogger("RedShift").setLevel(logging.WARNING)

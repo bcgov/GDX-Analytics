@@ -22,41 +22,91 @@ import os
 import logging
 import sys
 import json  # to read json config files
-import psycopg2
+from lib.redshift import RedShift
+from datetime import datetime
+from tzlocal import get_localzone
+from pytz import timezone
+import lib.logs as log
 
-# Logging has two handlers: INFO to stdout and DEBUG to a file handler
+# Set local timezone and get time
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+                .normalize(datetime.now(local_tz)
+                           .astimezone(yvr_tz)))
+
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+log.setup()
+logging.getLogger("RedShift").setLevel(logging.WARNING)
 
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+
+# Provides exit code and logs message
+def clean_exit(code, message):
+    """Exits with a logger message and code"""
+    logger.debug('Exiting with code %s : %s', str(code), message)
+    sys.exit(code)
+
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename),
-                              "a", encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
 # check that configuration file was passed as argument
 if len(sys.argv) != 2:
     print('Usage: python build_derived_assets.py config.json')
-    sys.exit(1)
+    clean_exit(1, 'Bad command use.')
 configfile = sys.argv[1]
 # confirm that the file exists
 if os.path.isfile(configfile) is False:
     print("Invalid file name {}".format(configfile))
-    sys.exit(1)
+    clean_exit(1, 'Invalid file name.')
 # open the confifile for reading
 with open(configfile) as f:
     data = json.load(f)
+
+
+def report(data):
+    '''reports out the data from the main program loop'''
+    # if no objects were processed; do not print a report
+    if data["objects"] == 0:
+        return
+    print(f'report {__file__}:')
+    print(f'\nObjects to process: {data["objects"]}')
+    print(f'Objects successfully processed: {data["processed"]}')
+    print(f'Objects that failed to process: {data["failed"]}')
+    print(f'Objects output to \'processed/good\': {data["good"]}')
+    print(f'Objects output to \'processed/bad\': {data["bad"]}')
+    print(f'Objects loaded to Redshift: {data["loaded"]}')
+    print(
+        "\nList of objects successfully fully ingested from S3, processed, "
+        "loaded to S3 ('good'), and copied to Redshift:")
+    if data['good_list']:
+        for i, meta in enumerate(data['good_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print('None')
+    print('\nList of objects that failed to process:')
+    if data['bad_list']:
+        for i, meta in enumerate(data['bad_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print('None')
+    print('\nList of objects that were not processed due to early exit:')
+    if data['incomplete_list']:
+        for i, meta in enumerate(data['incomplete_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print("None")
+
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+                  .normalize(datetime.now(local_tz)
+                             .astimezone(yvr_tz)))
+    print(
+        '\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
+
 
 schema_name = data['schema_name']
 asset_host = data['asset_host']
@@ -263,16 +313,33 @@ query = r'''
            asset_source=asset_source,
            asset_scheme_and_authority=asset_scheme_and_authority)
 
+# Reporting variables
+report_stats = {
+    'objects': 0,
+    'processed': 0,
+    'failed': 0,
+    'good': 0,
+    'bad': 0,
+    'loaded': 0,
+    'good_list': [],
+    'bad_list': [],
+    'incomplete_list': []
+}
 
-with psycopg2.connect(conn_string) as conn:
-    with conn.cursor() as curs:
-        try:
-            curs.execute(query)
-        except psycopg2.Error:
-            logger.exception(
-                ('Error: failed to execute the transaction '
-                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
-        else:
-            logger.info(
-                ('Success: executed the transaction '
-                 'to prepare the %s.asset_downloads_derived PDT'), schema_name)
+
+# Execute the transaction against Redshift using local lib redshift module
+table_name = 'microservice.asset_downloads_derived'
+spdb = RedShift.snowplow(table_name)
+if spdb.query(query):
+    report_stats['loaded'] += 1
+else:
+    report_stats['failed'] += 1
+    report_stats['bad'] += 1
+    report_stats['bad_list'].append(table_name)
+    report_stats['incomplete_list'].remove(table_name)
+    clean_exit(1, f'Query failed to load {table_name}, '
+               'no further processing.')
+spdb.close_connection()
+
+report(report_stats)
+clean_exit(0, 'Finished all processing cleanly.')

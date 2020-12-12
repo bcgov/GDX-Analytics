@@ -267,7 +267,7 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
-        clean_exit(0, f'Goodfile {object_summary.key} in objects to process, '
+        clean_exit(1, f'Empty file {object_summary.key} in objects to process, '
                    'no further processing.')
 
     body = obj['Body']

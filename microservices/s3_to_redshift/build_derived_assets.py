@@ -109,6 +109,7 @@ schema_name = data['schema_name']
 asset_host = data['asset_host']
 asset_source = data['asset_source']
 asset_scheme_and_authority = data['asset_scheme_and_authority']
+dbtable = data['dbtable']
 
 
 conn_string = """
@@ -322,7 +323,7 @@ report_stats = {
 
 
 # Execute the transaction against Redshift using local lib redshift module
-table_name = 'microservice.asset_downloads_derived'
+table_name = dbtable
 spdb = RedShift.snowplow(table_name)
 if spdb.query(query):
     report_stats['loaded'] += 1

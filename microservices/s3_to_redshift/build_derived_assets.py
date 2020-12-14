@@ -74,18 +74,18 @@ def report(data):
     print(f'Objects that failed to process: {data["failed"]}')
     print(f'Objects loaded to Redshift: {data["loaded"]}')
     print(
-        "\nList of objects successfully fully ingested from S3, processed, "
-        "loaded to S3 ('good'), and copied to Redshift:")
+        "\nList of tables successfully parsed, "
+        "and copied to the derived table in Redshift:")
     if data['good_list']:
         [print(table) for table in data['good_list']]
     else:
         print('None')
-    print('\nList of objects that failed to process:')
+    print('\nList of tables that failed to process:')
     if data['bad_list']:
         [print(table) for table in data['bad_list']]
     else:
         print('None')
-    print('\nList of objects that were not processed due to early exit:')
+    print('\nList of tables that were not processed due to early exit:')
     if data['incomplete_list']:
         [print(table) for table in data['incomplete_list']]
     else:

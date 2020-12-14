@@ -77,20 +77,17 @@ def report(data):
         "\nList of objects successfully fully ingested from S3, processed, "
         "loaded to S3 ('good'), and copied to Redshift:")
     if data['good_list']:
-        for i, meta in enumerate(data['good_list']):
-            print(f"{i}: {meta.key}")
+        [print(table) for table in data['good_list']]
     else:
         print('None')
     print('\nList of objects that failed to process:')
     if data['bad_list']:
-        for i, meta in enumerate(data['bad_list']):
-            print(f"{i}: {meta.key}")
+        [print(table) for table in data['bad_list']]
     else:
         print('None')
     print('\nList of objects that were not processed due to early exit:')
     if data['incomplete_list']:
-        for i, meta in enumerate(data['incomplete_list']):
-            print(f"{i}: {meta.key}")
+        [print(table) for table in data['incomplete_list']]
     else:
         print("None")
 

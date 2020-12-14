@@ -326,6 +326,7 @@ table_name = 'microservice.asset_downloads_derived'
 spdb = RedShift.snowplow(table_name)
 if spdb.query(query):
     report_stats['loaded'] += 1
+    report_stats['good_list'].append(table_name)
 else:
     report_stats['failed'] += 1
     report_stats['bad'] += 1

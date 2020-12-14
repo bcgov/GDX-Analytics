@@ -165,6 +165,7 @@ def report(data):
     print(f'Objects output to \'processed/good\': {data["good"]}')
     print(f'Objects output to \'processed/bad\': {data["bad"]}')
     print(f'Objects loaded to Redshift: {data["loaded"]}')
+    print(f'Empty Objects: {data["empty"]}')
     print(
         "\nList of objects successfully fully ingested from S3, processed, "
         "loaded to S3 ('good'), and copied to Redshift:")
@@ -185,6 +186,12 @@ def report(data):
             print(f"{i}: {meta.key}")
     else: 
         print("None")
+    print('\nList of empty objects:')
+    if data['empty_list']:
+        for i, meta in enumerate(data['empty_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print('None')
 
     # get times from system and convert to Americas/Vancouver for printing
     yvr_dt_end = (yvr_tz
@@ -227,7 +234,7 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
 
 # an object exists to be processed as a truncate copy to the table
 if truncate and len(objects_to_process) == 1:
-    logger.info(
+    logger.debug(
         'truncate is set. processing only one file: {0} (modified {1})'.format(
             objects_to_process[0].key, objects_to_process[0].last_modified))
 
@@ -239,8 +246,10 @@ report_stats = {
     'good': 0,
     'bad': 0,
     'loaded': 0,
+    'empty': 0,
     'good_list': [],
     'bad_list': [],
+    'empty_list': [],
     'incomplete_list': []
 }
 
@@ -258,8 +267,8 @@ for object_summary in objects_to_process:
 
     # The file is an empty upload. Key to goodfile and continue
     if(obj['ContentLength'] == 0):
-        logger.info('%s is empty, keying to goodfile and proceeding.',
-                    object_summary.key)
+        logger.debug('%s is empty, keying to goodfile and proceeding.',
+                     object_summary.key)
         outfile = goodfile
         try:
             client.copy_object(Bucket=f"{bucket}",
@@ -267,6 +276,10 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
+        report_stats['empty'] += 1
+        report_stats['empty_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
+        report(report_stats)
         clean_exit(1, f'Empty file {object_summary.key} in objects to process, '
                    'no further processing.')
 
@@ -363,7 +376,7 @@ for object_summary in objects_to_process:
 
         # Concatenate all the parsed lines together with the end of line char
         csv_string = linefeed.join(parsed_list)
-        logger.info(object_summary.key + " parsed successfully")
+        logger.debug(object_summary.key + " parsed successfully")
 
     # This is not an apache access log
     if 'access_log_parse' not in data:
@@ -540,6 +553,7 @@ COMMIT;
         report_stats['bad'] += 1
         report_stats['bad_list'].append(object_summary)
         report_stats['incomplete_list'].remove(object_summary)
+        report(report_stats)
         clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
                    'no further processing.')
     report_stats['good'] += 1

@@ -22,6 +22,10 @@ import json  # to read json config files
 import sys  # to read command line parameters
 import os.path  # file handling
 import logging
+import lib.logs as log
+from datetime import datetime
+from tzlocal import get_localzone
+from pytz import timezone
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
@@ -35,27 +39,15 @@ from referer_parser import Referer
 # referer_parser documentation:
 # https://github.com/snowplow-referer-parser/referer-parser
 
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+                .normalize(datetime.now(local_tz)
+                           .astimezone(yvr_tz)))
 
-# set up logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# create stdout handler for logs at the INFO level
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# create file handler for logs at the DEBUG level in
-# /logs/asset_data_to_redshift.log
-log_filename = '{0}'.format(os.path.basename(__file__).replace('.py', '.log'))
-handler = logging.FileHandler(os.path.join('logs', log_filename), "a",
-                              encoding=None, delay="true")
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(asctime)s:%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+log.setup()
+logging.getLogger("RedShift").setLevel(logging.WARNING)
 
 
 def clean_exit(code, message):
@@ -161,6 +153,57 @@ def is_processed(object_summary):
     return False
 
 
+def report(data):
+    '''reports out the data from the main program loop'''
+    # if no objects were processed; do not print a report
+    if data["objects"] == 0:
+        return
+    print(f'report {__file__}:')
+    print(f'\nObjects to process: {data["objects"]}')
+    print(f'Objects successfully processed: {data["processed"]}')
+    print(f'Objects that failed to process: {data["failed"]}')
+    print(f'Objects output to \'processed/good\': {data["good"]}')
+    print(f'Objects output to \'processed/bad\': {data["bad"]}')
+    print(f'Objects loaded to Redshift: {data["loaded"]}')
+    print(f'Empty Objects: {data["empty"]}')
+    print(
+        "\nList of objects successfully fully ingested from S3, processed, "
+        "loaded to S3 ('good'), and copied to Redshift:")
+    if data['good_list']:
+        for i, meta in enumerate(data['good_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print('None')
+    print('\nList of objects that failed to process:')
+    if data['bad_list']:
+        for i, meta in enumerate(data['bad_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print('None')
+    print('\nList of objects that were not processed due to early exit:')
+    if data['incomplete_list']:
+        for i, meta in enumerate(data['incomplete_list']):
+            print(f"{i}: {meta.key}")
+    else: 
+        print("None")
+    print('\nList of empty objects:')
+    if data['empty_list']:
+        for i, meta in enumerate(data['empty_list']):
+            print(f"{i}: {meta.key}")
+    else:
+        print('None')
+
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+                  .normalize(datetime.now(local_tz)
+                             .astimezone(yvr_tz)))
+    print(
+        '\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
+
+
 # This bucket scan will find unprocessed objects.
 # objects_to_process will contain zero or one objects if truncate = True
 # objects_to_process will contain zero or more objects if truncate = False
@@ -191,9 +234,27 @@ for object_summary in my_bucket.objects.filter(Prefix=source + "/"
 
 # an object exists to be processed as a truncate copy to the table
 if truncate and len(objects_to_process) == 1:
-    logger.info(
+    logger.debug(
         'truncate is set. processing only one file: {0} (modified {1})'.format(
             objects_to_process[0].key, objects_to_process[0].last_modified))
+
+# Reporting variables. Accumulates as the the loop below is traversed
+report_stats = {
+    'objects': 0,
+    'processed': 0,
+    'failed': 0,
+    'good': 0,
+    'bad': 0,
+    'loaded': 0,
+    'empty': 0,
+    'good_list': [],
+    'bad_list': [],
+    'empty_list': [],
+    'incomplete_list': []
+}
+
+report_stats['objects'] = len(objects_to_process)
+report_stats['incomplete_list'] = objects_to_process.copy()
 
 # process the objects that were found during the earlier directory pass
 for object_summary in objects_to_process:
@@ -206,8 +267,8 @@ for object_summary in objects_to_process:
 
     # The file is an empty upload. Key to goodfile and continue
     if(obj['ContentLength'] == 0):
-        logger.info('%s is empty, keying to goodfile and proceeding.',
-                    object_summary.key)
+        logger.debug('%s is empty, keying to goodfile and proceeding.',
+                     object_summary.key)
         outfile = goodfile
         try:
             client.copy_object(Bucket=f"{bucket}",
@@ -215,7 +276,13 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
-        clean_exit(0, f'Goodfile {object_summary.key} in objects to process, '
+        report_stats['empty'] += 1
+        report_stats['good'] += 1
+        report_stats['good_list'].append(object_summary)
+        report_stats['empty_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
+        report(report_stats)
+        clean_exit(1, f'Empty file {object_summary.key} in objects to process, '
                    'no further processing.')
 
     body = obj['Body']
@@ -311,7 +378,7 @@ for object_summary in objects_to_process:
 
         # Concatenate all the parsed lines together with the end of line char
         csv_string = linefeed.join(parsed_list)
-        logger.info(object_summary.key + " parsed successfully")
+        logger.debug(object_summary.key + " parsed successfully")
 
     # This is not an apache access log
     if 'access_log_parse' not in data:
@@ -322,6 +389,10 @@ for object_summary in objects_to_process:
         try:
             csv_string = csv_string.decode('utf-8')
         except UnicodeDecodeError as e:
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
             e_object = e.object.splitlines()
             logger.exception(
                 ''.join((
@@ -337,7 +408,9 @@ for object_summary in objects_to_process:
                     + object_summary.key, Key=badfile)
             except Exception as e:
                 logger.exception("S3 transfer failed.\n{0}".format(e.message))
-            continue
+            report(report_stats)
+            clean_exit(1, f'Bad file {object_summary.key} in objects to '
+                       'process, no further processing.')
 
     # Check for an empty file. If it's empty, accept it as bad and skip
     # to the next object to process
@@ -349,6 +422,10 @@ for object_summary in objects_to_process:
             dtype=dtype_dic,
             usecols=range(column_count))
     except pandas.errors.EmptyDataError as _e:
+        report_stats['failed'] += 1
+        report_stats['bad'] += 1
+        report_stats['bad_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
         logger.exception('exception reading {0}'.format(object_summary.key))
         if (str(_e) == "No columns to parse from file"):
             logger.warning('File is empty, keying to badfile \
@@ -365,9 +442,14 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
+        report(report_stats)
         clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
                    'no further processing.')
     except ValueError:
+        report_stats['failed'] += 1
+        report_stats['bad'] += 1
+        report_stats['bad_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
         logger.exception('ValueError exception reading %s', object_summary.key)
         logger.warning('Keying to badfile and proceeding.')
         outfile = badfile
@@ -377,6 +459,7 @@ for object_summary in objects_to_process:
                                Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
+        report(report_stats)
         clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
                    'no further processing.')
 
@@ -404,7 +487,7 @@ for object_summary in objects_to_process:
         for thisfield in data['dateformat']:
             df[thisfield['field']] = \
                 pd.to_datetime(df[thisfield['field']],
-                                   format=thisfield['format'])
+                               format=thisfield['format'])
 
     # Put the full data set into a buffer and write it
     # to a "|" delimited file in the batch directory
@@ -468,8 +551,18 @@ COMMIT;
     except ClientError:
         logger.exception("S3 transfer failed")
     if outfile == badfile:
+        report_stats['failed'] += 1
+        report_stats['bad'] += 1
+        report_stats['bad_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
+        report(report_stats)
         clean_exit(1, f'Bad file {object_summary.key} in objects to process, '
                    'no further processing.')
+    report_stats['good'] += 1
+    report_stats['good_list'].append(object_summary)
+    report_stats['incomplete_list'].remove(object_summary)
+    logger.debug("finished %s", object_summary.key)
     logger.debug("finished %s", object_summary.key)
 
+report(report_stats)
 clean_exit(0, 'Finished all processing cleanly.')

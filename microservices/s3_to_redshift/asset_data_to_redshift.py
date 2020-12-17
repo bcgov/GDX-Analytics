@@ -277,6 +277,8 @@ for object_summary in objects_to_process:
         except ClientError:
             logger.exception("S3 transfer failed")
         report_stats['empty'] += 1
+        report_stats['good'] += 1
+        report_stats['good_list'].append(object_summary)
         report_stats['empty_list'].append(object_summary)
         report_stats['incomplete_list'].remove(object_summary)
         report(report_stats)

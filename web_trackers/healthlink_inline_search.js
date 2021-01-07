@@ -34,4 +34,4 @@ if (window.location.pathname.split('/')[1] == 'search'
     terms = terms.replace('+', " ").replace(/"/g,"").replace(/,/g,"");
     return terms;
   }
-//<!-- Snowplow stop plowing -->
+// <!-- Snowplow stops plowing -->

@@ -36,4 +36,4 @@ function getUrlParamArray(param, defaultValue) {
     });
     return vars;
 }
-//<!-- Snowplow stop plowing -->
+//<!-- Snowplow stops plowing -->

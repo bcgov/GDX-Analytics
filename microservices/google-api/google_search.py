@@ -546,3 +546,5 @@ for site_item in config_sites:  # noqa: C901
 #         else:
 #             logger.info("Google Search PDT loaded successfully")
 #             clean_exit(0,'Finished succesfully.')
+
+report(report_stats)

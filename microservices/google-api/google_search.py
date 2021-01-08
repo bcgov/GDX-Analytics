@@ -235,8 +235,9 @@ def report(data):
     # if no objects were processed; do not print a report
     if data['sites'] == 0:
         return
+    print('SUCCESS')
     print(f'report {__file__}:')
-    #print(f'\nSites to process: {data["objects"]}')
+    print(f'\nSites to process: {data["sites"]}')
     #print(f'Objects successfully processed: {data["processed"]}')
     #print(f'Objects that failed to process: {data["failed"]}')
     #print(f'Objects output to \'processed/good\': {data["good"]}')
@@ -547,4 +548,5 @@ for site_item in config_sites:  # noqa: C901
 #             logger.info("Google Search PDT loaded successfully")
 #             clean_exit(0,'Finished succesfully.')
 
+print('Number of Sites:', report_stats['sites'])  # Printing to validate aginst report(report_stats)
 report(report_stats)

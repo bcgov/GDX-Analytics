@@ -229,6 +229,21 @@ conn_string = (
     f"user='{pguser}' "
     f"password={pgpass}")
 
+# Will run at end of script to print out accumulated report_stats
+def report(data):
+    '''reports out the data from the main program loop'''
+    # if no objects were processed; do not print a report
+    if data['sites'] == 0:
+        return
+    print(f'report {__file__}:')
+    #print(f'\nSites to process: {data["objects"]}')
+    #print(f'Objects successfully processed: {data["processed"]}')
+    #print(f'Objects that failed to process: {data["failed"]}')
+    #print(f'Objects output to \'processed/good\': {data["good"]}')
+    #print(f'Objects output to \'processed/bad\': {data["bad"]}')
+    #print(f'Objects loaded to Redshift: {data["loaded"]}')
+
+
 # Reporting variables. Accumulates as the the sites listed in google_search.json are looped over
 report_stats = {
     'sites':0,  # Number of sites to loop through 

@@ -75,7 +75,6 @@ from googleapiclient.errors import HttpError as GoogleHttpError
 import psycopg2  # For Amazon Redshift IO
 import lib.logs as log
 
-
 # Ctrl+C
 def signal_handler(sig, frame):
     '''Ctrl+C signal handler'''
@@ -229,6 +228,21 @@ conn_string = (
     f"port='{port}' "
     f"user='{pguser}' "
     f"password={pgpass}")
+
+# Reporting variables. Accumulates as the the sites listed in google_search.json are looped over
+report_stats = {
+    'sites':0,  # Number of sites to loop through 
+    'processed':0,
+    'failed':0,
+    'good': 0,
+    'bad': 0,
+    'loaded': 0,
+    'good_list':[],
+    'bad_list':[],
+    'incomplete_list':[]
+}
+
+report_stats['sites'] = len(config_sites)
 
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901

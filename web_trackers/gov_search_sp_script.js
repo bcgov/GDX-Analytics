@@ -40,4 +40,4 @@
         });
     	return vars;
     }
-//  <!-- Snowplow stop plowing -->
+//  <!-- Snowplow stops plowing -->

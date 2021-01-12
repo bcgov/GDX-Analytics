@@ -368,6 +368,8 @@ for site_item in config_sites:  # noqa: C901
                         if retry == 11:
                             logger.error(("Failing with HTTP error after 10 "
                                           "retries with query time easening."))
+                            report_stats['failed'] += 1
+                            report_stats['failed_api_call'].append('PLACEHOLDER')  # Determine if I should rebuild filename in a new variable, or if moving site_fqdn and outfile up is feasible.
                             sys.exit()
                         wait_time = wait_time * 2
                         logger.warning(
@@ -376,6 +378,7 @@ for site_item in config_sites:  # noqa: C901
                         retry = retry + 1
                         sleep(wait_time)
                     else:
+                        report_stats['retrieved'] += 1
                         break
 
                 index = index + 1

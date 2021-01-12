@@ -319,7 +319,7 @@ for site_item in config_sites:  # noqa: C901
                 yield start_date + timedelta(_n)
 
         search_analytics_response = ''
-
+        
         # loops on each date from start date to the end date, inclusive
         # initializing date_in_range avoids pylint [undefined-loop-variable]
         date_in_range = ()
@@ -352,6 +352,10 @@ for site_item in config_sites:  # noqa: C901
                     "rowLimit": rowlimit,
                     "startRow": index * rowlimit}
 
+                # Set name of current file 
+                temp_fqdn = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
+                current_file = f"googlesearch-{temp_fqdn}-{start_dt}-{max_date_in_data}.csv"
+
                 # This query to the Google Search API may eventually yield an
                 # HTTP response code of 429, "Rate Limit Exceeded".
                 # The handling attempt below will increase the wait time on
@@ -369,7 +373,7 @@ for site_item in config_sites:  # noqa: C901
                             logger.error(("Failing with HTTP error after 10 "
                                           "retries with query time easening."))
                             report_stats['failed'] += 1
-                            report_stats['failed_api_call'].append('PLACEHOLDER')  # Determine if I should rebuild filename in a new variable, or if moving site_fqdn and outfile up is feasible.
+                            report_stats['failed_api_call'].append(current_file)
                             sys.exit()
                         wait_time = wait_time * 2
                         logger.warning(

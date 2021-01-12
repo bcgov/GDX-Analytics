@@ -241,7 +241,7 @@ def report(data):
     print(f'Failed API calls: {data["failed"]}')
     print(f'Objects loaded to S3 and copied to RedShift: {data["processed"]}')
     print(f'List of objects that failed to copy to Redshift: {data["failed_to_rs"]}')
-    print(f'List of objects that were not processed due to early exit: {data["early_objects"]}')
+    print(f'List of objects that were not processed due to early exit: {data["failed_api_call"]}')
 
 
 # Reporting variables. Accumulates as the the sites listed in google_search.json are looped over

@@ -235,29 +235,25 @@ def report(data):
     # if no objects were processed; do not print a report
     if data['sites'] == 0:
         return
-    print('SUCCESS')
-    print(f'report {__file__}:')
+    print(f'{__file__} report:')
     print(f'\nSites to process: {data["sites"]}')
-    #print(f'Objects successfully processed: {data["processed"]}')
-    #print(f'Objects that failed to process: {data["failed"]}')
-    #print(f'Objects output to \'processed/good\': {data["good"]}')
-    #print(f'Objects output to \'processed/bad\': {data["bad"]}')
-    #print(f'Objects loaded to Redshift: {data["loaded"]}')
+    print(f'Successful API calls: {data["retrieved"]}')
+    print(f'Failed API calls: {data["failed"]}')
+    print(f'Objects loaded to S3 and copied to RedShift: {data["processed"]}')
+    print(f'List of objects that failed to copy to Redshift: {data["failed_to_rs"]}')
+    print(f'List of objects that were not processed due to early exit: {data["early_objects"]}')
 
 
 # Reporting variables. Accumulates as the the sites listed in google_search.json are looped over
 report_stats = {
-    'sites':0,  # Number of sites to loop through 
-    'processed':0,
+    'sites':0,  # Number of sites in google_search.json 
+    'retrieved':0,
     'failed':0,
-    'good': 0,
-    'bad': 0,
-    'loaded': 0,
-    'good_list':[],
-    'bad_list':[],
-    'incomplete_list':[]
+    'processed':[],  # Successfully called from the API, loaded to S3, and copied to Redshift
+    'failed_to_rs':[],  # Objects that failed to copy to Redshift
+    'failed_api_call':[]  # Objects not processed due to early exit
 }
-
+#
 report_stats['sites'] = len(config_sites)
 
 # each site in the config list of sites gets processed in this loop
@@ -548,5 +544,4 @@ for site_item in config_sites:  # noqa: C901
 #             logger.info("Google Search PDT loaded successfully")
 #             clean_exit(0,'Finished succesfully.')
 
-print('Number of Sites:', report_stats['sites'])  # Printing to validate aginst report(report_stats)
 report(report_stats)

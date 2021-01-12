@@ -2,7 +2,7 @@
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "source": "client",
   "destination": "processed",
-  "directory": "google_gdx_GDXDSD_3346",
+  "directory": "google_gdx_gdxdsd_3346",
   "dbtable": "google.googlesearch_gdxdsd3346",
   "sites": [
     {

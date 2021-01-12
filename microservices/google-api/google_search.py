@@ -247,7 +247,7 @@ def report(data):
 # Reporting variables. Accumulates as the the sites listed in google_search.json are looped over
 report_stats = {
     'sites':0,  # Number of sites in google_search.json 
-    'retrieved':0,
+    'retrieved':0,  # Starts as same values as sites. Minus 1 for each failed API call.
     'failed':0,
     'processed':[],  # Successfully called from the API, loaded to S3, and copied to Redshift
     'failed_to_rs':[],  # Objects that failed to copy to Redshift
@@ -255,6 +255,7 @@ report_stats = {
 }
 #
 report_stats['sites'] = len(config_sites)
+report_stats['retrieved'] = len(config_sites)  # Will be subtracted from if a failure occurs
 
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
@@ -373,6 +374,7 @@ for site_item in config_sites:  # noqa: C901
                             logger.error(("Failing with HTTP error after 10 "
                                           "retries with query time easening."))
                             report_stats['failed'] += 1
+                            report_stats['retrieved'] -= 1
                             report_stats['failed_api_call'].append(current_file)
                             sys.exit()
                         wait_time = wait_time * 2
@@ -382,7 +384,6 @@ for site_item in config_sites:  # noqa: C901
                         retry = retry + 1
                         sleep(wait_time)
                     else:
-                        report_stats['retrieved'] += 1
                         break
 
                 index = index + 1
@@ -436,6 +437,9 @@ for site_item in config_sites:  # noqa: C901
         logger.debug('OBJECT LOADED ON: %s, OBJECT SIZE: %s',
                      object_summary.last_modified, object_summary.size)
 
+        # S3 file path for report_stats
+        s3_file_path = f's3://{config_bucket}/{object_key}'
+
         # Prepare the Redshift COPY command.
         logquery = (
             f"copy {config_dbtable} FROM 's3://{config_bucket}/{object_key}' "
@@ -455,6 +459,7 @@ for site_item in config_sites:  # noqa: C901
                     curs.execute(query)
                 # if the DB call fails, print error and place file in /bad
                 except psycopg2.Error:
+                    report_stats['failed_to_rs'].append(s3_file_path)
                     logger.exception(
                         "FAILURE loading %s (%s index) over date range "
                         "%s to %s into %s. Object key %s.", site_name,
@@ -462,6 +467,7 @@ for site_item in config_sites:  # noqa: C901
                         config_dbtable, object_key.split('/')[-1])
                     clean_exit(1,'Could not load to redshift.')
                 else:
+                    report_stats['processed'].append(s3_file_path)
                     logger.info(
                         "SUCCESS loading %s (%s index) over date range "
                         "%s to %s into %s. Object key %s.", site_name,

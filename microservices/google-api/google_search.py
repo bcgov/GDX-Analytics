@@ -238,12 +238,12 @@ def report(data):
     print(f'{__file__} report:')
     print(f'\nSites to process: {data["sites"]}')
     print(f'Successful API calls: {data["retrieved"]}')
-    print(f'Failed API calls: {data["failed"]}')
-    print(f'Objects loaded to S3 and copied to RedShift:')
+    print(f'Failed API calls: {data["failed"]}\n')
+    print(f'Objects loaded to S3 and copied to RedShift:\n')
 
     # Print all processed sites
     for item in data['processed']:
-        print(item)
+        print(f'\n{item}')
 
     # If nothing failed to copy to RedShift, print None
     if not data['failed_to_rs']:
@@ -251,7 +251,7 @@ def report(data):
     else:
         print(f'List of objects that failed to copy to Redshift:')
         for item in data['failed_to_rs']:
-            print(item)
+            print(f'\n{item}')
 
     # If nothing failed do to early exit, print None
     if not data['failed_api_call']:
@@ -259,7 +259,7 @@ def report(data):
     else:
         print(f'List of objects that were not processed due to early exit:/n')
         for item in data['failed_api_call']:
-            print(item)
+            print(f'\n{item}')
 
 
 # Reporting variables. Accumulates as the the sites listed in google_search.json are looped over

@@ -613,7 +613,7 @@ yvr_dt_pdt_start = (yvr_tz
 #             curs.execute(query)
 #         except psycopg2.Error:
 #             logger.exception("Google Search PDT loading failed")
-#             report_stats['pdt_build_succcess] = True
+#             report_stats['pdt_build_succcess'] = True
 #             clean_exit(1,'Could not rebuild PDT in Redshift.')
 #         else:
 #             logger.debug("Google Search PDT loaded successfully")

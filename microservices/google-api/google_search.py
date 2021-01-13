@@ -254,8 +254,8 @@ def report(data):
     print(f'Objects loaded to S3 and copied to RedShift:')
 
     # Print all processed sites
-    for item in data['processed']:
-        print(f'\n{item}')
+    for i, site in enumerate(data['processed'], 1):
+        print(f"\n{i}: {site}")
 
     # If nothing failed to copy to RedShift, print None
     if not data['failed_to_rs']:
@@ -274,9 +274,9 @@ def report(data):
             print(f'\n{item}')
     
     if report_stats['pdt_build_success']:
-        print('Google Search PDT loaded successfully\n')
+        print('\nGoogle Search PDT loaded successfully\n')
     else:
-        print('Google Search PDT load failed\n')
+        print('\nGoogle Search PDT load failed\n')
 
     # get times from system and convert to Americas/Vancouver for printing
     yvr_dt_end = (yvr_tz
@@ -304,11 +304,11 @@ report_stats = {
     'processed':[],  # API call, load to S3, and copy to Redshift all OK
     'failed_to_rs':[],  # Objects that failed to copy to Redshift
     'failed_api_call':[],  # Objects not processed due to early exit
-    'pdt_build_success':False  # Will become 1 if successfull
+    'pdt_build_success':False  # True if successfull
 }
 
 report_stats['sites'] = len(config_sites)
-report_stats['retrieved'] = len(config_sites)  # Will be subtracted from if a failure occurs
+report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
 
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
@@ -316,7 +316,7 @@ for site_item in config_sites:  # noqa: C901
     site_name = site_item["name"]
 
     # get the last loaded date.
-    # may be None if this site has not previously been loaded into Redshift)
+    # may be None if this site has not previously been loaded into Redshift
     last_loaded_date = last_loaded(site_name)
 
     # if the last load is 2 days old, there will be no new data in Google

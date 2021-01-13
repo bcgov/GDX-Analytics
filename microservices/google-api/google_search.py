@@ -249,7 +249,8 @@ def report(data):
     print(f'{__file__} report:')
     print(f'\nSites to process: {data["sites"]}')
     print(f'Successful API calls: {data["retrieved"]}')
-    print(f'Failed API calls: {data["failed"]}\n')
+    print(f'Failed API calls: {data["failed"]}')
+    print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
     print(f'Objects loaded to S3 and copied to RedShift:')
 
     # Print all processed sites
@@ -258,7 +259,7 @@ def report(data):
 
     # If nothing failed to copy to RedShift, print None
     if not data['failed_to_rs']:
-        print(f'List of objects that failed to copy to Redshift: \n\nNone\n')
+        print(f'\nList of objects that failed to copy to Redshift: \n\nNone\n')
     else:
         print(f'\nList of objects that failed to copy to Redshift:')
         for item in data['failed_to_rs']:
@@ -273,9 +274,9 @@ def report(data):
             print(f'\n{item}')
     
     if report_stats['pdt_build_success']:
-        print('Google Search PDT loaded successfully')
+        print('Google Search PDT loaded successfully\n')
     else:
-        print("Google Search PDT load failed")
+        print('Google Search PDT load failed\n')
 
     # get times from system and convert to Americas/Vancouver for printing
     yvr_dt_end = (yvr_tz
@@ -300,6 +301,7 @@ report_stats = {
     'sites':0,  # Number of sites in google_search.json 
     'retrieved':0,  # Successful API calls
     'failed':0,
+    'failed_rs':0,
     'processed':[],  # API call, load to S3, and copy to Redshift all OK
     'failed_to_rs':[],  # Objects that failed to copy to Redshift
     'failed_api_call':[],  # Objects not processed due to early exit
@@ -527,6 +529,9 @@ for site_item in config_sites:  # noqa: C901
                         config_dbtable, object_key.split('/')[-1])
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt
+
+# Count all failed loads to RedShift        
+report_stats['failed_rs'] = len(report_stats['failed_to_rs'])
 
 # Get PDT build start time
 yvr_dt_pdt_start = (yvr_tz

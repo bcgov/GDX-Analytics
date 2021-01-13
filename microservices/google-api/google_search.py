@@ -241,10 +241,13 @@ def report(data):
     print(f'Failed API calls: {data["failed"]}')
     print(f'Objects loaded to S3 and copied to RedShift: {data["processed"]}')
     if not data['processed']:
+        print(f'List of objects that failed to copy to Redshift:')
         print('None')
     else:
         print(f'List of objects that failed to copy to Redshift: {data["failed_to_rs"]}')
+
     if not data['failed_to_rs']:
+        print(f'List of objects that were not processed due to early exit:')
         print('None')
     else:
         print(f'List of objects that were not processed due to early exit: {data["failed_api_call"]}')

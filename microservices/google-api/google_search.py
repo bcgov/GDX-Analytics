@@ -262,7 +262,7 @@ def report(data):
         print(f'\nList of objects that failed to copy to Redshift: \n\nNone\n')
     else:
         print(f'\nList of objects that failed to copy to Redshift:')
-        for item in data['failed_to_rs']:
+        for i, item in enumerate(data['failed_to_rs'], 1):
             print(f'\n{item}')
 
     # If nothing failed do to early exit, print None
@@ -270,7 +270,7 @@ def report(data):
         print(f'List of sites not processed due to early exit: \n\nNone\n')
     else:
         print(f'List of sites that were not processed due to early exit:')
-        for item in data['failed_api_call']:
+        for i, item in enumerate(data['failed_api_call']), 1:
             print(f'\n{item}')
     
     if report_stats['pdt_build_success']:

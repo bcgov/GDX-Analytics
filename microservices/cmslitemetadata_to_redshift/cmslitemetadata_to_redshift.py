@@ -197,6 +197,46 @@ def main():
         logger.debug("%s has not been processed.", filename)
         return False
 
+    def report(data):
+        '''reports out the data from the main program loop'''
+        # if no objects were processed; do not print a report
+        if data["objects"] == 0:
+            return
+        print(f'report {__file__}:')
+        print(f'\nObjects to process: {data["objects"]}')
+        print(f'Objects successfully processed: {data["processed"]}')
+        print(f'Objects that failed to process: {data["failed"]}')
+        print(f'Objects output to \'processed/good\': {data["good"]}')
+        print(f'Objects output to \'processed/bad\': {data["bad"]}')
+        print(f'Objects loaded to Redshift: {data["loaded"]}')
+        print(
+            "\nList of objects successfully fully ingested from S3, processed, "
+            "loaded to S3 ('good'), and copied to Redshift:")
+        if data['good_list']:
+            for i, meta in enumerate(data['good_list']):
+                print(f"{i}: {meta.key}")
+        else: print('None')
+        print('\nList of objects that failed to process:')
+        if data['bad_list']:
+            for i, meta in enumerate(data['bad_list']):
+                print(f"{i}: {meta.key}")
+        else: print('None')
+        print('\nList of objects that were not processed due to early exit:')
+        if data['incomplete_list']:
+            for i, meta in enumerate(data['incomplete_list']):
+                print(f"{i}: {meta.key}")
+        else: print("None")
+
+        # get times from system and convert to Americas/Vancouver for printing
+        yvr_dt_end = (yvr_tz
+            .normalize(datetime.now(local_tz)
+            .astimezone(yvr_tz)))
+        print(
+            '\nMicroservice started at: '
+            f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'elapsing: {yvr_dt_end - yvr_dt_start}.')
+
     # This bucket scan will find unprocessed objects.
     # objects_to_process will contain zero or one objects if truncate=True;
     # objects_to_process will contain zero or more objects if truncate=False.
@@ -233,6 +273,22 @@ def main():
         logger.info(('truncate is set. processing most recent file match: '
                      '%s (modified %s)'), objects_to_process[0].key,
                     objects_to_process[0].last_modified)
+
+    # Reporting variables. Accumulates as the the loop below is traversed
+    report_stats = {
+        'objects':0,
+        'processed':0,
+        'failed':0,
+        'good': 0,
+        'bad': 0,
+        'loaded': 0,
+        'good_list':[],
+        'bad_list':[],
+        'incomplete_list':[]
+    }
+
+report_stats['objects'] = len(objects_to_process)
+report_stats['incomplete_list'] = objects_to_process.copy()
 
     # process the objects that were found during the earlier directory pass
     for object_summary in objects_to_process:

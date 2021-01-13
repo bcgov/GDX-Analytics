@@ -85,8 +85,6 @@ yvr_tz = timezone('America/Vancouver')
 yvr_dt_start = (yvr_tz
     .normalize(datetime.now(local_tz)
     .astimezone(yvr_tz)))
-# Set again at PDT build start time
-yvr_dt_pdt_start = ()
 
 # Ctrl+C
 def signal_handler(sig, frame):
@@ -285,11 +283,12 @@ def report(data):
         .normalize(datetime.now(local_tz)
         .astimezone(yvr_tz)))
 
-    print(
-        'PDT build started at: '
-        f'{yvr_dt_pdt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
-        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
-        f'elapsing: {yvr_dt_end - yvr_dt_pdt_start}.')
+    if report_stats['pdt_build_success']:
+        print(
+            'PDT build started at: '
+            f'{yvr_dt_pdt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'elapsing: {yvr_dt_end - yvr_dt_pdt_start}.')
     print(
         '\nMicroservice started at: '
         f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '

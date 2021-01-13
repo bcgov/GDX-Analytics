@@ -486,7 +486,7 @@ for site_item in config_sites:  # noqa: C901
                     clean_exit(1,'Could not load to redshift.')
                 else:
                     report_stats['processed'].append(s3_file_path)
-                    logger.info(
+                    logger.debug(
                         "SUCCESS loading %s (%s index) over date range "
                         "%s to %s into %s. Object key %s.", site_name,
                         str(index), str(start_dt), str(end_dt),

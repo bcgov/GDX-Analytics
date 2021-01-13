@@ -249,7 +249,7 @@ def report(data):
     print(f'{__file__} report:')
     print(f'\nSites to process: {data["sites"]}')
     print(f'Successful API calls: {data["retrieved"]}')
-    print(f'Failed API calls: {data["failed"]}')
+    print(f'Failed API calls: {data["failed_api"]}')
     print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
     print(f'Objects loaded to S3 and copied to RedShift:')
 
@@ -269,7 +269,7 @@ def report(data):
     if not data['failed_api_call']:
         print(f'List of sites not processed due to early exit: \n\nNone\n')
     else:
-        print(f'List of objects that were not processed due to early exit:/n')
+        print(f'List of sites that were not processed due to early exit:')
         for item in data['failed_api_call']:
             print(f'\n{item}')
     
@@ -299,7 +299,7 @@ def report(data):
 report_stats = {
     'sites':0,  # Number of sites in google_search.json 
     'retrieved':0,  # Successful API calls
-    'failed':0,
+    'failed_api':0,
     'failed_rs':0,
     'processed':[],  # API call, load to S3, and copy to Redshift all OK
     'failed_to_rs':[],  # Objects that failed to copy to Redshift
@@ -426,8 +426,9 @@ for site_item in config_sites:  # noqa: C901
                         if retry == 11:
                             logger.error(("Failing with HTTP error after 10 "
                                           "retries with query time easening."))
-                            report_stats['failed'] += 1
+                            report_stats['failed_api'] += 1
                             report_stats['retrieved'] -= 1
+                            report_stats['failed_rs'] -= 1
                             report_stats['failed_api_call'].append(current_file)
                             # Run report to output any stats avaiable
                             report(report_stats)

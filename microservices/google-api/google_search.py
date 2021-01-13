@@ -79,12 +79,14 @@ from googleapiclient.errors import HttpError as GoogleHttpError
 import psycopg2  # For Amazon Redshift IO
 import lib.logs as log
 
-# Get script start time
+# Get script start times
 local_tz = get_localzone()
 yvr_tz = timezone('America/Vancouver')
 yvr_dt_start = (yvr_tz
     .normalize(datetime.now(local_tz)
     .astimezone(yvr_tz)))
+# Set again at PDT build start time
+yvr_dt_pdt_start = ()
 
 # Ctrl+C
 def signal_handler(sig, frame):

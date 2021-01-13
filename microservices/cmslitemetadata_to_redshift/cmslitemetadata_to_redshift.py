@@ -186,6 +186,7 @@ def main():
         except ClientError:
             pass  # this object does not exist under the good destination path
         else:
+            logger.debug('%s was processed as good already.', filename)
             return True
         try:
             client.head_object(Bucket=bucket, Key=loc_badfile)

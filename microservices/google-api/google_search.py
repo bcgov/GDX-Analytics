@@ -263,15 +263,15 @@ def report(data):
     else:
         print(f'\nList of objects that failed to copy to Redshift:')
         for i, item in enumerate(data['failed_to_rs'], 1):
-            print(f'\n{item}')
+            print(f'\n{i}: {item}')
 
     # If nothing failed do to early exit, print None
     if not data['failed_api_call']:
         print(f'List of sites not processed due to early exit: \n\nNone\n')
     else:
         print(f'List of sites that were not processed due to early exit:')
-        for i, item in enumerate(data['failed_api_call']), 1:
-            print(f'\n{item}')
+        for i, site in enumerate(data['failed_api_call']), 1:
+            print(f'\n{i}: {site}')
     
     if report_stats['pdt_build_success']:
         print('\nGoogle Search PDT loaded successfully\n')

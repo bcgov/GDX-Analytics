@@ -11,6 +11,8 @@ python-language-server = {extras = ["all"],version = "*"}
 [packages]
 apiclient = "*"
 backoff = "*"
+pytz = "*"
+tzlocal = "*"
 boto3 = "*"
 pandas = "*"
 botocore = "*"

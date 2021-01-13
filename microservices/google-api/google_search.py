@@ -239,7 +239,7 @@ def report(data):
     print(f'\nSites to process: {data["sites"]}')
     print(f'Successful API calls: {data["retrieved"]}')
     print(f'Failed API calls: {data["failed"]}\n')
-    print(f'Objects loaded to S3 and copied to RedShift:\n')
+    print(f'Objects loaded to S3 and copied to RedShift:')
 
     # Print all processed sites
     for item in data['processed']:
@@ -249,7 +249,7 @@ def report(data):
     if not data['failed_to_rs']:
         print(f'List of objects that failed to copy to Redshift: \n\nNone\n')
     else:
-        print(f'List of objects that failed to copy to Redshift:')
+        print(f'\nList of objects that failed to copy to Redshift:')
         for item in data['failed_to_rs']:
             print(f'\n{item}')
 

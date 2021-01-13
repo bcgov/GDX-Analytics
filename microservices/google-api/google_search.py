@@ -267,7 +267,7 @@ def report(data):
 
     # If nothing failed do to early exit, print None
     if not data['failed_api_call']:
-        print(f'List of objects that were not processed due to early exit: \n\nNone\n')
+        print(f'List of sites not processed due to early exit: \n\nNone\n')
     else:
         print(f'List of objects that were not processed due to early exit:/n')
         for item in data['failed_api_call']:
@@ -294,8 +294,6 @@ def report(data):
         f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
         f'elapsing: {yvr_dt_end - yvr_dt_start}.')
 
-
-
 # Reporting variables. Accumulates as the the sites lare looped over
 report_stats = {
     'sites':0,  # Number of sites in google_search.json 
@@ -307,7 +305,7 @@ report_stats = {
     'failed_api_call':[],  # Objects not processed due to early exit
     'pdt_build_success':False  # Will become 1 if successfull
 }
-#
+
 report_stats['sites'] = len(config_sites)
 report_stats['retrieved'] = len(config_sites)  # Will be subtracted from if a failure occurs
 
@@ -430,6 +428,8 @@ for site_item in config_sites:  # noqa: C901
                             report_stats['failed'] += 1
                             report_stats['retrieved'] -= 1
                             report_stats['failed_api_call'].append(current_file)
+                            # Run report to output any stats avaiable
+                            report(report_stats)
                             sys.exit()
                         wait_time = wait_time * 2
                         logger.warning(

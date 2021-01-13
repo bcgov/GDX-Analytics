@@ -428,7 +428,7 @@ for site_item in config_sites:  # noqa: C901
                                           "retries with query time easening."))
                             report_stats['failed_api'] += 1
                             report_stats['retrieved'] -= 1
-                            report_stats['failed_rs'] -= 1
+                            report_stats['failed_rs'] += 1
                             report_stats['failed_api_call'].append(current_file)
                             # Run report to output any stats avaiable
                             report(report_stats)

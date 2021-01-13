@@ -12,6 +12,10 @@
     {
       "name": "https://betterbuildingsbc.ca/",
       "start_date_default": "2021-01-01"
+    },
+    {
+      "name": "https://doesnot3x1stq.ca/",
+      "start_date_default": "2021-01-01"
     }
   ]
 }

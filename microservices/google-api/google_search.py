@@ -62,6 +62,10 @@ import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
 import logging
+import time
+from datetime import datetime
+from tzlocal import get_localzone
+from pytz import timezone
 import signal
 import backoff
 import boto3     # For Amazon S3 IO
@@ -74,6 +78,13 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleHttpError
 import psycopg2  # For Amazon Redshift IO
 import lib.logs as log
+
+# Get script start time
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+    .normalize(datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # Ctrl+C
 def signal_handler(sig, frame):
@@ -260,6 +271,23 @@ def report(data):
         print(f'List of objects that were not processed due to early exit:/n')
         for item in data['failed_api_call']:
             print(f'\n{item}')
+    
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+        .normalize(datetime.now(local_tz)
+        .astimezone(yvr_tz)))
+
+    print(
+        '\nPDT build started at: '
+        f'{yvr_dt_pdt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_pdt_start}.')
+    print(
+        '\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
+
 
 
 # Reporting variables. Accumulates as the the sites listed in google_search.json are looped over
@@ -494,6 +522,10 @@ for site_item in config_sites:  # noqa: C901
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt
 
+# Get PDT build start time
+yvr_dt_pdt_start = (yvr_tz
+    .normalize(datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # # This query will INSERT data that is the result of a JOIN into
 # # cmslite.google_pdt, a persistent dereived table which facilitating the LookML

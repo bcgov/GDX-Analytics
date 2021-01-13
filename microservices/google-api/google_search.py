@@ -272,13 +272,18 @@ def report(data):
         for item in data['failed_api_call']:
             print(f'\n{item}')
     
+    if report_stats['pdt_build_success']:
+        print('Google Search PDT loaded successfully')
+    else:
+        print("Google Search PDT load failed")
+
     # get times from system and convert to Americas/Vancouver for printing
     yvr_dt_end = (yvr_tz
         .normalize(datetime.now(local_tz)
         .astimezone(yvr_tz)))
 
     print(
-        '\nPDT build started at: '
+        'PDT build started at: '
         f'{yvr_dt_pdt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
         f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
         f'elapsing: {yvr_dt_end - yvr_dt_pdt_start}.')
@@ -290,14 +295,15 @@ def report(data):
 
 
 
-# Reporting variables. Accumulates as the the sites listed in google_search.json are looped over
+# Reporting variables. Accumulates as the the sites lare looped over
 report_stats = {
     'sites':0,  # Number of sites in google_search.json 
-    'retrieved':0,  # Starts as same values as sites. Minus 1 for each failed API call.
+    'retrieved':0,  # Successful API calls
     'failed':0,
-    'processed':[],  # Successfully called from the API, loaded to S3, and copied to Redshift
+    'processed':[],  # API call, load to S3, and copy to Redshift all OK
     'failed_to_rs':[],  # Objects that failed to copy to Redshift
-    'failed_api_call':[]  # Objects not processed due to early exit
+    'failed_api_call':[],  # Objects not processed due to early exit
+    'pdt_build_success':False  # Will become 1 if successfull
 }
 #
 report_stats['sites'] = len(config_sites)
@@ -602,9 +608,10 @@ yvr_dt_pdt_start = (yvr_tz
 #             curs.execute(query)
 #         except psycopg2.Error:
 #             logger.exception("Google Search PDT loading failed")
+#             report_stats['pdt_build_succcess] = True
 #             clean_exit(1,'Could not rebuild PDT in Redshift.')
 #         else:
-#             logger.info("Google Search PDT loaded successfully")
+#             logger.debug("Google Search PDT loaded successfully")
 #             clean_exit(0,'Finished succesfully.')
 
 report(report_stats)

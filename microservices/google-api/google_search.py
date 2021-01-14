@@ -312,6 +312,7 @@ report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
 
 for site_item in config_sites:
     report_stats['failed_api_call'].append(site_item['name'])
+    report_stats['failed_to_rs'].append(site_item['name'])
 
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901

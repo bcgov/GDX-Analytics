@@ -33,6 +33,7 @@ import psycopg2  # to connect to Redshift
 from lib.redshift import RedShift
 import lib.logs as log
 from tzlocal import get_localzone
+from pytz import timezone
 
 
 def main():

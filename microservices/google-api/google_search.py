@@ -438,8 +438,6 @@ for site_item in config_sites:  # noqa: C901
                         retry = retry + 1
                         sleep(wait_time)
                     else:
-                        # Remove site_name from failed list
-                        report_stats['failed_api_call'].remove(site_name)
                         break
 
                 index = index + 1
@@ -523,15 +521,19 @@ for site_item in config_sites:  # noqa: C901
                         config_dbtable, object_key.split('/')[-1])
                     clean_exit(1,'Could not load to redshift.')
                 else:
-                    del report_stats['failed_to_rs'][-1]
                     report_stats['processed'].append(s3_file_path)
                     logger.debug(
                         "SUCCESS loading %s (%s index) over date range "
                         "%s to %s into %s. Object key %s.", site_name,
                         str(index), str(start_dt), str(end_dt),
                         config_dbtable, object_key.split('/')[-1])
+
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt
+
+    # Remove site_name from failed lists
+    report_stats['failed_api_call'].remove(site_name)
+    report_stats['failed_to_rs'].remove(site_name)
 
 # Count all failed loads to RedShift        
 report_stats['failed_rs'] = len(report_stats['failed_to_rs'])

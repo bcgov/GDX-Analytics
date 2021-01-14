@@ -309,6 +309,7 @@ report_stats = {
 
 report_stats['sites'] = len(config_sites)
 report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
+report_stats['failed_api_call'] = config_sites.copy()
 
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
@@ -406,10 +407,6 @@ for site_item in config_sites:  # noqa: C901
                     "rowLimit": rowlimit,
                     "startRow": index * rowlimit}
 
-                # Set name of current file 
-                temp_fqdn = re.sub(r'^https?:\/\/', '', re.sub(r'\/$', '', site_name))
-                current_file = f"googlesearch-{temp_fqdn}-{start_dt}-{max_date_in_data}.csv"
-
                 # This query to the Google Search API may eventually yield an
                 # HTTP response code of 429, "Rate Limit Exceeded".
                 # The handling attempt below will increase the wait time on
@@ -429,7 +426,6 @@ for site_item in config_sites:  # noqa: C901
                             report_stats['failed_api'] += 1
                             report_stats['retrieved'] -= 1
                             report_stats['failed_rs'] += 1
-                            report_stats['failed_api_call'].append(current_file)
                             # Run report to output any stats avaiable
                             report(report_stats)
                             sys.exit()
@@ -440,6 +436,8 @@ for site_item in config_sites:  # noqa: C901
                         retry = retry + 1
                         sleep(wait_time)
                     else:
+                        # Remove site_name from failed list
+                        report_stats['failed_api_call'].remove(site_name)
                         break
 
                 index = index + 1

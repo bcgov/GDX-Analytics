@@ -287,8 +287,8 @@ def main():
         'incomplete_list':[]
     }
 
-report_stats['objects'] = len(objects_to_process)
-report_stats['incomplete_list'] = objects_to_process.copy()
+    report_stats['objects'] = len(objects_to_process)
+    report_stats['incomplete_list'] = objects_to_process.copy()
 
     # process the objects that were found during the earlier directory pass
     for object_summary in objects_to_process:

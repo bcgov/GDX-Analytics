@@ -317,7 +317,6 @@ for site_item in config_sites:  # noqa: C901
     
     # add site_name to failed lists. Will be removed on success
     report_stats['failed_api_call'].append(site_name)
-    print(report_stats['failed_api_call'])  # Test
 
     # get the last loaded date.
     # may be None if this site has not previously been loaded into Redshift
@@ -440,7 +439,7 @@ for site_item in config_sites:  # noqa: C901
                         sleep(wait_time)
                     else:
                         # Remove site_name from failed list
-                        del report_stats['failed_api_call'][-1]
+                        report_stats['failed_api_call'].remove(site_name)
                         break
 
                 index = index + 1

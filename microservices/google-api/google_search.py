@@ -317,7 +317,7 @@ for site_item in config_sites:  # noqa: C901
     
     # add site_name to failed lists. Will be removed on success
     report_stats['failed_api_call'].append(site_name)
-    report_stats['failed_to_rs'].append(site_name)
+    print(report_stats['failed_api_call'])  # Test
 
     # get the last loaded date.
     # may be None if this site has not previously been loaded into Redshift
@@ -440,7 +440,7 @@ for site_item in config_sites:  # noqa: C901
                         sleep(wait_time)
                     else:
                         # Remove site_name from failed list
-                        report_stats['failed_api_call'].remove(site_name)
+                        del report_stats['failed_api_call'][-1]
                         break
 
                 index = index + 1
@@ -496,6 +496,7 @@ for site_item in config_sites:  # noqa: C901
 
         # S3 file path for report_stats
         s3_file_path = f's3://{config_bucket}/{object_key}'
+        report_stats['failed_to_rs'].append(s3_file_path)
 
         # Prepare the Redshift COPY command.
         logquery = (
@@ -523,7 +524,7 @@ for site_item in config_sites:  # noqa: C901
                         config_dbtable, object_key.split('/')[-1])
                     clean_exit(1,'Could not load to redshift.')
                 else:
-                    report_stats['failed_to_rs'].remove(s3_file_path)
+                    del report_stats['failed_to_rs'][-1]
                     report_stats['processed'].append(s3_file_path)
                     logger.debug(
                         "SUCCESS loading %s (%s index) over date range "

@@ -310,14 +310,14 @@ report_stats = {
 report_stats['sites'] = len(config_sites)
 report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
 
+for site_item in config_sites:
+    report_stats['failed_api_call'].append(site_item['name'])
+
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
     # read the config for the site name and default start date if specified
     site_name = site_item["name"]
     
-    # add site_name to failed lists. Will be removed on success
-    report_stats['failed_api_call'].append(site_name)
-
     # get the last loaded date.
     # may be None if this site has not previously been loaded into Redshift
     last_loaded_date = last_loaded(site_name)

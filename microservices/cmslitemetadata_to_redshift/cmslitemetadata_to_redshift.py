@@ -32,10 +32,17 @@ import numpy as np
 import psycopg2  # to connect to Redshift
 from lib.redshift import RedShift
 import lib.logs as log
+from tzlocal import get_localzone
 
 
 def main():
     """Process S3 loaded CMS Lite Metadata file to Redshift"""
+
+    local_tz = get_localzone()
+    yvr_tz = timezone('America/Vancouver')
+    yvr_dt_start = (yvr_tz
+        .normalize(datetime.now(local_tz)
+        .astimezone(yvr_tz)))
 
     logger = logging.getLogger(__name__)
     log.setup()

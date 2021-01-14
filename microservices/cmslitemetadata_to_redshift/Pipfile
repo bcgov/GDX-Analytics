@@ -11,6 +11,8 @@ python-language-server = {extras = ["all"],version = "*"}
 [packages]
 boto3 = "*"
 pandas = "*"
+pytz = "*"
+tzlocal = "*"
 botocore = "*"
 psycopg2-binary = "*"
 microservices = {editable = true,path = "./.."}

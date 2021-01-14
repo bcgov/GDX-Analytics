@@ -30,7 +30,7 @@ from botocore.exceptions import ClientError
 import pandas as pd  # data processing
 import numpy as np
 import psycopg2  # to connect to Redshift
-import lib.logs as log
+from lib.redshift import RedShift
 
 
 def main():
@@ -309,26 +309,38 @@ report_stats['incomplete_list'] = objects_to_process.copy()
         # Check for an empty file. If it's empty, accept it as good and move on
         _df = None
         try:
-            _df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
-                              dtype=dtype_dic, usecols=range(column_count))
+            _df = pd.read_csv(StringIO(csv_string), 
+                              sep=delim, 
+                              index_col=False,
+                              dtype=dtype_dic, 
+                              usecols=range(column_count))
         except pd.errors.EmptyDataError:
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
             logger.exception("Empty file:")
             outfile = badfile
             client.copy_object(
                 Bucket=bucket,
                 CopySource=bucket + '/' + object_summary.key,
                 Key=outfile)
+            report(report_stats)
             clean_exit(
                 1,
                 f'{object_summary.key} was empty and was tagged as bad.')
         except pd.errors.ParserError:
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
             logger.exception("Parse error:")
             outfile = badfile
-
             client.copy_object(
                 Bucket=bucket,
                 CopySource=bucket + '/' + object_summary.key,
                 Key=outfile)
+            report(report_stats)
             clean_exit(
                 1,
                 f'{object_summary.key} did not parse and was tagged as bad.')
@@ -461,19 +473,16 @@ report_stats['incomplete_list'] = objects_to_process.copy()
             (os.environ['AWS_ACCESS_KEY_ID'], 'AWS_ACCESS_KEY_ID').replace
             (os.environ['AWS_SECRET_ACCESS_KEY'], 'AWS_SECRET_ACCESS_KEY'))
 
-        logger.debug('\n%s', logquery)
-        with psycopg2.connect(conn_string) as conn:
-            with conn.cursor() as curs:
-                try:
-                    curs.execute(query)
-                except psycopg2.Error:
-                    logger.exception("Executing transaction for %s failed.",
-                                     object_summary.key)
-                    outfile = badfile
-                else:  # if the DB call succeed, place file in /good
-                    logger.info("Executing transaction %s succeeded.",
-                                object_summary.key)
-                    outfile = goodfile
+        # Execute the transaction against Redshift using 
+        # local lib redshift module.
+        logger.debug(logquery)
+        spdb = RedShift.snowplow(batchfile)
+        if spdb.query(query):
+            outfile = goodfile
+            report_stats['loaded'] += 1
+        else:
+            outfile = badfile
+        spdb.close_connection()
 
         # Copies the uploaded file from client into processed/good or /bad
         try:
@@ -483,12 +492,18 @@ report_stats['incomplete_list'] = objects_to_process.copy()
                 Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
+            report(report_stats)
             clean_exit(
                 1,
                 f'S3 transfer of {object_summary.key} to {outfile} failed.')
 
         # exit with non-zero code if the file was keyed to bad
         if outfile == badfile:
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
+            report(report_stats)
             clean_exit(1,f'{object_summary.key} was processed as bad.')
 
     # now we run the single-time load on the cmslite.themes
@@ -678,39 +693,21 @@ WHERE index = 1;
 COMMIT;
     """.format(dbschema=dbschema)
 
-    # Execute the query and log the outcome
+    # Execute the query using local lib redshift module and log the outcome
     logger.debug('Executing query:\n%s', query)
-    with psycopg2.connect(conn_string) as conn:
-        with conn.cursor() as curs:
-            try:
-                curs.execute(query)
-            # if the DB call fails, print error and place file in /bad
-            except psycopg2.Error:
-                logger.exception("Psycopg2 error processing themes table")
-                clean_exit(1,'Failed to rebuild themes table.')
-            # if the DB call succeed, place file in /good
-            else:
-                logger.info("Themes table loaded successfully")
-                # if the job was succesful, write to cmslite.microservice_log
-                endtime = str(datetime.datetime.now())
-                query = (f"SET search_path TO {dbschema}; "
-                         "INSERT INTO microservice_log VALUES "
-                         f"('{starttime}', '{endtime}');")
-                try:
-                    curs.execute(query)
-                except psycopg2.Error:  # if the DB call fails, print error
-                    logger.exception(
-                        "Failed to write to %s.microservice_log", dbschema)
-                    logger.debug("To manually update, use: "
-                                 "start time: %s -- end time: %s",
-                                 starttime, endtime)
-                    clean_exit(1,'microservice_log load failed.')
-                else:
-                    logger.info("timestamp row added to microservice_log "
-                                "table")
-                    logger.debug("start time: %s -- end time: %s",
-                                 starttime, endtime)
+    spdb = RedShift.snowplow(batchfile)
+    if spdb.query(query):
+        outfile = goodfile
+        report_stats['loaded'] += 1
+    else:
+        outfile = badfile
+    spdb.close_connection()
 
+    report_stats['good'] += 1
+    report_stats['good_list'].append(object_summary)
+    report_stats['incomplete_list'].remove(object_summary)
+    logger.debug("finished %s", object_summary.key)
+    report(report_stats)
     clean_exit(0,'Succesfully finished cmslitemetadata_to_redshift.')
 
 

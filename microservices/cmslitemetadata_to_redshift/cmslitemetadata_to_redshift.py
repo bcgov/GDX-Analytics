@@ -31,6 +31,7 @@ import pandas as pd  # data processing
 import numpy as np
 import psycopg2  # to connect to Redshift
 from lib.redshift import RedShift
+import lib.logs as log
 
 
 def main():

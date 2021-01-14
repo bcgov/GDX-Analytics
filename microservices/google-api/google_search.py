@@ -310,6 +310,7 @@ report_stats = {
 report_stats['sites'] = len(config_sites)
 report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
 report_stats['failed_api_call'] = config_sites.copy()
+report_stats['failed_to_rs'] = config_sites.copy()
 
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
@@ -513,7 +514,6 @@ for site_item in config_sites:  # noqa: C901
                     curs.execute(query)
                 # if the DB call fails, print error and place file in /bad
                 except psycopg2.Error:
-                    report_stats['failed_to_rs'].append(s3_file_path)
                     logger.exception(
                         "FAILURE loading %s (%s index) over date range "
                         "%s to %s into %s. Object key %s.", site_name,
@@ -521,6 +521,7 @@ for site_item in config_sites:  # noqa: C901
                         config_dbtable, object_key.split('/')[-1])
                     clean_exit(1,'Could not load to redshift.')
                 else:
+                    report_stats['failed_to_rs'].remove(s3_file_path)
                     report_stats['processed'].append(s3_file_path)
                     logger.debug(
                         "SUCCESS loading %s (%s index) over date range "

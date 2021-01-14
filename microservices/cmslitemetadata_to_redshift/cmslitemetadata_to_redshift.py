@@ -23,11 +23,12 @@ import os  # to read environment variables
 import json  # to read json config files
 import sys  # to read command line parameters
 import itertools  # functional tools for creating and using iterators
-import datetime
+from datetime import datetime
 import logging
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import pandas.errors
 import numpy as np
 import psycopg2  # to connect to Redshift
 from lib.redshift import RedShift
@@ -58,7 +59,7 @@ def main():
     # changes to that table trigger Looker cacheing.
     # As a result, Looker refreshes its cmslite metadata cache
     # each time this microservice completes
-    starttime = str(datetime.datetime.now())
+    starttime = str(datetime.now())
 
     # Read configuration file
     if len(sys.argv) != 2:  # will be 1 if no arguments, 2 if one argument
@@ -211,7 +212,7 @@ def main():
         # if no objects were processed; do not print a report
         if data["objects"] == 0:
             return
-        print(f'report {__file__}:')
+        print(f'Report {__file__}:')
         print(f'\nObjects to process: {data["objects"]}')
         print(f'Objects successfully processed: {data["processed"]}')
         print(f'Objects that failed to process: {data["failed"]}')
@@ -234,6 +235,14 @@ def main():
         if data['incomplete_list']:
             for i, meta in enumerate(data['incomplete_list']):
                 print(f"{i}: {meta.key}")
+        else: print("None")
+        print('\nList of tables that were successfully loaded into Redshift:')
+        if data['tables_loaded']:
+            [print(table) for table in data['tables_loaded']]
+        else: print("None")
+        print('\nList of tables that failed to load into Redshift:')
+        if data['table_loads_failed']:
+            [print(table) for table in data['table_loads_failed']]
         else: print("None")
 
         # get times from system and convert to Americas/Vancouver for printing
@@ -293,7 +302,9 @@ def main():
         'loaded': 0,
         'good_list':[],
         'bad_list':[],
-        'incomplete_list':[]
+        'incomplete_list':[],
+        'tables_loaded':[],
+        'table_loads_failed':[]
     }
 
     report_stats['objects'] = len(objects_to_process)
@@ -323,36 +334,45 @@ def main():
                               index_col=False,
                               dtype=dtype_dic, 
                               usecols=range(column_count))
-        except pd.errors.EmptyDataError:
+        except pandas.errors.EmptyDataError as _e:
+            logger.exception('Exception reading %s', object_summary.key)
             report_stats['failed'] += 1
             report_stats['bad'] += 1
             report_stats['bad_list'].append(object_summary)
             report_stats['incomplete_list'].remove(object_summary)
-            logger.exception("Empty file:")
-            outfile = badfile
-            client.copy_object(
-                Bucket=bucket,
-                CopySource=bucket + '/' + object_summary.key,
-                Key=outfile)
+            if str(_e) == "No columns to parse from file":
+                logger.warning('%s is empty, keying to badfile and stopping.',
+                           object_summary.key)
+                outfile = badfile
+            else:
+                logger.warning('%s not empty, keying to badfile and stopping.',
+                           object_summary.key)
+                outfile = badfile
+            try:
+                client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+            except ClientError:
+                logger.exception("S3 transfer failed")
             report(report_stats)
-            clean_exit(
-                1,
-                f'{object_summary.key} was empty and was tagged as bad.')
-        except pd.errors.ParserError:
+            clean_exit(1, f'{object_summary.key} was empty and was tagged as bad.')
+        except ValueError:
             report_stats['failed'] += 1
             report_stats['bad'] += 1
             report_stats['bad_list'].append(object_summary)
             report_stats['incomplete_list'].remove(object_summary)
-            logger.exception("Parse error:")
+            logger.exception('ValueError exception reading %s', object_summary.key)
+            logger.warning('Keying to badfile and proceeding.')
             outfile = badfile
-            client.copy_object(
-                Bucket=bucket,
-                CopySource=bucket + '/' + object_summary.key,
-                Key=outfile)
+            try:
+                client.copy_object(Bucket=f"{bucket}",
+                                   CopySource=f"{bucket}/{object_summary.key}",
+                                   Key=outfile)
+            except ClientError:
+                logger.exception("S3 transfer failed")
             report(report_stats)
-            clean_exit(
-                1,
-                f'{object_summary.key} did not parse and was tagged as bad.')
+            clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
+                       'no further processing.')
 
         # set the data frame to use the columns listed in the .conf file.
         # Note that this overrides the columns in the file, and will give an
@@ -489,8 +509,10 @@ def main():
         if spdb.query(query):
             outfile = goodfile
             report_stats['loaded'] += 1
+            report_stats['tables_loaded'].append(dbschema + '.metadata')
         else:
             outfile = badfile
+            report_stats['table_loads_failed'].append(dbschema + '.metadata')
         spdb.close_connection()
 
         # Copies the uploaded file from client into processed/good or /bad
@@ -514,6 +536,10 @@ def main():
             report_stats['incomplete_list'].remove(object_summary)
             report(report_stats)
             clean_exit(1,f'{object_summary.key} was processed as bad.')
+
+        report_stats['good'] += 1
+        report_stats['good_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
 
     # now we run the single-time load on the cmslite.themes
     query = """
@@ -702,19 +728,18 @@ WHERE index = 1;
 COMMIT;
     """.format(dbschema=dbschema)
 
-    # Execute the query using local lib redshift module and log the outcome
-    logger.debug('Executing query:\n%s', query)
-    spdb = RedShift.snowplow(batchfile)
-    if spdb.query(query):
-        outfile = goodfile
-        report_stats['loaded'] += 1
-    else:
-        outfile = badfile
-    spdb.close_connection()
+    if(len(objects_to_process) > 0):
+        # Execute the query using local lib redshift module and log the outcome
+        logger.debug('Executing query:\n%s', query)
+        spdb = RedShift.snowplow(batchfile)
+        if spdb.query(query):
+            outfile = goodfile
+            report_stats['loaded'] += 1
+            report_stats['tables_loaded'].append(dbschema + '.themes')
+        else:
+            outfile = badfile
+        spdb.close_connection()
 
-    report_stats['good'] += 1
-    report_stats['good_list'].append(object_summary)
-    report_stats['incomplete_list'].remove(object_summary)
     logger.debug("finished %s", object_summary.key)
     report(report_stats)
     clean_exit(0,'Succesfully finished cmslitemetadata_to_redshift.')

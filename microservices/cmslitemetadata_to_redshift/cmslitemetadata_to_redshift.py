@@ -23,18 +23,28 @@ import os  # to read environment variables
 import json  # to read json config files
 import sys  # to read command line parameters
 import itertools  # functional tools for creating and using iterators
-import datetime
+from datetime import datetime
 import logging
 import boto3  # s3 access
 from botocore.exceptions import ClientError
 import pandas as pd  # data processing
+import pandas.errors
 import numpy as np
 import psycopg2  # to connect to Redshift
+from lib.redshift import RedShift
 import lib.logs as log
+from tzlocal import get_localzone
+from pytz import timezone
 
 
 def main():
     """Process S3 loaded CMS Lite Metadata file to Redshift"""
+
+    local_tz = get_localzone()
+    yvr_tz = timezone('America/Vancouver')
+    yvr_dt_start = (yvr_tz
+        .normalize(datetime.now(local_tz)
+        .astimezone(yvr_tz)))
 
     logger = logging.getLogger(__name__)
     log.setup()
@@ -49,7 +59,7 @@ def main():
     # changes to that table trigger Looker cacheing.
     # As a result, Looker refreshes its cmslite metadata cache
     # each time this microservice completes
-    starttime = str(datetime.datetime.now())
+    starttime = str(datetime.now())
 
     # Read configuration file
     if len(sys.argv) != 2:  # will be 1 if no arguments, 2 if one argument
@@ -186,6 +196,7 @@ def main():
         except ClientError:
             pass  # this object does not exist under the good destination path
         else:
+            logger.debug('%s was processed as good already.', filename)
             return True
         try:
             client.head_object(Bucket=bucket, Key=loc_badfile)
@@ -195,6 +206,54 @@ def main():
             return True
         logger.debug("%s has not been processed.", filename)
         return False
+
+    def report(data):
+        '''reports out the data from the main program loop'''
+        # if no objects were processed; do not print a report
+        if data["objects"] == 0:
+            return
+        print(f'Report {__file__}:')
+        print(f'\nObjects to process: {data["objects"]}')
+        print(f'Objects successfully processed: {data["processed"]}')
+        print(f'Objects that failed to process: {data["failed"]}')
+        print(f'Objects output to \'processed/good\': {data["good"]}')
+        print(f'Objects output to \'processed/bad\': {data["bad"]}')
+        print(f'Objects loaded to Redshift: {data["loaded"]}')
+        print(
+            "\nList of objects successfully fully ingested from S3, processed, "
+            "loaded to S3 ('good'), and copied to Redshift:")
+        if data['good_list']:
+            for i, meta in enumerate(data['good_list']):
+                print(f"{i}: {meta.key}")
+        else: print('None')
+        print('\nList of objects that failed to process:')
+        if data['bad_list']:
+            for i, meta in enumerate(data['bad_list']):
+                print(f"{i}: {meta.key}")
+        else: print('None')
+        print('\nList of objects that were not processed due to early exit:')
+        if data['incomplete_list']:
+            for i, meta in enumerate(data['incomplete_list']):
+                print(f"{i}: {meta.key}")
+        else: print("None")
+        print('\nList of tables that were successfully loaded into Redshift:')
+        if data['tables_loaded']:
+            [print(table) for table in data['tables_loaded']]
+        else: print("None")
+        print('\nList of tables that failed to load into Redshift:')
+        if data['table_loads_failed']:
+            [print(table) for table in data['table_loads_failed']]
+        else: print("None")
+
+        # get times from system and convert to Americas/Vancouver for printing
+        yvr_dt_end = (yvr_tz
+            .normalize(datetime.now(local_tz)
+            .astimezone(yvr_tz)))
+        print(
+            '\nMicroservice started at: '
+            f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'elapsing: {yvr_dt_end - yvr_dt_start}.')
 
     # This bucket scan will find unprocessed objects.
     # objects_to_process will contain zero or one objects if truncate=True;
@@ -233,6 +292,24 @@ def main():
                      '%s (modified %s)'), objects_to_process[0].key,
                     objects_to_process[0].last_modified)
 
+    # Reporting variables. Accumulates as the the loop below is traversed
+    report_stats = {
+        'objects':0,
+        'processed':0,
+        'failed':0,
+        'good': 0,
+        'bad': 0,
+        'loaded': 0,
+        'good_list':[],
+        'bad_list':[],
+        'incomplete_list':[],
+        'tables_loaded':[],
+        'table_loads_failed':[]
+    }
+
+    report_stats['objects'] = len(objects_to_process)
+    report_stats['incomplete_list'] = objects_to_process.copy()
+
     # process the objects that were found during the earlier directory pass
     for object_summary in objects_to_process:
         # Check to see if the file has been processed already
@@ -252,29 +329,50 @@ def main():
         # Check for an empty file. If it's empty, accept it as good and move on
         _df = None
         try:
-            _df = pd.read_csv(StringIO(csv_string), sep=delim, index_col=False,
-                              dtype=dtype_dic, usecols=range(column_count))
-        except pd.errors.EmptyDataError:
-            logger.exception("Empty file:")
+            _df = pd.read_csv(StringIO(csv_string), 
+                              sep=delim, 
+                              index_col=False,
+                              dtype=dtype_dic, 
+                              usecols=range(column_count))
+        except pandas.errors.EmptyDataError as _e:
+            logger.exception('Exception reading %s', object_summary.key)
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
+            if str(_e) == "No columns to parse from file":
+                logger.warning('%s is empty, keying to badfile and stopping.',
+                           object_summary.key)
+                outfile = badfile
+            else:
+                logger.warning('%s not empty, keying to badfile and stopping.',
+                           object_summary.key)
+                outfile = badfile
+            try:
+                client.copy_object(Bucket=f"{bucket}",
+                               CopySource=f"{bucket}/{object_summary.key}",
+                               Key=outfile)
+            except ClientError:
+                logger.exception("S3 transfer failed")
+            report(report_stats)
+            clean_exit(1, f'{object_summary.key} was empty and was tagged as bad.')
+        except ValueError:
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
+            logger.exception('ValueError exception reading %s', object_summary.key)
+            logger.warning('Keying to badfile and proceeding.')
             outfile = badfile
-            client.copy_object(
-                Bucket=bucket,
-                CopySource=bucket + '/' + object_summary.key,
-                Key=outfile)
-            clean_exit(
-                1,
-                f'{object_summary.key} was empty and was tagged as bad.')
-        except pd.errors.ParserError:
-            logger.exception("Parse error:")
-            outfile = badfile
-
-            client.copy_object(
-                Bucket=bucket,
-                CopySource=bucket + '/' + object_summary.key,
-                Key=outfile)
-            clean_exit(
-                1,
-                f'{object_summary.key} did not parse and was tagged as bad.')
+            try:
+                client.copy_object(Bucket=f"{bucket}",
+                                   CopySource=f"{bucket}/{object_summary.key}",
+                                   Key=outfile)
+            except ClientError:
+                logger.exception("S3 transfer failed")
+            report(report_stats)
+            clean_exit(1,f'Bad file {object_summary.key} in objects to process, '
+                       'no further processing.')
 
         # set the data frame to use the columns listed in the .conf file.
         # Note that this overrides the columns in the file, and will give an
@@ -404,19 +502,18 @@ def main():
             (os.environ['AWS_ACCESS_KEY_ID'], 'AWS_ACCESS_KEY_ID').replace
             (os.environ['AWS_SECRET_ACCESS_KEY'], 'AWS_SECRET_ACCESS_KEY'))
 
-        logger.debug('\n%s', logquery)
-        with psycopg2.connect(conn_string) as conn:
-            with conn.cursor() as curs:
-                try:
-                    curs.execute(query)
-                except psycopg2.Error:
-                    logger.exception("Executing transaction for %s failed.",
-                                     object_summary.key)
-                    outfile = badfile
-                else:  # if the DB call succeed, place file in /good
-                    logger.info("Executing transaction %s succeeded.",
-                                object_summary.key)
-                    outfile = goodfile
+        # Execute the transaction against Redshift using 
+        # local lib redshift module.
+        logger.debug(logquery)
+        spdb = RedShift.snowplow(batchfile)
+        if spdb.query(query):
+            outfile = goodfile
+            report_stats['loaded'] += 1
+            report_stats['tables_loaded'].append(dbschema + '.metadata')
+        else:
+            outfile = badfile
+            report_stats['table_loads_failed'].append(dbschema + '.metadata')
+        spdb.close_connection()
 
         # Copies the uploaded file from client into processed/good or /bad
         try:
@@ -426,13 +523,23 @@ def main():
                 Key=outfile)
         except ClientError:
             logger.exception("S3 transfer failed")
+            report(report_stats)
             clean_exit(
                 1,
                 f'S3 transfer of {object_summary.key} to {outfile} failed.')
 
         # exit with non-zero code if the file was keyed to bad
         if outfile == badfile:
+            report_stats['failed'] += 1
+            report_stats['bad'] += 1
+            report_stats['bad_list'].append(object_summary)
+            report_stats['incomplete_list'].remove(object_summary)
+            report(report_stats)
             clean_exit(1,f'{object_summary.key} was processed as bad.')
+
+        report_stats['good'] += 1
+        report_stats['good_list'].append(object_summary)
+        report_stats['incomplete_list'].remove(object_summary)
 
     # now we run the single-time load on the cmslite.themes
     query = """
@@ -621,39 +728,20 @@ WHERE index = 1;
 COMMIT;
     """.format(dbschema=dbschema)
 
-    # Execute the query and log the outcome
-    logger.debug('Executing query:\n%s', query)
-    with psycopg2.connect(conn_string) as conn:
-        with conn.cursor() as curs:
-            try:
-                curs.execute(query)
-            # if the DB call fails, print error and place file in /bad
-            except psycopg2.Error:
-                logger.exception("Psycopg2 error processing themes table")
-                clean_exit(1,'Failed to rebuild themes table.')
-            # if the DB call succeed, place file in /good
-            else:
-                logger.info("Themes table loaded successfully")
-                # if the job was succesful, write to cmslite.microservice_log
-                endtime = str(datetime.datetime.now())
-                query = (f"SET search_path TO {dbschema}; "
-                         "INSERT INTO microservice_log VALUES "
-                         f"('{starttime}', '{endtime}');")
-                try:
-                    curs.execute(query)
-                except psycopg2.Error:  # if the DB call fails, print error
-                    logger.exception(
-                        "Failed to write to %s.microservice_log", dbschema)
-                    logger.debug("To manually update, use: "
-                                 "start time: %s -- end time: %s",
-                                 starttime, endtime)
-                    clean_exit(1,'microservice_log load failed.')
-                else:
-                    logger.info("timestamp row added to microservice_log "
-                                "table")
-                    logger.debug("start time: %s -- end time: %s",
-                                 starttime, endtime)
+    if(len(objects_to_process) > 0):
+        # Execute the query using local lib redshift module and log the outcome
+        logger.debug('Executing query:\n%s', query)
+        spdb = RedShift.snowplow(batchfile)
+        if spdb.query(query):
+            outfile = goodfile
+            report_stats['loaded'] += 1
+            report_stats['tables_loaded'].append(dbschema + '.themes')
+        else:
+            outfile = badfile
+        spdb.close_connection()
 
+    logger.debug("finished %s", object_summary.key)
+    report(report_stats)
     clean_exit(0,'Succesfully finished cmslitemetadata_to_redshift.')
 
 

@@ -312,8 +312,7 @@ report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
 
 for site_item in config_sites:
     report_stats['failed_api_call'].append(site_item['name'])
-    report_stats['failed_to_rs'].append(site_item['name'])
-
+    
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
     # read the config for the site name and default start date if specified
@@ -522,6 +521,7 @@ for site_item in config_sites:  # noqa: C901
                         config_dbtable, object_key.split('/')[-1])
                     clean_exit(1,'Could not load to redshift.')
                 else:
+                    report_stats['failed_to_rs'].remove(s3_file_path)
                     report_stats['processed'].append(s3_file_path)
                     logger.debug(
                         "SUCCESS loading %s (%s index) over date range "
@@ -534,7 +534,6 @@ for site_item in config_sites:  # noqa: C901
 
     # Remove site_name from failed lists
     report_stats['failed_api_call'].remove(site_name)
-    report_stats['failed_to_rs'].remove(site_name)
 
 # Count all failed loads to RedShift        
 report_stats['failed_rs'] = len(report_stats['failed_to_rs'])

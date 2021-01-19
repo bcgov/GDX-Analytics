@@ -1,0 +1,47 @@
+{
+	"$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+	"description": "Schema for Stop Overdose Map Marker Clicks",
+	"self": {
+		"vendor": "ca.bc.gov.stopoverdose",
+		"name": "stop_overdose_marker_click",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+	"type": "object",
+	"properties": {
+		"geo_latitude": {
+			"type": ["string"],
+			"maxLength": 255
+		},
+		"geo_longitude": {
+			"type": ["string"],
+			"maxLength": 255
+		},
+        "name": {
+            "type": ["string"],
+			"maxLength": 255
+        },
+        "description": {
+            "type": ["string","null"],
+			"maxLength": 1023
+        },
+        "hours": {
+            "type": ["string","null"],
+			"maxLength": 255
+        },
+        "phone": {
+            "type": ["string","null"],
+			"maxLength": 255
+        },
+        "email": {
+            "type": ["string","null"],
+			"maxLength": 255
+        },
+        "address": {
+            "type": ["string","null"],
+			"maxLength": 255
+        }
+	},
+        "required": ["geo_latitude", "geo_longitude", "name"],
+	"additionalProperties": false
+}

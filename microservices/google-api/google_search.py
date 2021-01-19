@@ -543,85 +543,85 @@ yvr_dt_pdt_start = (yvr_tz
     .normalize(datetime.now(local_tz)
     .astimezone(yvr_tz)))
 
-# # This query will INSERT data that is the result of a JOIN into
-# # cmslite.google_pdt, a persistent dereived table which facilitating the LookML
-# query = """
-# -- perform this as a transaction.
-# -- Either the whole query completes, or it leaves the old table intact
-# BEGIN;
-# DROP TABLE IF EXISTS cmslite.google_pdt;
+# This query will INSERT data that is the result of a JOIN into
+# cmslite.google_pdt, a persistent dereived table which facilitating the LookML
+query = """
+-- perform this as a transaction.
+-- Either the whole query completes, or it leaves the old table intact
+BEGIN;
+DROP TABLE IF EXISTS cmslite.google_pdt;
 
-# CREATE TABLE IF NOT EXISTS cmslite.google_pdt (
-#         site              VARCHAR(255)    ENCODE ZSTD,
-#         date              date            ENCODE AZ64,
-#         query             VARCHAR(2048)   ENCODE ZSTD,
-#         country           VARCHAR(255)    ENCODE ZSTD,
-#         device            VARCHAR(255)    ENCODE ZSTD,
-#         page              VARCHAR(2047)   ENCODE ZSTD,
-#         position          FLOAT           ENCODE ZSTD,
-#         clicks            DECIMAL         ENCODE ZSTD,
-#         ctr               FLOAT           ENCODE ZSTD,
-#         impressions       DECIMAL         ENCODE ZSTD,
-#         node_id           VARCHAR(255)    ENCODE ZSTD,
-#         page_urlhost      VARCHAR(255)    ENCODE ZSTD,
-#         title             VARCHAR(2047)   ENCODE ZSTD,
-#         theme_id          VARCHAR(255)    ENCODE ZSTD,
-#         subtheme_id       VARCHAR(255)    ENCODE ZSTD,
-#         topic_id          VARCHAR(255)    ENCODE ZSTD,
-#         subtopic_id       VARCHAR(255)    ENCODE ZSTD,
-#         subsubtopic_id    VARCHAR(255)    ENCODE ZSTD,
-#         theme             VARCHAR(2047)   ENCODE ZSTD,
-#         subtheme          VARCHAR(2047)   ENCODE ZSTD,
-#         topic             VARCHAR(2047)   ENCODE ZSTD,
-#         subtopic          VARCHAR(2047)   ENCODE ZSTD,
-#         subsubtopic       VARCHAR(2047)   ENCODE ZSTD)
-#         COMPOUND SORTKEY (date,page_urlhost,theme,page,clicks);
+CREATE TABLE IF NOT EXISTS cmslite.google_pdt (
+        site              VARCHAR(255)    ENCODE ZSTD,
+        date              date            ENCODE AZ64,
+        query             VARCHAR(2048)   ENCODE ZSTD,
+        country           VARCHAR(255)    ENCODE ZSTD,
+        device            VARCHAR(255)    ENCODE ZSTD,
+        page              VARCHAR(2047)   ENCODE ZSTD,
+        position          FLOAT           ENCODE ZSTD,
+        clicks            DECIMAL         ENCODE ZSTD,
+        ctr               FLOAT           ENCODE ZSTD,
+        impressions       DECIMAL         ENCODE ZSTD,
+        node_id           VARCHAR(255)    ENCODE ZSTD,
+        page_urlhost      VARCHAR(255)    ENCODE ZSTD,
+        title             VARCHAR(2047)   ENCODE ZSTD,
+        theme_id          VARCHAR(255)    ENCODE ZSTD,
+        subtheme_id       VARCHAR(255)    ENCODE ZSTD,
+        topic_id          VARCHAR(255)    ENCODE ZSTD,
+        subtopic_id       VARCHAR(255)    ENCODE ZSTD,
+        subsubtopic_id    VARCHAR(255)    ENCODE ZSTD,
+        theme             VARCHAR(2047)   ENCODE ZSTD,
+        subtheme          VARCHAR(2047)   ENCODE ZSTD,
+        topic             VARCHAR(2047)   ENCODE ZSTD,
+        subtopic          VARCHAR(2047)   ENCODE ZSTD,
+        subsubtopic       VARCHAR(2047)   ENCODE ZSTD)
+        COMPOUND SORTKEY (date,page_urlhost,theme,page,clicks);
 
-# ALTER TABLE cmslite.google_pdt OWNER TO microservice;
-# GRANT SELECT ON cmslite.google_pdt TO looker;
+ALTER TABLE cmslite.google_pdt OWNER TO microservice;
+GRANT SELECT ON cmslite.google_pdt TO looker;
 
-# INSERT INTO cmslite.google_pdt
-#       SELECT gs.*,
-#           COALESCE(node_id,'') AS node_id,
-#           SPLIT_PART(page, '/',3) as page_urlhost,
-#           title,
-#           theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme,
-#           subtheme, topic, subtopic, subsubtopic
-#       FROM google.googlesearch AS gs
-#       -- fix for misreporting of redirected front page URL in Google search
-#       LEFT JOIN cmslite.themes AS themes ON
-#         CASE WHEN page = 'https://www2.gov.bc.ca/'
-#             THEN 'https://www2.gov.bc.ca/gov/content/home'
-#             ELSE page
-#             END = themes.hr_url
-#         WHERE site NOT IN ('sc-domain:gov.bc.ca', 'sc-domain:engage.gov.bc.ca')
-#             OR site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
-#                 'healthgateway.gov.bc.ca',
-#                 'engage.gov.bc.ca',
-#                 'feedback.engage.gov.bc.ca',
-#                 'www2.gov.bc.ca',
-#                 'www.engage.gov.bc.ca',
-#                 'curriculum.gov.bc.ca',
-#                 'studentsuccess.gov.bc.ca',
-#                 'news.gov.bc.ca',
-#                 'bcforhighschool.gov.bc.ca')
-#             OR site = 'sc-domain:engage.gov.bc.ca';
+INSERT INTO cmslite.google_pdt
+      SELECT gs.*,
+          COALESCE(node_id,'') AS node_id,
+          SPLIT_PART(page, '/',3) as page_urlhost,
+          title,
+          theme_id, subtheme_id, topic_id, subtopic_id, subsubtopic_id, theme,
+          subtheme, topic, subtopic, subsubtopic
+      FROM google.googlesearch AS gs
+      -- fix for misreporting of redirected front page URL in Google search
+      LEFT JOIN cmslite.themes AS themes ON
+        CASE WHEN page = 'https://www2.gov.bc.ca/'
+            THEN 'https://www2.gov.bc.ca/gov/content/home'
+            ELSE page
+            END = themes.hr_url
+        WHERE site NOT IN ('sc-domain:gov.bc.ca', 'sc-domain:engage.gov.bc.ca')
+            OR site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
+                'healthgateway.gov.bc.ca',
+                'engage.gov.bc.ca',
+                'feedback.engage.gov.bc.ca',
+                'www2.gov.bc.ca',
+                'www.engage.gov.bc.ca',
+                'curriculum.gov.bc.ca',
+                'studentsuccess.gov.bc.ca',
+                'news.gov.bc.ca',
+                'bcforhighschool.gov.bc.ca')
+            OR site = 'sc-domain:engage.gov.bc.ca';
 
-# COMMIT;
-# """
+COMMIT;
+"""
 
-# # Execute the query and log the outcome
-# logger.debug(query)
-# with psycopg2.connect(conn_string) as conn:
-#     with conn.cursor() as curs:
-#         try:
-#             curs.execute(query)
-#         except psycopg2.Error:
-#             logger.exception("Google Search PDT loading failed")
-#             report_stats['pdt_build_succcess'] = True
-#             clean_exit(1,'Could not rebuild PDT in Redshift.')
-#         else:
-#             logger.debug("Google Search PDT loaded successfully")
-#             clean_exit(0,'Finished succesfully.')
+# Execute the query and log the outcome
+logger.debug(query)
+with psycopg2.connect(conn_string) as conn:
+    with conn.cursor() as curs:
+        try:
+            curs.execute(query)
+        except psycopg2.Error:
+            logger.exception("Google Search PDT loading failed")
+            report_stats['pdt_build_succcess'] = True
+            clean_exit(1,'Could not rebuild PDT in Redshift.')
+        else:
+            logger.debug("Google Search PDT loaded successfully")
+            clean_exit(0,'Finished succesfully.')
 
 report(report_stats)

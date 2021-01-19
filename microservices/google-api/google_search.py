@@ -427,7 +427,6 @@ for site_item in config_sites:  # noqa: C901
                                           "retries with query time easening."))
                             report_stats['failed_api'] += 1
                             report_stats['retrieved'] -= 1
-                            report_stats['failed_rs'] += 1
                             # Run report to output any stats avaiable
                             report(report_stats)
                             sys.exit()
@@ -519,6 +518,7 @@ for site_item in config_sites:  # noqa: C901
                         "%s to %s into %s. Object key %s.", site_name,
                         str(index), str(start_dt), str(end_dt),
                         config_dbtable, object_key.split('/')[-1])
+                    report_stats['failed_rs'] += 1
                     clean_exit(1,'Could not load to redshift.')
                 else:
                     report_stats['failed_to_rs'].remove(s3_file_path)

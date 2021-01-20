@@ -622,6 +622,6 @@ with psycopg2.connect(conn_string) as conn:
         else:
             report_stats['pdt_build_success'] = True
             logger.debug("Google Search PDT loaded successfully")
-            clean_exit(0,'Finished succesfully.')
-
-report(report_stats)
+            report(report_stats)
+            clean_exit(0,'Finished successfully.')
+            

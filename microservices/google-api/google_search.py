@@ -62,6 +62,10 @@ import sys       # to read command line parameters
 import os.path   # file handling
 import io        # file and stream handling
 import logging
+import time
+from datetime import datetime
+from tzlocal import get_localzone
+from pytz import timezone
 import signal
 import backoff
 import boto3     # For Amazon S3 IO
@@ -75,6 +79,12 @@ from googleapiclient.errors import HttpError as GoogleHttpError
 import psycopg2  # For Amazon Redshift IO
 import lib.logs as log
 
+# Get script start times
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+    .normalize(datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # Ctrl+C
 def signal_handler(sig, frame):
@@ -230,13 +240,86 @@ conn_string = (
     f"user='{pguser}' "
     f"password={pgpass}")
 
+# Will run at end of script to print out accumulated report_stats
+def report(data):
+    '''reports out the data from the main program loop'''
+    # if no objects were processed; do not print a report
+    if data['sites'] == 0:
+        return
+    print(f'{__file__} report:')
+    print(f'\nSites to process: {data["sites"]}')
+    print(f'Successful API calls: {data["retrieved"]}')
+    print(f'Failed API calls: {data["failed_api"]}')
+    print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
+    print(f'Objects loaded to S3 and copied to RedShift:')
+
+    # Print all processed sites
+    for i, site in enumerate(data['processed'], 1):
+        print(f"\n{i}: {site}")
+
+    # If nothing failed to copy to RedShift, print None
+    if not data['failed_to_rs']:
+        print(f'\nList of objects that failed to copy to Redshift: \n\nNone\n')
+    else:
+        print(f'\nList of objects that failed to copy to Redshift:')
+        for i, item in enumerate(data['failed_to_rs'], 1):
+            print(f'\n{i}: {item}')
+
+    # If nothing failed do to early exit, print None
+    if not data['failed_api_call']:
+        print(f'List of sites not processed due to early exit: \n\nNone\n')
+    else:
+        print(f'List of sites that were not processed due to early exit:')
+        for i, site in enumerate(data['failed_api_call']), 1:
+            print(f'\n{i}: {site}')
+    
+    if report_stats['pdt_build_success']:
+        print('\nGoogle Search PDT loaded successfully\n')
+    else:
+        print('\nGoogle Search PDT load failed\n')
+
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+        .normalize(datetime.now(local_tz)
+        .astimezone(yvr_tz)))
+
+    if report_stats['pdt_build_success']:
+        print(
+            'PDT build started at: '
+            f'{yvr_dt_pdt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+            f'elapsing: {yvr_dt_end - yvr_dt_pdt_start}.')
+    print(
+        '\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
+
+# Reporting variables. Accumulates as the the sites lare looped over
+report_stats = {
+    'sites':0,  # Number of sites in google_search.json 
+    'retrieved':0,  # Successful API calls
+    'failed_api':0,
+    'failed_rs':0,
+    'processed':[],  # API call, load to S3, and copy to Redshift all OK
+    'failed_to_rs':[],  # Objects that failed to copy to Redshift
+    'failed_api_call':[],  # Objects not processed due to early exit
+    'pdt_build_success':False  # True if successfull
+}
+
+report_stats['sites'] = len(config_sites)
+report_stats['retrieved'] = len(config_sites)  # Minus 1 if failure occurs
+
+for site_item in config_sites:
+    report_stats['failed_api_call'].append(site_item['name'])
+    
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
     # read the config for the site name and default start date if specified
     site_name = site_item["name"]
-
+    
     # get the last loaded date.
-    # may be None if this site has not previously been loaded into Redshift)
+    # may be None if this site has not previously been loaded into Redshift
     last_loaded_date = last_loaded(site_name)
 
     # if the last load is 2 days old, there will be no new data in Google
@@ -293,7 +376,7 @@ for site_item in config_sites:  # noqa: C901
                 yield start_date + timedelta(_n)
 
         search_analytics_response = ''
-
+        
         # loops on each date from start date to the end date, inclusive
         # initializing date_in_range avoids pylint [undefined-loop-variable]
         date_in_range = ()
@@ -342,6 +425,10 @@ for site_item in config_sites:  # noqa: C901
                         if retry == 11:
                             logger.error(("Failing with HTTP error after 10 "
                                           "retries with query time easening."))
+                            report_stats['failed_api'] += 1
+                            report_stats['retrieved'] -= 1
+                            # Run report to output any stats avaiable
+                            report(report_stats)
                             sys.exit()
                         wait_time = wait_time * 2
                         logger.warning(
@@ -384,7 +471,7 @@ for site_item in config_sites:  # noqa: C901
             continue
         
         if max_date_in_data < str(end_dt):
-            logger.warning('The date range in the request spanned %s - %s, '
+            logger.debug('The date range in the request spanned %s - %s, '
                            'but the max date in the data retrieved was: %s',
                            str(start_dt),str(end_dt),str(max_date_in_data))
 
@@ -402,6 +489,10 @@ for site_item in config_sites:  # noqa: C901
         object_summary = resource.ObjectSummary(config_bucket, object_key)
         logger.debug('OBJECT LOADED ON: %s, OBJECT SIZE: %s',
                      object_summary.last_modified, object_summary.size)
+
+        # S3 file path for report_stats
+        s3_file_path = f's3://{config_bucket}/{object_key}'
+        report_stats['failed_to_rs'].append(s3_file_path)
 
         # Prepare the Redshift COPY command.
         logquery = (
@@ -427,16 +518,30 @@ for site_item in config_sites:  # noqa: C901
                         "%s to %s into %s. Object key %s.", site_name,
                         str(index), str(start_dt), str(end_dt),
                         config_dbtable, object_key.split('/')[-1])
+                    report_stats['failed_rs'] += 1
                     clean_exit(1,'Could not load to redshift.')
                 else:
-                    logger.info(
+                    report_stats['failed_to_rs'].remove(s3_file_path)
+                    report_stats['processed'].append(s3_file_path)
+                    logger.debug(
                         "SUCCESS loading %s (%s index) over date range "
                         "%s to %s into %s. Object key %s.", site_name,
                         str(index), str(start_dt), str(end_dt),
                         config_dbtable, object_key.split('/')[-1])
+
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt
 
+    # Remove site_name from failed lists
+    report_stats['failed_api_call'].remove(site_name)
+
+# Count all failed loads to RedShift        
+report_stats['failed_rs'] = len(report_stats['failed_to_rs'])
+
+# Get PDT build start time
+yvr_dt_pdt_start = (yvr_tz
+    .normalize(datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # This query will INSERT data that is the result of a JOIN into
 # cmslite.google_pdt, a persistent dereived table which facilitating the LookML
@@ -513,7 +618,10 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception("Google Search PDT loading failed")
+            report(report_stats)
             clean_exit(1,'Could not rebuild PDT in Redshift.')
         else:
-            logger.info("Google Search PDT loaded successfully")
-            clean_exit(0,'Finished succesfully.')
+            report_stats['pdt_build_success'] = True
+            logger.debug("Google Search PDT loaded successfully")
+            report(report_stats)
+            clean_exit(0,'Finished successfully.')

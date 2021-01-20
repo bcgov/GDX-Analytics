@@ -471,7 +471,7 @@ for site_item in config_sites:  # noqa: C901
             continue
         
         if max_date_in_data < str(end_dt):
-            logger.warning('The date range in the request spanned %s - %s, '
+            logger.debug('The date range in the request spanned %s - %s, '
                            'but the max date in the data retrieved was: %s',
                            str(start_dt),str(end_dt),str(max_date_in_data))
 

@@ -108,6 +108,10 @@
     {
       "name": "https://www.welcomebc.ca/",
       "start_date_default": "2020-08-16"
+    },
+    {
+      "name": "https://www.responsibleservicebc.gov.bc.ca/",
+      "start_date_default": "2020-12-23"
     }
   ]
 }

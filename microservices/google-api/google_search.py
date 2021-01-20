@@ -618,10 +618,10 @@ with psycopg2.connect(conn_string) as conn:
             curs.execute(query)
         except psycopg2.Error:
             logger.exception("Google Search PDT loading failed")
+            report(report_stats)
             clean_exit(1,'Could not rebuild PDT in Redshift.')
         else:
             report_stats['pdt_build_success'] = True
             logger.debug("Google Search PDT loaded successfully")
             report(report_stats)
             clean_exit(0,'Finished successfully.')
-            

@@ -78,5 +78,4 @@ function track_youtube_player(player_info) {
   });
 }
 </script>
-<!-- Snowplow stop plowing -->
-
+<!-- Snowplow stops plowing -->

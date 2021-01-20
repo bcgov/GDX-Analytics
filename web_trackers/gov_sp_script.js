@@ -33,4 +33,4 @@
        window.snowplow('trackPageView');
      }
 
-//  <!-- Snowplow stop plowing -->
+// <!-- Snowplow stops plowing -->

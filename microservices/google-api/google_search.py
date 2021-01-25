@@ -538,7 +538,10 @@ for site_item in config_sites:  # noqa: C901
                             config_dbtable, object_key.split('/')[-1])
                     else:
                         # The s3 object is 68B and max_Date_in data == 0
-                       report_stats['no_new_data'] += 1
+                        logger.debug(
+                            "%s max_date_in_data == 0"
+                            "Nothing copied to RedShift", site_name)
+                        report_stats['no_new_data'] += 1
 
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt

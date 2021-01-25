@@ -242,20 +242,24 @@ conn_string = (
 
 # Will run at end of script to print out accumulated report_stats
 def report(data):
-    '''reports out the data from the main program loop'''
+    '''Reports out the data from the main program loop'''
     # if no objects were processed; do not print a report
-    if data['sites'] == 0:
+    if data['no_new_data'] == data['sites']:
+        logger.debug("No API response contained new data")
         return
     print(f'{__file__} report:')
     print(f'\nSites to process: {data["sites"]}')
     print(f'Successful API calls: {data["retrieved"]}')
     print(f'Failed API calls: {data["failed_api"]}')
     print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
-    print(f'Objects loaded to S3 and copied to RedShift:')
 
     # Print all processed sites
-    for i, site in enumerate(data['processed'], 1):
-        print(f"\n{i}: {site}")
+    if not data['processed']:
+        print(f'Objects loaded to S3 and copied to RedShift: \n\nNone\n')
+    else:
+        print(f'Objects loaded to S3 and copied to RedShift:')
+        for i, site in enumerate(data['processed'], 1):
+            print(f"\n{i}: {site}")
 
     # If nothing failed to copy to RedShift, print None
     if not data['failed_to_rs']:
@@ -297,8 +301,9 @@ def report(data):
 
 # Reporting variables. Accumulates as the the sites lare looped over
 report_stats = {
-    'sites':0,  # Number of sites in google_search.json 
+    'sites':0,  # Number of sites in google_search.json
     'retrieved':0,  # Successful API calls
+    'no_new_data':0, # Sites where last_loaded_date < 2 days
     'failed_api':0,
     'failed_rs':0,
     'processed':[],  # API call, load to S3, and copy to Redshift all OK
@@ -316,7 +321,7 @@ for site_item in config_sites:
 # each site in the config list of sites gets processed in this loop
 for site_item in config_sites:  # noqa: C901
     # read the config for the site name and default start date if specified
-    site_name = site_item["name"]
+    site_name = site_item['name']
     
     # get the last loaded date.
     # may be None if this site has not previously been loaded into Redshift
@@ -324,6 +329,8 @@ for site_item in config_sites:  # noqa: C901
 
     # if the last load is 2 days old, there will be no new data in Google
     if last_loaded_date is not None and last_loaded_date >= latest_date:
+        report_stats['failed_api_call'].remove(site_name)
+        report_stats['no_new_data'] += 1
         continue
 
     # determine default start
@@ -464,7 +471,7 @@ for site_item in config_sites:  # noqa: C901
         # checks if only the header was written (68 bytes in stream)
         if stream.tell() == 68:
             logger.warning('No data retrieved for %s over date request range '
-                           '%s - %s. Skipping s3 object creatiton and '
+                           '%s - %s. Skipping s3 object creation and '
                            'Redshift load steps.',
                            site_name, start_dt, end_dt)
             # continue without writing a file.
@@ -522,12 +529,16 @@ for site_item in config_sites:  # noqa: C901
                     clean_exit(1,'Could not load to redshift.')
                 else:
                     report_stats['failed_to_rs'].remove(s3_file_path)
-                    report_stats['processed'].append(s3_file_path)
-                    logger.debug(
-                        "SUCCESS loading %s (%s index) over date range "
-                        "%s to %s into %s. Object key %s.", site_name,
-                        str(index), str(start_dt), str(end_dt),
-                        config_dbtable, object_key.split('/')[-1])
+                    if max_date_in_data != str(0):
+                        report_stats['processed'].append(s3_file_path)
+                        logger.debug(
+                            "SUCCESS loading %s (%s index) over date range "
+                            "%s to %s into %s. Object key %s.", site_name,
+                            str(index), str(start_dt), str(end_dt),
+                            config_dbtable, object_key.split('/')[-1])
+                    else:
+                        # The s3 object is 68B and max_Date_in data == 0
+                       report_stats['no_new_data'] += 1
 
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt

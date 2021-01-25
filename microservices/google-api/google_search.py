@@ -471,7 +471,7 @@ for site_item in config_sites:  # noqa: C901
         # checks if only the header was written (68 bytes in stream)
         if stream.tell() == 68:
             logger.warning('No data retrieved for %s over date request range '
-                           '%s - %s. Skipping s3 object creatiton and '
+                           '%s - %s. Skipping s3 object creation and '
                            'Redshift load steps.',
                            site_name, start_dt, end_dt)
             # continue without writing a file.
@@ -529,12 +529,16 @@ for site_item in config_sites:  # noqa: C901
                     clean_exit(1,'Could not load to redshift.')
                 else:
                     report_stats['failed_to_rs'].remove(s3_file_path)
-                    report_stats['processed'].append(s3_file_path)
-                    logger.debug(
-                        "SUCCESS loading %s (%s index) over date range "
-                        "%s to %s into %s. Object key %s.", site_name,
-                        str(index), str(start_dt), str(end_dt),
-                        config_dbtable, object_key.split('/')[-1])
+                    if max_date_in_data != str(0):
+                        report_stats['processed'].append(s3_file_path)
+                        logger.debug(
+                            "SUCCESS loading %s (%s index) over date range "
+                            "%s to %s into %s. Object key %s.", site_name,
+                            str(index), str(start_dt), str(end_dt),
+                            config_dbtable, object_key.split('/')[-1])
+                    else:
+                        # The s3 object is 68B and max_Date_in data == 0
+                       report_stats['no_new_data'] += 1
 
         # set last_loaded_date to end_dt to iterate through the next month
         last_loaded_date = end_dt

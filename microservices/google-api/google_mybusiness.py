@@ -371,11 +371,10 @@ for account in validated_accounts:
 
         # if start and end times are same, then there's no new data
         if start_time == end_time:
-            logger.info(
+            logger.debug(
                 "Redshift already contains the latest avaialble data for %s.",
                 location_name)
             report_stats['no_new_data'] += 1
-            logger.debug(f"{location_name} API response contained no new data")
             continue
 
         logger.debug("Querying range from %s to %s", start_date, end_date)

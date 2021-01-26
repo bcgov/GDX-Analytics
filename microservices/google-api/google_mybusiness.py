@@ -61,19 +61,27 @@ import psycopg2
 import argparse
 import httplib2
 import pandas as pd
-import dateutil.relativedelta
-
-import googleapiclient.errors
 
 from io import StringIO
 import datetime
+from pytz import timezone
+import dateutil.relativedelta
 from datetime import timedelta
+from tzlocal import get_localzone
+
+import googleapiclient.errors
 from googleapiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
 import lib.logs as log
 
+# Get script start time
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+    .normalize(datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # Ctrl+C
 def signal_handler(signal, frame):
@@ -202,6 +210,24 @@ def last_loaded(dbtable, location_id):
     con.close()
     return last_loaded_date
 
+# Reporting variables. Accumulates as the the loop below is traversed
+report_stats = {
+    'locations':0,
+    'retrieved':0,
+    'not_retrieved':0,
+    'processed':0,
+    'failed':0,
+    'good': 0,
+    'bad': 0,
+    'loaded_to_rs': 0,
+    'locations_list':[],
+    'retrieved_list':[],
+    'not_retrieved_list':[],
+    'failed_to_s3':[],
+    'failed_to_rs':[],
+    'good_list':[],
+    'bad_list':[]
+}
 
 # Location Check
 
@@ -250,6 +276,10 @@ for account in validated_accounts:
         # encode as ASCII for dataframe
         location_uri = loc['name']
         location_name = loc['locationName']
+
+        # Report out locations names and count
+        report_stats['locations_list'].append(location_name)
+        report_stats['locations'] += 1
 
         # if a start_date is defined in the config file, use that date
         start_date = account['start_date']
@@ -337,8 +367,17 @@ for account in validated_accounts:
                 reportInsights(body=bodyvar, name=account_uri).execute()
         except googleapiclient.errors.HttpError:
             logger.exception("Request contains an invalid argument. Skipping.")
+            report_stats['not_retrieved_list'].append(location_name)
+            report_stats['not_retrieved'] += 1
+            badfiles += 1
             continue
+        else:
+            # If retreived, report it
+            logger.debug(f"{location_name} Retrieved.")
+            report_stats['retrieved_list'].append(location_name)
+            report_stats['retrieved'] += 1
 
+        # Write API response for every location to debug log    
         logger.debug("Response body\n%s", reportInsights)
 
         # We constrain API calls to one location at a time, so
@@ -417,8 +456,10 @@ for account in validated_accounts:
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])
         logger.debug(logquery)
 
+        # Define s3 bucket paths
         goodfile = f"{config_destination}/good/{object_key}"
         badfile = f"{config_destination}/bad/{object_key}"
+
         # Connect to Redshift and execute the query.
         with psycopg2.connect(conn_string) as conn:
             with conn.cursor() as curs:
@@ -430,14 +471,15 @@ for account in validated_accounts:
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
                     movefile = badfile
+                    report_stats['failed_to_rs'].append(movefile)
                     badfiles += 1
                 else:
-                    logger.info("".join((
+                    logger.debug("".join((
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
                     movefile = goodfile
-
+                    
         # copy the object to the S3 outfile (processed/good/ or processed/bad/)
         try:
             s3.copy_object(
@@ -446,8 +488,18 @@ for account in validated_accounts:
                 .format(object_key), Key=movefile)
         except boto3.exceptions.ClientError:
             logger.exception("S3 transfer to %s failed", movefile)
+            report_stats['failed_to_s3'].append(movefile)
+            badfiles += 1
             clean_exit(1,f'S3 transfer of {object_key} to {movefile} failed.')
+        else:
+            if movefile == goodfile:
+                report_stats['good_list'].append(movefile)
+                report_stats['good'] += 1
+            else:
+                report_stats['bad_list'].append(movefile)
+                report_stats['bad'] += 1
 
+# Any exception occured throughout script, run report()
 if badfiles:
     clean_exit(1,'A file was processed as bad on this run.')
 clean_exit(0,'Ran without errors.')

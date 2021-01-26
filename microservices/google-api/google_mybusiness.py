@@ -207,6 +207,9 @@ def last_loaded(dbtable, location_id):
 # Will run at end of script to print out accumulated report_stats
 def report(data):
     '''reports out the data from the main program loop'''
+    if data['no_new_data'] == data['locations']:
+        logger.debug("No API response contained new data")
+        return
     print(f'{__file__} report:')
     print(f'\nLocations to process: {data["locations"]}')
     print(f'Successful API calls: {data["retrieved"]}')
@@ -225,7 +228,7 @@ def report(data):
         print(f'\n\nNone\n')
 
     # Print all fully processed locations in bad
-    print(f'Objects loaded RedShift and to S3 /bad:')
+    print(f'\nObjects loaded RedShift and to S3 /bad:')
     if data['bad_list']:
         for i, item in enumerate(data['bad_list'], 1):
             print(f"\n{i}: {item}")
@@ -252,6 +255,7 @@ def report(data):
 # Reporting variables. Accumulates as the the loop below is traversed
 report_stats = {
     'locations':0,
+    'no_new_data':0,
     'retrieved':0,
     'not_retrieved':0,
     'processed':0,
@@ -370,6 +374,8 @@ for account in validated_accounts:
             logger.info(
                 "Redshift already contains the latest avaialble data for %s.",
                 location_name)
+            report_stats['no_new_data'] += 1
+            logger.debug(f"{location_name} API response contained no new data")
             continue
 
         logger.debug("Querying range from %s to %s", start_date, end_date)
@@ -543,7 +549,5 @@ for account in validated_accounts:
                 report_stats['bad_list'].append(movefile)
                 report_stats['bad'] += 1
 
-# Any exception occured throughout script, run report()
-if badfiles:
-    clean_exit(1,'A file was processed as bad on this run.')
+report(report_stats)
 clean_exit(0,'Ran without errors.')

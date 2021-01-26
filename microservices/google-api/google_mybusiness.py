@@ -76,12 +76,6 @@ from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
 import lib.logs as log
 
-# Get script start time
-local_tz = get_localzone()
-yvr_tz = timezone('America/Vancouver')
-yvr_dt_start = (yvr_tz
-    .normalize(datetime.now(local_tz)
-    .astimezone(yvr_tz)))
 
 # Ctrl+C
 def signal_handler(signal, frame):
@@ -210,22 +204,68 @@ def last_loaded(dbtable, location_id):
     con.close()
     return last_loaded_date
 
+# Will run at end of script to print out accumulated report_stats
+def report(data):
+    '''reports out the data from the main program loop'''
+    print(f'{__file__} report:')
+    print(f'\nLocations to process: {data["locations"]}')
+    print(f'Successful API calls: {data["retrieved"]}')
+    print(f'Failed API calls: {data["not_retrieved"]}')
+    print(f'Successful loads to RedShift: {data["loaded_to_rs"]}\n')
+    print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
+    print(f'Files loads to S3 /good: {data["good"]}\n')
+    print(f'Files loads to S3 /bad: {data["bad"]}\n')
+
+    # Print all fully processed locations in good
+    print(f'Objects loaded RedShift and to S3 /good:')
+    if data['good_list']:
+        for i, item in enumerate(data['good_list'], 1):
+            print(f"\n{i}: {item}")
+    else:
+        print(f'\n\nNone\n')
+
+    # Print all fully processed locations in bad
+    print(f'Objects loaded RedShift and to S3 /bad:')
+    if data['bad_list']:
+        for i, item in enumerate(data['bad_list'], 1):
+            print(f"\n{i}: {item}")
+    else:
+        print(f'\n\nNone\n')
+
+    # If nothing failed to copy to RedShift, print None
+    if not data['failed_rs_list']:
+        print(f'\nList of objects that failed to copy to Redshift: \n\nNone\n')
+    else:
+        print(f'\nList of objects that failed to copy to Redshift:')
+        for i, item in enumerate(data['failed_rs_list'], 1):
+            print(f'\n{i}: {item}')
+
+    # Unsuccessful API calls 
+    if not data['not_retrieved_list']:
+        print(f'List of sites not processed due to early exit: \n\nNone\n')
+    else:
+        print(f'List of sites that were not processed due to early exit:')
+        for i, site in enumerate(data['not_retrieved_list']), 1:
+            print(f'\n{i}: {site}')
+
+
 # Reporting variables. Accumulates as the the loop below is traversed
 report_stats = {
     'locations':0,
     'retrieved':0,
     'not_retrieved':0,
     'processed':0,
-    'failed':0,
     'good': 0,
     'bad': 0,
     'loaded_to_rs': 0,
+    'failed_rs':0,
     'locations_list':[],
     'retrieved_list':[],
     'not_retrieved_list':[],
-    'failed_to_s3':[],
-    'failed_to_rs':[],
-    'good_list':[],
+    'failed_s3_list':[],
+    'good_rs_list':[],
+    'failed_rs_list':[],
+    'good_list':[],  # Made it all the way through
     'bad_list':[]
 }
 
@@ -297,7 +337,7 @@ for account in validated_accounts:
         # query RedShift to see if there is a date already loaded
         last_loaded_date = last_loaded(config_dbtable, loc['name'])
         if last_loaded_date is None:
-            logger.info("first time loading %s: %s",
+            logger.debug("first time loading %s: %s",
                         account['name'], loc['name'])
 
         # If it is loaded with some data for this ID, use that date plus
@@ -471,7 +511,8 @@ for account in validated_accounts:
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
                     movefile = badfile
-                    report_stats['failed_to_rs'].append(movefile)
+                    report_stats['failed_rs_list'].append(movefile)
+                    report_stats['failed_rs'] += 1
                     badfiles += 1
                 else:
                     logger.debug("".join((
@@ -479,6 +520,9 @@ for account in validated_accounts:
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
                     movefile = goodfile
+                    report_stats['good_rs_list'].append(movefile)
+                    report_stats['loaded_to_rs'] += 1
+                    report_stats
                     
         # copy the object to the S3 outfile (processed/good/ or processed/bad/)
         try:
@@ -488,7 +532,7 @@ for account in validated_accounts:
                 .format(object_key), Key=movefile)
         except boto3.exceptions.ClientError:
             logger.exception("S3 transfer to %s failed", movefile)
-            report_stats['failed_to_s3'].append(movefile)
+            report_stats['failed_s3_list'].append(movefile)
             badfiles += 1
             clean_exit(1,f'S3 transfer of {object_key} to {movefile} failed.')
         else:

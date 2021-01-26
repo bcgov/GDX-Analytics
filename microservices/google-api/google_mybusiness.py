@@ -61,13 +61,15 @@ import psycopg2
 import argparse
 import httplib2
 import pandas as pd
-import dateutil.relativedelta
-
-import googleapiclient.errors
 
 from io import StringIO
 import datetime
+from pytz import timezone
+import dateutil.relativedelta
 from datetime import timedelta
+from tzlocal import get_localzone
+
+import googleapiclient.errors
 from googleapiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
@@ -202,6 +204,74 @@ def last_loaded(dbtable, location_id):
     con.close()
     return last_loaded_date
 
+# Will run at end of script to print out accumulated report_stats
+def report(data):
+    '''reports out the data from the main program loop'''
+    if data['no_new_data'] == data['locations']:
+        logger.debug("No API response contained new data")
+        return
+    print(f'{__file__} report:')
+    print(f'\nLocations to process: {data["locations"]}')
+    print(f'Successful API calls: {data["retrieved"]}')
+    print(f'Failed API calls: {data["not_retrieved"]}')
+    print(f'Successful loads to RedShift: {data["loaded_to_rs"]}\n')
+    print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
+    print(f'Files loads to S3 /good: {data["good"]}\n')
+    print(f'Files loads to S3 /bad: {data["bad"]}\n')
+
+    # Print all fully processed locations in good
+    print(f'Objects loaded RedShift and to S3 /good:')
+    if data['good_list']:
+        for i, item in enumerate(data['good_list'], 1):
+            print(f"\n{i}: {item}")
+    else:
+        print(f'\n\nNone\n')
+
+    # Print all fully processed locations in bad
+    print(f'\nObjects loaded RedShift and to S3 /bad:')
+    if data['bad_list']:
+        for i, item in enumerate(data['bad_list'], 1):
+            print(f"\n{i}: {item}")
+    else:
+        print(f'\n\nNone\n')
+
+    # If nothing failed to copy to RedShift, print None
+    if not data['failed_rs_list']:
+        print(f'\nList of objects that failed to copy to Redshift: \n\nNone\n')
+    else:
+        print(f'\nList of objects that failed to copy to Redshift:')
+        for i, item in enumerate(data['failed_rs_list'], 1):
+            print(f'\n{i}: {item}')
+
+    # Unsuccessful API calls 
+    if not data['not_retrieved_list']:
+        print(f'List of sites not processed due to early exit: \n\nNone\n')
+    else:
+        print(f'List of sites that were not processed due to early exit:')
+        for i, site in enumerate(data['not_retrieved_list']), 1:
+            print(f'\n{i}: {site}')
+
+
+# Reporting variables. Accumulates as the the loop below is traversed
+report_stats = {
+    'locations':0,
+    'no_new_data':0,
+    'retrieved':0,
+    'not_retrieved':0,
+    'processed':0,
+    'good': 0,
+    'bad': 0,
+    'loaded_to_rs': 0,
+    'failed_rs':0,
+    'locations_list':[],
+    'retrieved_list':[],
+    'not_retrieved_list':[],
+    'failed_s3_list':[],
+    'good_rs_list':[],
+    'failed_rs_list':[],
+    'good_list':[],  # Made it all the way through
+    'bad_list':[]
+}
 
 # Location Check
 
@@ -251,6 +321,10 @@ for account in validated_accounts:
         location_uri = loc['name']
         location_name = loc['locationName']
 
+        # Report out locations names and count
+        report_stats['locations_list'].append(location_name)
+        report_stats['locations'] += 1
+
         # if a start_date is defined in the config file, use that date
         start_date = account['start_date']
         if start_date == '':
@@ -267,7 +341,7 @@ for account in validated_accounts:
         # query RedShift to see if there is a date already loaded
         last_loaded_date = last_loaded(config_dbtable, loc['name'])
         if last_loaded_date is None:
-            logger.info("first time loading %s: %s",
+            logger.debug("first time loading %s: %s",
                         account['name'], loc['name'])
 
         # If it is loaded with some data for this ID, use that date plus
@@ -297,9 +371,10 @@ for account in validated_accounts:
 
         # if start and end times are same, then there's no new data
         if start_time == end_time:
-            logger.info(
+            logger.debug(
                 "Redshift already contains the latest avaialble data for %s.",
                 location_name)
+            report_stats['no_new_data'] += 1
             continue
 
         logger.debug("Querying range from %s to %s", start_date, end_date)
@@ -337,8 +412,17 @@ for account in validated_accounts:
                 reportInsights(body=bodyvar, name=account_uri).execute()
         except googleapiclient.errors.HttpError:
             logger.exception("Request contains an invalid argument. Skipping.")
+            report_stats['not_retrieved_list'].append(location_name)
+            report_stats['not_retrieved'] += 1
+            badfiles += 1
             continue
+        else:
+            # If retreived, report it
+            logger.debug(f"{location_name} Retrieved.")
+            report_stats['retrieved_list'].append(location_name)
+            report_stats['retrieved'] += 1
 
+        # Write API response for every location to debug log    
         logger.debug("Response body\n%s", reportInsights)
 
         # We constrain API calls to one location at a time, so
@@ -417,8 +501,10 @@ for account in validated_accounts:
             AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY'])
         logger.debug(logquery)
 
+        # Define s3 bucket paths
         goodfile = f"{config_destination}/good/{object_key}"
         badfile = f"{config_destination}/bad/{object_key}"
+
         # Connect to Redshift and execute the query.
         with psycopg2.connect(conn_string) as conn:
             with conn.cursor() as curs:
@@ -430,14 +516,19 @@ for account in validated_accounts:
                         .format(location_name, e.pgerror),
                         " Object key: {0}".format(object_key.split('/')[-1]))))
                     movefile = badfile
+                    report_stats['failed_rs_list'].append(movefile)
+                    report_stats['failed_rs'] += 1
                     badfiles += 1
                 else:
-                    logger.info("".join((
+                    logger.debug("".join((
                         "Loaded {0} successfully."
                         .format(location_name),
                         ' Object key: {0}'.format(object_key.split('/')[-1]))))
                     movefile = goodfile
-
+                    report_stats['good_rs_list'].append(movefile)
+                    report_stats['loaded_to_rs'] += 1
+                    report_stats
+                    
         # copy the object to the S3 outfile (processed/good/ or processed/bad/)
         try:
             s3.copy_object(
@@ -446,8 +537,16 @@ for account in validated_accounts:
                 .format(object_key), Key=movefile)
         except boto3.exceptions.ClientError:
             logger.exception("S3 transfer to %s failed", movefile)
+            report_stats['failed_s3_list'].append(movefile)
+            badfiles += 1
             clean_exit(1,f'S3 transfer of {object_key} to {movefile} failed.')
+        else:
+            if movefile == goodfile:
+                report_stats['good_list'].append(movefile)
+                report_stats['good'] += 1
+            else:
+                report_stats['bad_list'].append(movefile)
+                report_stats['bad'] += 1
 
-if badfiles:
-    clean_exit(1,'A file was processed as bad on this run.')
+report(report_stats)
 clean_exit(0,'Ran without errors.')

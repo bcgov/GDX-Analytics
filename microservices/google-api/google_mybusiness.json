@@ -2,8 +2,8 @@
   "bucket": "sp-ca-bc-gov-131565110619-12-microservices",
   "source": "client",
   "destination": "processed",
-  "directory": "google_mybusiness_gdxdsd3347",
-  "dbtable": "google.locations_gdxdsd3347",
+  "directory": "google_mybusiness",
+  "dbtable": "google.locations",
   "metrics": [
     "VIEWS_SEARCH",
     "VIEWS_MAPS",
@@ -23,7 +23,7 @@
       "client_shortname": "servicebc",
       "name": "Service BC Locations",
       "id": 5448030039,
-      "start_date": "2021-01-17",
+      "start_date": "",
       "end_date": ""
     }
   ]

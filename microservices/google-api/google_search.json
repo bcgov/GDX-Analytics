@@ -112,6 +112,14 @@
     {
       "name": "https://www.responsibleservicebc.gov.bc.ca/",
       "start_date_default": "2020-12-23"
+    },
+    {
+      "name": "https://digital.gov.bc.ca/",
+      "start_date_default": "2020-10-13"
+    },
+    {
+      "name": "https://cannabis.gov.bc.ca/",
+      "start_date_default": "2021-01-17"
     }
   ]
 }

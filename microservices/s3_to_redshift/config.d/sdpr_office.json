@@ -43,6 +43,6 @@
   ],
   "dateformat": [ { "field": "start_date", "format": "%d-%b-%y" } ,
       { "field": "end_date", "format": "%d-%b-%y" } ],
-  "delim": ",",
+  "delim": "|",
   "truncate": true
 }

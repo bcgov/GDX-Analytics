@@ -208,17 +208,17 @@ def is_processed(key):
 # Will run at end of script to print out accumulated report_stats
 def report(data):
     '''reports out the data from the main program loop'''
-    if data['no_new_data'] == data['locations']:
+    if data['no_new_data'] == True:
         logger.debug("No API response contained new data")
         return
     print(f'{__file__} report:')
-    print(f'\nLocations to process: {data["locations"]}')
+    print(f'\nItems to process: {data["locations"]}')
     print(f'Successful API calls: {data["retrieved"]}')
     print(f'Failed API calls: {data["not_retrieved"]}')
     print(f'Successful loads to RedShift: {data["loaded_to_rs"]}\n')
     print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
-    print(f'Objects loaded to S3 /good: {data["good"]}\n')
-    print(f'Objects loaded to S3 /bad: {data["bad"]}\n')
+    print(f'Objects output to processed/good: {data["good"]}\n')
+    print(f'Objects output to processed/bad {data["bad"]}\n')
 
     # Print all fully processed locations in good
     print(f'Objects loaded RedShift and to S3 /good:')
@@ -240,7 +240,7 @@ def report(data):
 
     # Print unsuccessful API calls 
     if data['not_retrieved_list']:
-        print(f'List of sites that were not processed do to Google API Error:')
+        print(f'\nList of sites that were not processed do to Google API Error:')
         for i, site in enumerate(data['not_retrieved_list']), 1:
             print(f'\n{i}: {site}')
 
@@ -248,12 +248,12 @@ def report(data):
 # Reporting variables. Accumulates as the the loop below is traversed
 report_stats = {
     'locations':0,
-    'no_new_data':0,
+    'no_new_data':False,
     'retrieved':0,
     'not_retrieved':0,
     'processed':0,
-    'good': 0,
-    'bad': 0,
+    'good':0,
+    'bad':0,
     'loaded_to_rs': 0,
     'failed_rs':0,
     'locations_list':[],
@@ -298,8 +298,6 @@ for loc in config_locationGroups:
 # iterate over ever validated account
 badfiles = 0
 for account in validated_accounts:
-    report_stats['locations_list'].append(account['clientShortname'])
-    report_stats['locations'] += 1
     # check the aggregate_days validity
     if 1 <= len(account["aggregate_days"]) <= 3:
         for i in account["aggregate_days"]:
@@ -321,9 +319,10 @@ for account in validated_accounts:
     object_key = object_key_path + outfile
 
     if is_processed(object_key):
-        logger.warning(
+        logger.debug(
             ("The file: %s has already been generated "
              "and processed by this script today."), object_key)
+        report_stats['no_new_data'] = True
         continue
 
     goodfile = f"{config_destination}/good/{object_key}"
@@ -371,7 +370,7 @@ for account in validated_accounts:
                     'languageCode': 'en-US'
                     }
                 }
-
+            report_stats['locations'] += 1
             logger.debug("Request JSON -- \n%s", json.dumps(bodyvar, indent=2))
 
             # Posts the API request
@@ -550,4 +549,5 @@ for account in validated_accounts:
     if outfile == badfile:
         clean_exit(1,'The output file was bad.')
 
+report(report_stats)
 clean_exit(0,'Finished without errors.')

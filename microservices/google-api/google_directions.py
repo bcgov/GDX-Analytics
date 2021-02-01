@@ -215,10 +215,10 @@ def report(data):
     print(f'\nItems to process: {data["locations"]}')
     print(f'Successful API calls: {data["retrieved"]}')
     print(f'Failed API calls: {data["not_retrieved"]}')
-    print(f'Successful loads to RedShift: {data["loaded_to_rs"]}\n')
-    print(f'Failed loads to RedShift: {data["failed_rs"]}\n')
-    print(f'Objects output to processed/good: {data["good"]}\n')
-    print(f'Objects output to processed/bad {data["bad"]}\n')
+    print(f'Successful loads to RedShift: {data["loaded_to_rs"]}')
+    print(f'Failed loads to RedShift: {data["failed_rs"]}')
+    print(f'Objects output to processed/good: {data["good"]}')
+    print(f'Objects output to processed/bad {data["bad"]}')
 
     # Print all fully processed locations in good
     print(f'Objects loaded RedShift and to S3 /good:')

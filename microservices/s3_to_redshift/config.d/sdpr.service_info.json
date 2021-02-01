@@ -12,6 +12,6 @@
 	"PgmCode",
 	"Program"
   ],
-  "delim": "," ,
+  "delim": "|",
   "truncate": true
 }

@@ -60,6 +60,10 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 import logging
+import time
+import datetime
+from tzlocal import get_localzone
+from pytz import timezone
 import psycopg2
 import argparse
 import httplib2
@@ -67,13 +71,18 @@ import pandas as pd
 from pandas import json_normalize
 import googleapiclient.errors
 from io import StringIO
-import datetime
 from googleapiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
 import lib.logs as log
 
+# Get script start time
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+    .normalize(datetime.datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # Ctrl+C
 def signal_handler(signal, frame):
@@ -212,13 +221,22 @@ def report(data):
         logger.debug("No API response contained new data")
         return
     print(f'{__file__} report:')
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+        .normalize(datetime.datetime.now(local_tz)
+        .astimezone(yvr_tz)))
+    print(
+    	'\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
     print(f'\nItems to process: {data["locations"]}')
     print(f'Successful API calls: {data["retrieved"]}')
     print(f'Failed API calls: {data["not_retrieved"]}')
     print(f'Successful loads to RedShift: {data["loaded_to_rs"]}')
     print(f'Failed loads to RedShift: {data["failed_rs"]}')
     print(f'Objects output to processed/good: {data["good"]}')
-    print(f'Objects output to processed/bad {data["bad"]}')
+    print(f'Objects output to processed/bad {data["bad"]}\n')
 
     # Print all fully processed locations in good
     print(f'Objects loaded RedShift and to S3 /good:')
@@ -520,7 +538,7 @@ for account in validated_accounts:
                 report_stats['failed_rs'] += 1
                 badfiles += 1
             else:
-                logger.info(
+                logger.debug(
                     ("Loaded %s driving directions successfully. "
                      "Object key %s."),
                     account['clientShortname'], object_key.split('/')[-1])

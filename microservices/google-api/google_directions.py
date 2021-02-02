@@ -60,6 +60,10 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 import logging
+import time
+import datetime
+from tzlocal import get_localzone
+from pytz import timezone
 import psycopg2
 import argparse
 import httplib2
@@ -67,13 +71,18 @@ import pandas as pd
 from pandas import json_normalize
 import googleapiclient.errors
 from io import StringIO
-import datetime
 from googleapiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import flow_from_clientsecrets
 import lib.logs as log
 
+# Get script start time
+local_tz = get_localzone()
+yvr_tz = timezone('America/Vancouver')
+yvr_dt_start = (yvr_tz
+    .normalize(datetime.datetime.now(local_tz)
+    .astimezone(yvr_tz)))
 
 # Ctrl+C
 def signal_handler(signal, frame):
@@ -183,7 +192,6 @@ service = build(
 client = boto3.client('s3')
 resource = boto3.resource('s3')
 
-
 # Check to see if the file has been processed already
 def is_processed(key):
     filename = key[key.rfind('/')+1:]  # get the filename (after the last '/')
@@ -206,6 +214,75 @@ def is_processed(key):
     logger.debug("%s has not been processed.", filename)
     return False
 
+# Will run at end of script to print out accumulated report_stats
+def report(data):
+    '''reports out the data from the main program loop'''
+    if data['no_new_data'] == True:
+        logger.debug("No API response contained new data")
+        return
+    print(f'{__file__} report:')
+    # get times from system and convert to Americas/Vancouver for printing
+    yvr_dt_end = (yvr_tz
+        .normalize(datetime.datetime.now(local_tz)
+        .astimezone(yvr_tz)))
+    print(
+    	'\nMicroservice started at: '
+        f'{yvr_dt_start.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'ended at: {yvr_dt_end.strftime("%Y-%m-%d %H:%M:%S%z (%Z)")}, '
+        f'elapsing: {yvr_dt_end - yvr_dt_start}.')
+    print(f'\nItems to process: {data["locations"]}')
+    print(f'Successful API calls: {data["retrieved"]}')
+    print(f'Failed API calls: {data["not_retrieved"]}')
+    print(f'Successful loads to RedShift: {data["loaded_to_rs"]}')
+    print(f'Failed loads to RedShift: {data["failed_rs"]}')
+    print(f'Objects output to processed/good: {data["good"]}')
+    print(f'Objects output to processed/bad {data["bad"]}\n')
+
+    # Print all fully processed locations in good
+    print(f'Objects loaded RedShift and to S3 /good:')
+    if data['good_list']:
+        for i, item in enumerate(data['good_list'], 1):
+            print(f"\n{i}: {item}")
+
+    # Print all fully processed locations in bad
+    if data['bad_list']:
+        print(f'\nObjects loaded RedShift and to S3 /bad:')
+        for i, item in enumerate(data['bad_list'], 1):
+            print(f"\n{i}: {item}")
+
+    # Print failed load to RedShift
+    if data['failed_rs_list']:
+        print(f'\nList of objects that failed to copy to Redshift:')
+        for i, item in enumerate(data['failed_rs_list'], 1):
+            print(f'\n{i}: {item}')
+
+    # Print unsuccessful API calls 
+    if data['not_retrieved_list']:
+        print(f'\nList of sites that were not processed do to Google API Error:')
+        for i, site in enumerate(data['not_retrieved_list']), 1:
+            print(f'\n{i}: {site}')
+
+
+# Reporting variables. Accumulates as the the loop below is traversed
+report_stats = {
+    'locations':0,
+    'no_new_data':False,
+    'retrieved':0,
+    'not_retrieved':0,
+    'processed':0,
+    'good':0,
+    'bad':0,
+    'loaded_to_rs': 0,
+    'failed_rs':0,
+    'locations_list':[],
+    'retrieved_list':[],
+    'not_retrieved_list':[],
+    'failed_s3_list':[],
+    'good_rs_list':[],
+    'failed_rs_list':[],
+    'good_list':[],  # Made it all the way through
+    'bad_list':[]
+}
 
 # Location Check
 # check that all locations defined in the configuration file are available
@@ -237,6 +314,7 @@ for loc in config_locationGroups:
         continue
 
 # iterate over ever validated account
+badfiles = 0
 for account in validated_accounts:
     # check the aggregate_days validity
     if 1 <= len(account["aggregate_days"]) <= 3:
@@ -259,9 +337,10 @@ for account in validated_accounts:
     object_key = object_key_path + outfile
 
     if is_processed(object_key):
-        logger.warning(
+        logger.debug(
             ("The file: %s has already been generated "
              "and processed by this script today."), object_key)
+        report_stats['no_new_data'] = True
         continue
 
     goodfile = f"{config_destination}/good/{object_key}"
@@ -309,7 +388,7 @@ for account in validated_accounts:
                     'languageCode': 'en-US'
                     }
                 }
-
+            report_stats['locations'] += 1
             logger.debug("Request JSON -- \n%s", json.dumps(bodyvar, indent=2))
 
             # Posts the API request
@@ -320,7 +399,13 @@ for account in validated_accounts:
             except googleapiclient.errors.HttpError:
                 logger.exception(
                     "Request contains an invalid argument. Skipping.")
+                report_stats['not_retrieved'] += 1
+                badfiles += 1
                 clean_exit(1,'Request to API caused an Error.')
+            else:
+                # If retreived, report it
+                logger.debug(f"{account['clientShortname']} Retrieved.")
+                report_stats['retrieved'] += 1
 
             # stitch all responses responses for later iterative processing
             stitched_responses['locationDrivingDirectionMetrics'] += \
@@ -449,12 +534,18 @@ for account in validated_accounts:
                      "on Object key: %s"),
                     account['clientShortname'],object_key.split('/')[-1])
                 outfile = badfile
+                report_stats['failed_rs_list'].append(outfile)
+                report_stats['failed_rs'] += 1
+                badfiles += 1
             else:
-                logger.info(
+                logger.debug(
                     ("Loaded %s driving directions successfully. "
                      "Object key %s."),
                     account['clientShortname'], object_key.split('/')[-1])
                 outfile = goodfile
+                report_stats['good_rs_list'].append(outfile)
+                report_stats['loaded_to_rs'] += 1
+                report_stats
 
     # copy the processed file to the outfile destination path
     try:
@@ -466,7 +557,15 @@ for account in validated_accounts:
         logger.exception("S3 copy %s to %s location failed.",
                          object_summary.key, outfile=outfile)
         clean_exit(1,'S3 transfer failed.')
+    else:
+        if outfile == goodfile:
+            report_stats['good_list'].append(outfile)
+            report_stats['good'] += 1
+        else:
+            report_stats['bad_list'].append(outfile)
+            report_stats['bad'] += 1
     if outfile == badfile:
         clean_exit(1,'The output file was bad.')
 
+report(report_stats)
 clean_exit(0,'Finished without errors.')

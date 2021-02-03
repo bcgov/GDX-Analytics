@@ -1,0 +1,46 @@
+{
+  "description": "Schema to track clicks on cards in the Wellbeing App",
+  "properties": {
+    "step": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The number of the step they just completed"
+    },
+    "action": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Is it next, previos, or find resources?"
+    },
+    "selected": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "maxLength": 255,
+        "description": "The label for an option"
+      },
+      "description": "What options were selected at this step"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "step"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.wellbeing",
+    "name": "wellbeing_wordcloud",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

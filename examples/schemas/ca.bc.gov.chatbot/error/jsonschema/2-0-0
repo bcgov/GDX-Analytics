@@ -1,0 +1,62 @@
+{
+  "description": "Schema for tracking errors when using the chatbot",
+  "properties": {
+    "code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023,
+      "description": "Error code"
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023,
+      "description": "Error message"
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023,
+      "description": "Status"
+    },
+    "agent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "As provided by DialogFlow - this will be the ID of the mega agent except if in the test environment we are pointing at a different agent"
+    },
+    "frontend_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The FrontendID of the agent on a website 'eg. GOV, HLBC'"
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The session_id as reported to Dialogflow for audit purposes"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "self": {
+    "vendor": "ca.bc.gov.chatbot",
+    "name": "error",
+    "format": "jsonschema",
+    "version": "2-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

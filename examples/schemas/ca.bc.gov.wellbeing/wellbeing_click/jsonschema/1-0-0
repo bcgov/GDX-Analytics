@@ -1,0 +1,44 @@
+{
+  "description": "Schema to track clicks on cards in the Wellbeing App",
+  "properties": {
+    "id": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "description": "The ID number of the resource"
+    },
+    "click_type": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What was clicked: listing_learn_more, card_learn_more, phone, email, website, general_url"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The name of the card"
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The URL of the item clicked"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "id",
+    "click_type",
+    "name",
+    "url"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.wellbeing",
+    "name": "wellbeing_click",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

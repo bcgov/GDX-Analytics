@@ -1,0 +1,35 @@
+{
+  "description": "Schema for tracking use of the chatbot",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023
+    },
+    "agent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.chatbot",
+    "name": "chatbot",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

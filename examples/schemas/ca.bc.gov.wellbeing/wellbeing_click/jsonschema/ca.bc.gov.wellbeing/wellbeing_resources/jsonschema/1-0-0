@@ -1,0 +1,97 @@
+{
+  "description": "Schema to track clicks on cards in the Wellbeing App",
+  "properties": {
+    "search_type": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What type of search is it: blank, word_cloud, interactive, clear"
+    },
+    "results_count": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "description": "Number of search results"
+    },
+    "keyword": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "What was enterred in the keyword field (if anything)"
+    },
+    "topic": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "maxLength": 255,
+        "description": "The label for a topic"
+      },
+      "description": "What topics were selected"
+    },
+    "audience": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "maxLength": 255,
+        "description": "The label for an audience"
+      },
+      "description": "What audiences were selected"
+    },
+    "region": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "maxLength": 255,
+        "description": "The label for a region"
+      },
+      "description": "What regions were selected"
+    },
+    "type": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "maxLength": 255,
+        "description": "The type for a topic"
+      },
+      "description": "What types were selected"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "search_type",
+    "results_count"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.wellbeing",
+    "name": "wellbeing_resources",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

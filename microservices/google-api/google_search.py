@@ -623,7 +623,7 @@ INSERT INTO cmslite.google_pdt
                 'studentsuccess.gov.bc.ca',
                 'news.gov.bc.ca',
                 'bcforhighschool.gov.bc.ca',
-                'www.responsibleservicebc.gov.bc.ca'.
+                'www.responsibleservicebc.gov.bc.ca',
                 'digital.gov.bc.ca',
                 'cannabis.gov.bc.ca'
               )

@@ -628,7 +628,7 @@ INSERT INTO cmslite.google_pdt
                 'cannabis.gov.bc.ca'
               )
             )
-            OR (site = 'sc-domain:engage.gov.bc.ca');;
+            OR (site = 'sc-domain:engage.gov.bc.ca');
 
 COMMIT;
 """

@@ -609,7 +609,11 @@ INSERT INTO cmslite.google_pdt
             ELSE page
             END = themes.hr_url
         WHERE site NOT IN ('sc-domain:gov.bc.ca', 'sc-domain:engage.gov.bc.ca')
-            OR site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
+            OR ( site = 'sc-domain:gov.bc.ca' AND page_urlhost = 'www.responsibleservicebc.gov.bc.ca' AND date < '2020-12-23') -- use the wildcard before 2020-12-23
+            OR ( site = 'sc-domain:gov.bc.ca' AND page_urlhost = 'digital.gov.bc.ca' AND date < '2020-10-13') -- use the wildcard before 2020-10-13
+            OR ( site = 'sc-domain:gov.bc.ca' AND page_urlhost = 'cannabis.gov.bc.ca' AND date < '2021-01-17') -- use the wildcard before 2021-01-17
+            OR (
+                site = 'sc-domain:gov.bc.ca' AND page_urlhost NOT IN (
                 'healthgateway.gov.bc.ca',
                 'engage.gov.bc.ca',
                 'feedback.engage.gov.bc.ca',
@@ -618,8 +622,13 @@ INSERT INTO cmslite.google_pdt
                 'curriculum.gov.bc.ca',
                 'studentsuccess.gov.bc.ca',
                 'news.gov.bc.ca',
-                'bcforhighschool.gov.bc.ca')
-            OR site = 'sc-domain:engage.gov.bc.ca';
+                'bcforhighschool.gov.bc.ca',
+                'www.responsibleservicebc.gov.bc.ca',
+                'digital.gov.bc.ca',
+                'cannabis.gov.bc.ca'
+              )
+            )
+            OR (site = 'sc-domain:engage.gov.bc.ca');
 
 COMMIT;
 """

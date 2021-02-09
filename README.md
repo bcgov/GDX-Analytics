@@ -1,10 +1,10 @@
 ## GDX Analytics
 
-This is the central repository for work by the GDX Analytics Team. 
+This is the central repository for work by the GDX Analytics Team.
 
 ## Features
 
-The GDX Analytics Service uses [Snowplow](http://snowplowanalytics.com/) and [Looker](http://looker.com/) to provide analytics for online and offline service delivery. 
+The GDX Analytics Service uses [Snowplow](http://snowplowanalytics.com/) and [Looker](http://looker.com/) to provide analytics for online and offline service delivery.
 
 ## Project Status
 
@@ -23,10 +23,6 @@ This project is currently under development and actively supported by the GDX An
 
 - Scripts for internal use to assist in regular maintenance procedures on EC2 instances or other services.
 
-#### [microservices/](./microservices/)
-
-- Microservices running on EC2 to perform automated data loads of well formed data into RedShift.
-
 #### [operations/](./operations/)
 
 - scripts to perform one-off on-demand operational tasks.
@@ -42,6 +38,10 @@ This project is currently under development and actively supported by the GDX An
 ## Relevant Repositories
 
 All GDX Analytics repositories can be found in the [bcgov](https://github.com/bcgov/) GitHub organization with the topic: [#gdx-analytics](https://github.com/topics/gdx-analytics).
+
+#### [GDX-Analytics-microservice/](https://github.com/bcgov/GDX-Analytics-microservice)
+
+The collection of GDX-Analytics Python microservices used to load and process data between systems and services.
 
 #### [GDX-Analytics-Looker-cfms_block/](https://github.com/bcgov/GDX-Analytics-Looker-cfms_block)
 
@@ -72,7 +72,7 @@ A Drupal 8 module that runs the GDX-Analytics Snowplow web trackers.
 This is for the Government of British Columbia’s instance their Google API LookML project. LookML is a language for describing dimensions, aggregates, calculations and data relationships in a SQL database
 
 ## Getting Help or Reporting an Issue
- 
+
 For inquiries about starting a new analytics account please contact the GDX Analytics Team.
 
 ## Contributors

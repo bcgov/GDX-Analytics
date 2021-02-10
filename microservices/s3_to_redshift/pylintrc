@@ -1,8 +1,0 @@
-[TYPECHECK]
-# List of members which are set dynamically and missed by pylint inference
-# system, and so shouldn't trigger E1101 when accessed. Python regular
-# expressions are accepted.
-generated-members=.*resource.*,.*object.splitlines
-
-[BASIC]
-good-names=dbschema,no_header,conn_string,csv_string,linefeed,referrer_string,linefeed,query,logquery,scratch_start,scratch_copy,scratch_copy_log,scratch_cleanup

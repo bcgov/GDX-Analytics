@@ -1,6 +1,0 @@
-# microservice logs folders
-logs/
-
-# the Python Egg artifacts created when installing `microservices` from setup.py as an editable package
-# (such as by `pip install -e .` or `pipenv install '-e .'`)
-*.egg*

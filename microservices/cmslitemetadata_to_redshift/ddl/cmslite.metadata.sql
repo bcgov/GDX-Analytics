@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS  cmslite.metadata (
  "parent_node_id"               VARCHAR(255)                ENCODE ZSTD,
  "ancestor_nodes"               VARCHAR(4095)               ENCODE ZSTD,
  "hr_url"                       VARCHAR(2047)               ENCODE ZSTD,
- "keywords"                     VARCHAR(1023)               ENCODE ZSTD,
+ "keywords"                     VARCHAR(2048)               ENCODE ZSTD,
  "description"                  VARCHAR(1023)               ENCODE ZSTD,
  "page_type"                    VARCHAR(255)                ENCODE ZSTD,
  "synonyms"                     VARCHAR(1023)               ENCODE ZSTD,

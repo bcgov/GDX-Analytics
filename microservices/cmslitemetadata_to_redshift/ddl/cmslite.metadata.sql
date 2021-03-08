@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS  cmslite;
 
-CREATE TABLE IF NOT EXISTS  test.microservice_log (
+CREATE TABLE IF NOT EXISTS  cmslite.microservice_log (
     "starttime" TIMESTAMP WITHOUT TIME ZONE ENCODE LZO,
     "endtime"   TIMESTAMP WITHOUT TIME ZONE ENCODE LZO
 )
@@ -8,37 +8,37 @@ DISTSTYLE AUTO;
 
 -- DICTIONARY TABLES
 
-CREATE TABLE IF NOT EXISTS  test.content_types (
+CREATE TABLE IF NOT EXISTS  cmslite.content_types (
     "id"      BIGINT        ENCODE LZO  NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.mbcterms_subject_categories (
+CREATE TABLE IF NOT EXISTS  cmslite.mbcterms_subject_categories (
     "id"      BIGINT        ENCODE LZO NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.dcterms_subjects (
+CREATE TABLE IF NOT EXISTS  cmslite.dcterms_subjects (
     "id"      BIGINT        ENCODE LZO NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.dcterms_languages (
+CREATE TABLE IF NOT EXISTS  cmslite.dcterms_languages (
     "id"      BIGINT        ENCODE LZO NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.audiences (
+CREATE TABLE IF NOT EXISTS  cmslite.audiences (
     "id"      BIGINT        ENCODE LZO NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.creators (
+CREATE TABLE IF NOT EXISTS  cmslite.creators (
     "id"      BIGINT        ENCODE LZO NOT NULL,
     "value"   VARCHAR(255)  ENCODE ZSTD NOT NULL
 )
@@ -46,37 +46,37 @@ DISTSTYLE EVEN;
 
 -- LOOKUP TABLES
 
-CREATE TABLE IF NOT EXISTS  test.metadata_content_types (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata_content_types (
     "node_id"   VARCHAR(255)    ENCODE LZO  NOT NULL,
     "id"        BIGINT          ENCODE DELTA NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.metadata_subject_categories (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata_subject_categories (
     "node_id"   VARCHAR(255)    ENCODE LZO  NOT NULL,
     "id"        BIGINT          ENCODE DELTA NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.metadata_subjects (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata_subjects (
     "node_id"   VARCHAR(255)    ENCODE LZO  NOT NULL,
     "id"        BIGINT          ENCODE DELTA NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.metadata_languages (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata_languages (
      "node_id"   VARCHAR(255)    ENCODE LZO  NOT NULL,
     "id"        BIGINT          ENCODE DELTA NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.metadata_audiences (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata_audiences (
     "node_id"   VARCHAR(255)    ENCODE LZO  NOT NULL,
     "id"        BIGINT          ENCODE DELTA NOT NULL
 )
 DISTSTYLE EVEN;
 
-CREATE TABLE IF NOT EXISTS  test.metadata_creators (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata_creators (
     "node_id"   VARCHAR(255)    ENCODE LZO  NOT NULL,
     "id"        BIGINT          ENCODE DELTA NOT NULL
 )
@@ -84,12 +84,12 @@ DISTSTYLE EVEN;
 
 -- METADATA TABLE FOR NODE_ID RECORDS
 
-CREATE TABLE IF NOT EXISTS  test.metadata (
+CREATE TABLE IF NOT EXISTS  cmslite.metadata (
  "node_id"                      VARCHAR(255)                ENCODE LZO NOT NULL,
  "parent_node_id"               VARCHAR(255)                ENCODE ZSTD,
  "ancestor_nodes"               VARCHAR(4095)               ENCODE ZSTD,
  "hr_url"                       VARCHAR(2047)               ENCODE ZSTD,
- "keywords"                     VARCHAR(2048)               ENCODE ZSTD,
+ "keywords"                     VARCHAR(1023)               ENCODE ZSTD,
  "description"                  VARCHAR(1023)               ENCODE ZSTD,
  "page_type"                    VARCHAR(255)                ENCODE ZSTD,
  "synonyms"                     VARCHAR(1023)               ENCODE ZSTD,
@@ -124,38 +124,38 @@ CREATE TABLE IF NOT EXISTS  test.metadata (
 DISTSTYLE EVEN;
 
 -- Grant access to microservice
-GRANT ALL ON SCHEMA  test TO microservice;
+GRANT ALL ON SCHEMA  cmslite TO microservice;
 
 -- All tables owned by microservice
-ALTER TABLE  test.content_types OWNER TO microservice;
-ALTER TABLE  test.mbcterms_subject_categories OWNER TO microservice;
-ALTER TABLE  test.dcterms_subjects OWNER TO microservice;
-ALTER TABLE  test.dcterms_languages OWNER TO microservice;
-ALTER TABLE  test.audiences OWNER TO microservice;
-ALTER TABLE  test.creators OWNER TO microservice;
-ALTER TABLE  test.metadata_content_types OWNER TO microservice;
-ALTER TABLE  test.metadata_subject_categories OWNER TO microservice;
-ALTER TABLE  test.metadata_subjects OWNER TO microservice;
-ALTER TABLE  test.metadata_languages OWNER TO microservice;
-ALTER TABLE  test.metadata_audiences OWNER TO microservice;
-ALTER TABLE  test.metadata_creators OWNER TO microservice;
-ALTER TABLE  test.metadata OWNER TO microservice;
-ALTER TABLE  test.microservice_log OWNER TO microservice;
+ALTER TABLE  cmslite.content_types OWNER TO microservice;
+ALTER TABLE  cmslite.mbcterms_subject_categories OWNER TO microservice;
+ALTER TABLE  cmslite.dcterms_subjects OWNER TO microservice;
+ALTER TABLE  cmslite.dcterms_languages OWNER TO microservice;
+ALTER TABLE  cmslite.audiences OWNER TO microservice;
+ALTER TABLE  cmslite.creators OWNER TO microservice;
+ALTER TABLE  cmslite.metadata_content_types OWNER TO microservice;
+ALTER TABLE  cmslite.metadata_subject_categories OWNER TO microservice;
+ALTER TABLE  cmslite.metadata_subjects OWNER TO microservice;
+ALTER TABLE  cmslite.metadata_languages OWNER TO microservice;
+ALTER TABLE  cmslite.metadata_audiences OWNER TO microservice;
+ALTER TABLE  cmslite.metadata_creators OWNER TO microservice;
+ALTER TABLE  cmslite.metadata OWNER TO microservice;
+ALTER TABLE  cmslite.microservice_log OWNER TO microservice;
 
 -- Grant access to Looker to read the tables
-GRANT USAGE ON SCHEMA  test TO looker;
+GRANT USAGE ON SCHEMA  cmslite TO looker;
 
-GRANT SELECT ON  test.content_types TO looker;
-GRANT SELECT ON  test.mbcterms_subject_categories TO looker;
-GRANT SELECT ON  test.dcterms_subjects TO looker;
-GRANT SELECT ON  test.dcterms_languages TO looker;
-GRANT SELECT ON  test.audiences TO looker;
-GRANT SELECT ON  test.creators TO looker;
-GRANT SELECT ON  test.metadata_content_types TO looker;
-GRANT SELECT ON  test.metadata_subject_categories TO looker;
-GRANT SELECT ON  test.metadata_subjects TO looker;
-GRANT SELECT ON  test.metadata_languages TO looker;
-GRANT SELECT ON  test.metadata_audiences TO looker;
-GRANT SELECT ON  test.metadata_creators TO looker;
-GRANT SELECT ON  test.metadata TO looker;
-GRANT SELECT ON  test.microservice_log TO looker;
+GRANT SELECT ON  cmslite.content_types TO looker;
+GRANT SELECT ON  cmslite.mbcterms_subject_categories TO looker;
+GRANT SELECT ON  cmslite.dcterms_subjects TO looker;
+GRANT SELECT ON  cmslite.dcterms_languages TO looker;
+GRANT SELECT ON  cmslite.audiences TO looker;
+GRANT SELECT ON  cmslite.creators TO looker;
+GRANT SELECT ON  cmslite.metadata_content_types TO looker;
+GRANT SELECT ON  cmslite.metadata_subject_categories TO looker;
+GRANT SELECT ON  cmslite.metadata_subjects TO looker;
+GRANT SELECT ON  cmslite.metadata_languages TO looker;
+GRANT SELECT ON  cmslite.metadata_audiences TO looker;
+GRANT SELECT ON  cmslite.metadata_creators TO looker;
+GRANT SELECT ON  cmslite.metadata TO looker;
+GRANT SELECT ON  cmslite.microservice_log TO looker;

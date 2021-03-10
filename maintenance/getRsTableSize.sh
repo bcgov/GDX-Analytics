@@ -57,19 +57,23 @@ fi
 adminuser_rs -tqc "$sql" >> $OUT_FILE
 
 # Clean the file before s3 upload
-sed -i '/^[[:space:]]*$/d' $OUT_FILE
+sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
 
 # Copy output to  s3
 aws s3 --quiet cp "$OUT_FILE" $S3_PATH
 
 # Build table_size table
 read -r -d '' rs_copy <<EOF
-	COPY maintenance.table_sizes
-	FROM '$S3_PATH'
-	CREDENTIALS
-	'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
-	delimiter '|';
+        COPY maintenance.table_sizes
+        FROM '$S3_PATH'
+        CREDENTIALS
+        'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
+        escape
+	    ignoreblanklines
+        trimblanks
+        delimiter '|';
 EOF
+
 
 # Initiate copy to RedShift
 adminuser_rs -tqc "$rs_copy"

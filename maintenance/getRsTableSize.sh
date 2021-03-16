@@ -21,10 +21,21 @@
 shopt -s expand_aliases
 source ~/.bashrc
 
-# for no positional arguments return the full list of tables
+DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
+LOG_PATH="RsTableLogs/"
+LOG_PREFIX="RedShift_Table_Size_"
+OUT_FILE=${LOG_PATH}${LOG_PREFIX}$DATE
+S3_PATH="s3://sp-ca-bc-gov-131565110619-12-microservices/client/redshift_table_size/"
+S3_DEST="s3://sp-ca-bc-gov-131565110619-12-microservices/processed/good/client/redshift_table_size/"
+
+# For no positional arguments return the full list of tables
 if [ $# -eq 0 ]
   then
-    sql="select convert_timezone('America/Vancouver', getdate()) as date, schema, \"table\",size FROM SVV_TABLE_INFO order by size desc"
+    read -r -d '' sql <<EOF
+	SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size
+	FROM SVV_TABLE_INFO
+	ORDER BY size DESC
+EOF
 else
     limit=$1
     # validate that the positional argument is a positive number
@@ -33,9 +44,40 @@ else
         echo "error: Argument must be a number" >&2; exit 1
     else
     # limit the rows returned to the number provided as an argument
-        sql="select convert_timezone('America/Vancouver', getdate()) as date, schema, \"table\",size FROM SVV_TABLE_INFO order by size desc limit $limit"
+    read -r -d '' sql <<EOF
+        SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size
+        FROM SVV_TABLE_INFO
+        ORDER BY size DESC
+	LIMIT $limit
+EOF
     fi
 fi
 
-# execute the query using the adminuser_rs alias
-adminuser_rs -tqc "$sql"
+# Execute the query using the adminuser_rs alias and redirect output to file
+adminuser_rs -tqc "$sql" >> $OUT_FILE
+
+# Clean the file before s3 upload
+sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
+
+# Copy output to  s3
+aws s3 --quiet cp "$OUT_FILE" $S3_PATH
+
+# Build table_size table
+read -r -d '' rs_copy <<EOF
+        COPY maintenance.table_sizes
+        FROM '$S3_PATH'
+        CREDENTIALS
+        'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
+        escape
+	ignoreblanklines
+        trimblanks
+        delimiter '|';
+EOF
+
+
+# Initiate copy to RedShift
+adminuser_rs -tqc "$rs_copy"
+
+# Move log file to processed
+aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
+

@@ -6,7 +6,7 @@
         "string"
       ],
       "maxLength": 255,
-      "description": "Original language and target language."
+      "description": "The contents of the googtrans cookie. The original page language and target language. Ex: 'googtrans=/en/fr'"
     }
   },
   "additionalProperties": false,

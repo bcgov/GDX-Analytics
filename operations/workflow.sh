@@ -16,14 +16,18 @@ while getopts ":b :c" opt; do
     c)
       read -r -p "Enter branch name to delete: " rmbranch
       read -r -p "Are you sure you want to permanently delete branch folder $BRANCH_PATH$rmbranch? [y/N] " rmresponse
-      if [[ "$rmresponse" =~ ^([yY][eE][sS]|[yY])$ ]]
+      read -r -p "Have you removed any installed virtualenvs, or were none created? [y/N] " pipresponse
+      if [[ "$rmresponse" =~ ^([yY][eE][sS]|[yY])$ ]] && [[ "$pipresponse" =~ ^([yY][eE][sS]|[yY])$ ]]
       then
               rmpath="$BRANCH_PATH$rmbranch"
               printf "Deleting $rmpath ...\n"
               rm -rf $rmpath
 
+      elif [[ "$pipresponse" =~ ^([nN][oO]|[nN])$ ]]
+      then
+              printf "Please remove your pipenv before deleting branch folder\n"
       else
-              printf "Exiting...\n"
+              printf "Exiting....\n"
       fi
       exit 1
       ;;

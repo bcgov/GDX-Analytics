@@ -38,6 +38,9 @@ while getopts ":b :c" opt; do
       ;;
     \?)
       echo "Invalid option: -$OPTARG try again..." >&2
+      echo "-b to clone a branch"
+      echo "-c to cleanup a branch"
+      exit 1
       ;;
     :)
       echo "Option -$OPTARG requires an argument." >&2

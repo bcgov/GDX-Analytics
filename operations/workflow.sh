@@ -1,5 +1,14 @@
 #!/bin/bash
 
+###########################################################
+# Description: Simplifies git workflow on remote machines #
+#                                                         #
+# Usage: ./workflow.sh -opt                               #
+#                                                         #
+# Options: -b or -branch to clone a branch                #
+#          -c or -clean to delete a branch                #
+###########################################################
+
 BRANCH_PATH="$HOME/branch/"
 REPO="https://github.com/bcgov/GDX-Analytics-microservice.git"
 
@@ -8,7 +17,7 @@ while getopts ":b(branch) :c(clean)" opt; do
     b)
       read -p "Enter the branch label: " branch
       git ls-remote --heads ${REPO} ${branch} | grep ${branch} >/dev/null
-      if [ "$?" == "1" ]
+      if [ "$?" == "1" ] # Check exit code of git ls-remote
       then
               echo ""$branch" doesn't exist in "$REPO""
               exit
@@ -17,6 +26,7 @@ while getopts ":b(branch) :c(clean)" opt; do
       read -p "Enter your email to associate commits to: " email
       git clone --single-branch --branch $branch https://github.com/bcgov/GDX-Analytics-microservice.git $branch
       cd $branch
+      # Set git config
       git config user.name "${username}"
       git config user.email "${email}"
       exit 1
@@ -54,6 +64,7 @@ while getopts ":b(branch) :c(clean)" opt; do
       echo "Option -$OPTARG requires an argument." >&2
       echo "-b to clone a branch"
       echo "-c to cleanup a branch"
+      exit 1
       ;;
   esac
 done

@@ -1,17 +1,25 @@
 #!/bin/bash
-  
-BRANCH_PATH="$HOME/branch/"
 
-while getopts ":b :c" opt; do
+BRANCH_PATH="$HOME/branch/"
+REPO="https://github.com/bcgov/GDX-Analytics-microservice.git"
+
+while getopts ":b(branch) :c(clean)" opt; do
   case $opt in
     b)
       read -p "Enter the branch label: " branch
+      git ls-remote --heads ${REPO} ${branch} | grep ${branch} >/dev/null
+      if [ "$?" == "1" ]
+      then
+              echo ""$branch" doesn't exist in "$REPO""
+              exit
+      fi
       read -p "Enter your GitHub Name (First name Last name): " username
       read -p "Enter your email to associate commits to: " email
       git clone --single-branch --branch $branch https://github.com/bcgov/GDX-Analytics-microservice.git $branch
       cd $branch
       git config user.name "${username}"
       git config user.email "${email}"
+      exit 1
       ;;
     c)
       read -r -p "Enter branch name to delete: " rmbranch
@@ -37,14 +45,15 @@ while getopts ":b :c" opt; do
       exit 1
       ;;
     \?)
-      echo "Invalid option: -$OPTARG try again..." >&2
+      echo "Invalid option: -$OPTARG" >&2
       echo "-b to clone a branch"
       echo "-c to cleanup a branch"
       exit 1
       ;;
     :)
       echo "Option -$OPTARG requires an argument." >&2
-      exit 1
+      echo "-b to clone a branch"
+      echo "-c to cleanup a branch"
       ;;
   esac
 done

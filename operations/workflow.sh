@@ -22,7 +22,7 @@ while getopts ":b(branch) :c(clean)" opt; do
               echo ""$branch" doesn't exist in "$REPO""
               exit
       fi
-      read -p "Enter your GitHub Name (First name Last name): " username
+      read -p "Enter your first and last name: " username
       read -p "Enter your email to associate commits to: " email
       git clone --single-branch --branch $branch https://github.com/bcgov/GDX-Analytics-microservice.git $branch
       cd $branch

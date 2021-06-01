@@ -60,11 +60,12 @@ while getopts ":b(branch) :c(clean)" opt; do
       echo "-c to cleanup a branch"
       exit 1
       ;;
-    :)
-      echo "Option -$OPTARG requires an argument." >&2
-      echo "-b to clone a branch"
-      echo "-c to cleanup a branch"
-      exit 1
-      ;;
   esac
 done
+# Check if no option was passed
+if (( $OPTIND == 1 ))
+then
+        echo "This script requires an argument." >&2
+        echo "-b to clone a branch"
+        echo "-c to cleanup a branch"
+fi

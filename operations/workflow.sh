@@ -40,15 +40,18 @@ while getopts ":b(branch) :c(clean)" opt; do
               printf "Exiting with no action\n"
               exit 1
       fi
-      read -r -p "Have you removed any installed virtualenvs, or were none created? [y/N] " pipresponse
+      read -r -p "If you installed any pipenvs under $rmpath those will be removed by this cleanup task. Do you wish to continue? [y/N] " pipresponse
       if [[ "$rmresponse" =~ ^([yY][eE][sS]|[yY])$ ]] && [[ "$pipresponse" =~ ^([yY][eE][sS]|[yY])$ ]] && [[ -d "$rmpath" ]]
       then
               printf "Deleting $rmpath ...\n"
               rm -rf $rmpath
+              printf "Removing Virtual Environments...\n"
+              for f in $(find ~/.local/share/virtualenvs/*/.project -type f); do proj_path="$(cat $f)" && [ ! -d $proj_path ]
+              done
 
       elif [[ "$pipresponse" =~ ^([nN][oO]|[nN])$ ]]
       then
-              printf "Please remove your pipenv before deleting branch folder\n"
+              printf "Exiting with no action\n"
       else
               printf "The branch you entered does not exist\n"
       fi

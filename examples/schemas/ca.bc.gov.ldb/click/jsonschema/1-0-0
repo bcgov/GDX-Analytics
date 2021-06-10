@@ -1,0 +1,28 @@
+{
+  "description": "Schema to track click conversions on BC Liquor (LDB) products",
+  "properties": {
+    "click_type": {
+      "type": "string",
+      "maxLength": 31,
+      "description": "What type of click was it. The expected values are 'where_to_buy' and 'add_to_cellar'"
+    },
+    "sku": {
+      "type": "string",
+      "maxLength": 31,
+      "description": "What is the SKU?"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "click_type",
+    "sku"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.ldb",
+    "name": "click",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

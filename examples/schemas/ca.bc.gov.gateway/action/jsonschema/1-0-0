@@ -1,0 +1,38 @@
+{
+  "description": "Event to capture action in the Health Gateway App",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What action was taken? Expected values are expand, contract, view_card, click_button, download_report, click_link"
+    },
+    "text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The label for the action. ie. which button or which card was viewed, url visited, etc."
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1024,
+      "description": "Optionally an additional message."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.gateway",
+    "name": "action",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

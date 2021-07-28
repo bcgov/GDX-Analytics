@@ -81,3 +81,5 @@ adminuser_rs -tqc "$rs_copy"
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
 
+# Remove log files +7 days old
+find $LOG_PATH -mindepth 1 -mtime +7 -delete

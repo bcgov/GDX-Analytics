@@ -3,15 +3,16 @@
 #
 # Queries Redshift for the list of tables ordered by their size
 #
-# The results are returned without the column names printed out.
+# The results are written to a Redshift table.
 #
 # The column order is:
-# date, schema, table, size
+# date, schema, table, tbl_rows, size
 #
 # The date column is a timestamp in the America/Vancouver timezone
 # The schema column is what schema the table is in
-# the table columnn is the table name
-# the size column is the size of the table, in 1 MB data blocks.
+# The table columnn is the table name
+# The tbl_rows column is the table row count
+# The size column is the size of the table, in 1 MB data blocks.
 #
 # An optional positive number positional argument limits the rows returned.
 #
@@ -81,3 +82,5 @@ adminuser_rs -tqc "$rs_copy"
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
 
+# Remove log files +7 days old
+find $LOG_PATH -mindepth 1 -mtime +7 -delete

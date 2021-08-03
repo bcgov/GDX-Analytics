@@ -12,7 +12,7 @@ s = Subject()
 e = AsyncEmitter("spm.apps.gov.bc.ca", protocol="https")
 t = Tracker(e, encode_base64=False, app_id='orgbook_api')
 
-
+# Example Snowplow for an external API V3 call to "/search/topic?name=BC0772006"
 search_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_call/jsonschema/1-0-0', {
   'internal_call': False,
   'api_version': 'v3',
@@ -22,16 +22,16 @@ search_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_call/jsonschema/1-
   'parameters': ['name']
 })
 
-credentials_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_call/jsonschema/1-0-0', {
+# Example Snowplow for an external API V3 call to "/credentialtype"
+credentialtype_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_call/jsonschema/1-0-0', {
   'internal_call': False,
   'api_version': 'v3',
-  'endpoint': 'credentials',
-  'total': 2,
+  'endpoint': 'credentialtype',
   'response_time': 102,
-  'parameters': ['topic_id']
+  'total': 6
 })
 
 t.track_self_describing_event(search_json)
 time.sleep(5)
-t.track_self_describing_event(credentials_json)
+t.track_self_describing_event(credentialtype_json)
 time.sleep(5)

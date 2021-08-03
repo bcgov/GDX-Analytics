@@ -37,7 +37,8 @@ credentialtype_language_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_c
   'api_version': 'v3',
   'endpoint': 'credentialtype/{id}/language',
   'response_time': 302,
-  'total': 1
+  'total': 1,
+  'parameters': ['id']
 })
 
 t.track_self_describing_event(search_json)

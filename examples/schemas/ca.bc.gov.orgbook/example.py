@@ -31,7 +31,18 @@ credentialtype_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_call/jsons
   'total': 6
 })
 
+# Example Snowplow for an external API V3 call to "/credentialtype/1/language"
+credentialtype_language_json = SelfDescribingJson( 'iglu:ca.bc.gov.orgbook/api_call/jsonschema/1-0-0', {
+  'internal_call': False,
+  'api_version': 'v3',
+  'endpoint': 'credentialtype/{id}/language',
+  'response_time': 302,
+  'total': 1
+})
+
 t.track_self_describing_event(search_json)
 time.sleep(5)
 t.track_self_describing_event(credentialtype_json)
+time.sleep(5)
+t.track_self_describing_event(credentialtype_language_json)
 time.sleep(5)

@@ -1,10 +1,10 @@
 ## vue_js_tracker
 
-This is an example Vue.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vA2.10.2 in the Vue.js framework.
+This is an example Vue.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vE.2.14.0 in the Vue.js framework.
 
 ## Features
 
-This app contains the Snowplow Tracker Standalone va2.10.2, which is installed in the header
+This app contains the Snowplow Tracker Standalone vE.2.14.0, which is installed in the header
 section of index.html. It also leverages the Vue Router Add-on by calling the Snowplow 'trackpageview' function, whenever the Vue Router changes the navigation.
 
 
@@ -22,6 +22,12 @@ To install Vue CLI (globally)
 
 ```
 npm install -g @vue/cli
+```
+
+To install Vue CLI-Service (globally)
+
+```
+npm install -g @vue/cli-service
 ```
 
 See the official Vue.js installation documentation here: https://cli.vuejs.org/guide/installation.html

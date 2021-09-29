@@ -18,7 +18,8 @@
 
 
 version=$1
+name=${version}_$(date +%Y-%m-%d-%H-%M)
 
-mysqldump looker_dev > ./tmp/looker_dev_backup_v${version}_$(date +%Y-%m-%d).sql --set-gtid-purged=OFF --add-drop-database
-aws s3 cp ./tmp/looker_dev_backup_v${version}_$(date +%Y-%m-%d).sql s3://ca-bc-gov-analytics-lookerdb-backup/looker-dev-database-backup/
-rm ./tmp/looker_dev_backup_v${version}_$(date +%Y-%m-%d).sql
+mysqldump --result-file=./tmp/looker_dev_backup_v${name}.sql --set-gtid-purged=OFF --add-drop-database --databases looker_dev
+aws s3 cp ./tmp/looker_dev_backup_v${name}.sql s3://ca-bc-gov-analytics-lookerdb-backup/looker-dev-database-backup/
+rm ./tmp/looker_dev_backup_v${name}.sql

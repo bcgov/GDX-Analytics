@@ -21,5 +21,5 @@ version=$1
 name=${version}_$(date +%Y-%m-%d-%H-%M)
 
 mysqldump --result-file=./temp/looker_prod_backup_v${name}.sql --set-gtid-purged=OFF --add-drop-database --databases looker
-aws s3 cp ./temp/looker_dev_backup_v${name}.sql s3://ca-bc-gov-analytics-lookerdb-backup/looker-prod-database-backup/
+aws s3 cp ./temp/looker_prod_backup_v${name}.sql s3://ca-bc-gov-analytics-lookerdb-backup/looker-prod-database-backup/
 rm ./temp/looker_prod_backup_v${name}.sql

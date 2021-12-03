@@ -1,0 +1,51 @@
+{
+  "description": "Schema for an agent entity",
+  "properties": {
+    "agent_id": {
+      "description": "The internal Agent ID used within TheQ.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": "9223372036854776000"
+    },
+    "idir": {
+      "description": "Optionally, the IDIR of the agent performing the action.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 16
+    },
+    "role": {
+      "description": "The current role of the agent.",
+      "type": "string",
+      "enum": [
+        "CSR",
+        "Reception",
+        "GA",
+        "Support",
+        "Analytics",
+        "Helpdesk",
+        "WebSelfServe"
+      ]
+    },
+    "counter_type": {
+      "description": "The counter type for the agent.",
+      "type": "string",
+      "maxLength": 255
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "agent_id",
+    "role",
+    "counter_type"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.cfmspoc",
+    "name": "agent",
+    "format": "jsonschema",
+    "version": "4-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

@@ -1,0 +1,93 @@
+{
+  "description": "Schema to track actions on the Corporate Calendar",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What action was taken? (eg. Search, Save, Saved Search, Reset Dates, Reset Options)."
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000,
+      "description": "How many results are on the page?"
+    },
+    "search_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 63,
+      "description": "The name of the saved search if you are saving a search or running a saved search. NULL or omitted otherwise."
+    },
+    "filters": {
+      "type": "object",
+      "description": "Which filters are applied?",
+      "properties": {
+        "from_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10,
+          "description": "If a from date is sent, in format 'YYYY-MM-DD'. NULL or omitted otherwise."
+        },
+        "to_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10,
+          "description": "If a from date is sent, in format 'YYYY-MM-DD'. NULL or omitted otherwise."
+        },
+        "this_day_only": {
+          "type": "boolean",
+          "description": "False by default. True if 'This Day Only' is selected."
+        },
+        "search_text": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 255,
+          "description": "What keywords were enterred in the search, if any. NULL or omitted otherwise."
+        },
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 255,
+          "description": "A single value from the category list if selected. NULL or omitted otherwise."
+        },
+        "more": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 255,
+          "description": "A single value from the 'more' list if selected. NULL or omitted otherwise."
+        },
+        "look_ahead_filter": {
+          "type": "string",
+          "maxLength": 31,
+          "description": "What option is selected in the look ahead filter? One of these values: Show All, Look Ahead Only, Not for Look Ahead Only."
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action",
+    "count",
+    "filters"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.bcs",
+    "name": "calendar_action",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

@@ -1,0 +1,57 @@
+{
+  "description": "Event to capture API calls to the OrgBook API",
+  "properties": {
+    "internal_call": {
+      "type": "boolean",
+      "description": "Was the call made internally by Orgbook or an external user?"
+    },
+    "api_version": {
+      "type": "string",
+      "maxLength": 8,
+      "description": "What version of the API is being called? eg. v1, v2, v3, etc."
+    },
+    "endpoint": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Which API endpoint was queried? eg. credential, topic, fuzzy, etc."
+    },
+    "parameters": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "maxLength": 255,
+        "description": "An individual parameter used. eg. topic_id, latest, revoked, etc."
+      },
+      "description": "A list of the paramaters used in the API call."
+    },
+    "total": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total number of responses."
+    },
+    "response_time": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Response time in ms."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "internal_call",
+    "api_version",
+    "endpoint",
+    "total",
+    "response_time"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.orgbook",
+    "name": "api_call",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

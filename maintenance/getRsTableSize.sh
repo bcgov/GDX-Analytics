@@ -33,7 +33,7 @@ S3_DEST="s3://sp-ca-bc-gov-131565110619-12-microservices/processed/good/client/r
 if [ $# -eq 0 ]
   then
     read -r -d '' sql <<EOF
-	SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size
+	SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size, estimated_visible_rows, tbl_rows-estimated_visible_rows AS tombstoned_rows
 	FROM SVV_TABLE_INFO
 	ORDER BY size DESC
 EOF
@@ -46,7 +46,7 @@ else
     else
     # limit the rows returned to the number provided as an argument
     read -r -d '' sql <<EOF
-        SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size
+        SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size, estimated_visible_rows, tbl_rows-estimated_visible_rows AS tombstoned_rows
         FROM SVV_TABLE_INFO
         ORDER BY size DESC
 	LIMIT $limit

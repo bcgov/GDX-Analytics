@@ -73,7 +73,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 20,
           "description": "A single value from the 'Select Issue' list if selected. NULL or omitted otherwise."
         },
         "date_confirmed": {
@@ -81,7 +81,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 30,
           "description": "A single value from the 'Select Date Confirmed' list if selected. NULL or omitted otherwise."
         },
         "status": {
@@ -89,7 +89,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 20,
           "description": "A single value from the 'Select Status' list if selected. NULL or omitted otherwise."
         },
         "ministry": {
@@ -97,7 +97,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 20,
           "description": "A single value from the 'Select Ministry' list if selected. NULL or omitted otherwise."
         },
         "comm_contact": {
@@ -105,7 +105,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 100,
           "description": "A single value from the 'Select Comm. Contact' list if selected. NULL or omitted otherwise."
         },
         "representative": {
@@ -113,7 +113,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 100,
           "description": "A single value from the 'Select Representative' list if selected. NULL or omitted otherwise."
         },
         "intiative": {
@@ -121,7 +121,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 40,
           "description": "A single value from the 'Select Intiative' list if selected. NULL or omitted otherwise."
         },
         "premier_requested": {
@@ -129,7 +129,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 25,
           "description": "A single value from the 'Select Premier Requested' list if selected. NULL or omitted otherwise."
         },
         "distribution": {
@@ -137,7 +137,7 @@
             "string",
             "null"
           ],
-          "maxLength": 255,
+          "maxLength": 20,
           "description": "A single value from the 'Select Distribution' list if selected. NULL or omitted otherwise."
         },
         "look_ahead_filter": {

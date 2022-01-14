@@ -145,7 +145,6 @@
           "maxLength": 31,
           "description": "What option is selected in the look ahead filter? One of these values: Show All, Look Ahead Only, Not for Look Ahead Only."
         }
-
       }
     }
   },

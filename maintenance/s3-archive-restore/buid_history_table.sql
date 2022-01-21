@@ -7,8 +7,19 @@ WITH custom_events AS
 UNION
     SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_step_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_step_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_ldb_click_1' AS table_name FROM atomic.ca_bc_gov_ldb_click_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'    
-    
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_ldb_click_1' AS table_name FROM atomic.ca_bc_gov_ldb_click_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+UNION
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_form_action_1' AS table_name FROM atomic.ca_bc_gov_form_action_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'    
+UNION
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_form_error_1' AS table_name FROM atomic.ca_bc_gov_form_error_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+UNION
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_step_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_step_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+UNION
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_click_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_click_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+UNION
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_chatbot_chatbot_1' AS table_name FROM atomic.ca_bc_gov_chatbot_chatbot_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+UNION
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_chatbot_chatbot_2' AS table_name FROM atomic.ca_bc_gov_chatbot_chatbot_2 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
 )
 
 SELECT 

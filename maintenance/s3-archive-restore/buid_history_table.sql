@@ -1,25 +1,24 @@
 -- Build a CTE from atmoic data and SELECT columns required to build PDTs
--- Where the min root_tstamp is the oldest date in the corresponding business areas atomic table.
--- Where the max root_tstamp is up to but not including the first date where data is not yet archived
+-- Where the min root_tstamp is equivalent to two years of data
 WITH custom_events AS
 (
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_workbc_find_career_1' AS table_name FROM atomic.ca_bc_gov_workbc_find_career_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_workbc_find_career_1' AS table_name FROM atomic.ca_bc_gov_workbc_find_career_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_step_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_step_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_step_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_step_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_ldb_click_1' AS table_name FROM atomic.ca_bc_gov_ldb_click_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_ldb_click_1' AS table_name FROM atomic.ca_bc_gov_ldb_click_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_form_action_1' AS table_name FROM atomic.ca_bc_gov_form_action_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'    
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_form_action_1' AS table_name FROM atomic.ca_bc_gov_form_action_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'    
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_form_error_1' AS table_name FROM atomic.ca_bc_gov_form_error_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_form_error_1' AS table_name FROM atomic.ca_bc_gov_form_error_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_step_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_step_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_step_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_step_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_click_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_click_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_cfmspoc_appointment_click_1' AS table_name FROM atomic.ca_bc_gov_cfmspoc_appointment_click_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_chatbot_chatbot_1' AS table_name FROM atomic.ca_bc_gov_chatbot_chatbot_1 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_chatbot_chatbot_1' AS table_name FROM atomic.ca_bc_gov_chatbot_chatbot_1 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_chatbot_chatbot_2' AS table_name FROM atomic.ca_bc_gov_chatbot_chatbot_2 WHERE root_tstamp < '2021-10-01' AND root_tstamp >= '2021-09-01'
+    SELECT root_id, root_tstamp, 'atomic.ca_bc_gov_chatbot_chatbot_2' AS table_name FROM atomic.ca_bc_gov_chatbot_chatbot_2 WHERE root_tstamp < '2021-11-01' AND root_tstamp >= '2021-10-01'
 )
 
 SELECT 

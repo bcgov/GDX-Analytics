@@ -10,5 +10,5 @@ client_secret="Enter-here"
 
 # Use this command to install dependencies.
 pipenv install
-# Use command to run the script where arg1 = query_id
-pipenv run python looker_api_connect.py arg1
+# Use command to run the script where arg1 = query_id anad agr2 = number of times you want to run query
+pipenv run python looker_api_connect.py arg1 arg2

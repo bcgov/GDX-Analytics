@@ -1,6 +1,6 @@
-# Looker API Query Performance Timer
+# Measure Tile Performance
 
-This Looker API Query Performance Timer script, `measure_tile_performance.py` will output the runtime results of running a given input query (based on a Looker Explore slug) a given number of times.
+This Measure Tile Performance script, `measure_tile_performance.py` will output the runtime results of running a given input query (based on a Looker Explore slug) a given number of times.
 
 It runs by invoking the Looker API, which requires API Keys to access which must be set in the `config/looker.ini` file.
 

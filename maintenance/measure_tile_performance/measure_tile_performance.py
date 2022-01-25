@@ -25,7 +25,7 @@ if times > 100 or times <= 0:
 
 sdk = looker_sdk.init40("config/looker.ini")
 
-QueryList = []
+query_list = []
 header = ['SlugId', 'Timestamp', 'RunTime']
 
 from datetime import datetime
@@ -36,9 +36,9 @@ now = datetime.now()
 filename = slug_input + now.strftime("_%Y%m%dT%H%M%S") + '.csv'
 
 # get query_id from slug
-SlugResponse = sdk.query_for_slug(slug=slug_input)
+slug_response = sdk.query_for_slug(slug=slug_input)
 
-query = SlugResponse.id
+query = slug_response.id
 
 if args.file:
     with open(filename, 'w', encoding='UTF8') as f:
@@ -57,15 +57,15 @@ while i <= times :
     cache_only=False)
     # Convert string to Python dict 
     query_dic = json.loads(response) 
-    Runtime_duration = round(float(query_dic['runtime']), 2)
-    Ran_at_utc = pytz.utc.localize(datetime.fromisoformat(query_dic['ran_at'][:-1]))
-    Ran_at = Ran_at_utc.astimezone(pytz.timezone('America/Vancouver')).isoformat()
-    QueryList.append(Runtime_duration)
+    runtime_duration = round(float(query_dic['runtime']), 2)
+    ran_at_utc = pytz.utc.localize(datetime.fromisoformat(query_dic['ran_at'][:-1]))
+    ran_at = ran_at_utc.astimezone(pytz.timezone('America/Vancouver')).isoformat()
+    query_list.append(runtime_duration)
     if args.file:
         with open(filename, 'a', encoding='UTF8') as f:
             writer = csv.writer(f)
             # write the data
-            writer.writerow([slug_input, Ran_at, Runtime_duration])
+            writer.writerow([slug_input, ran_at, runtime_duration])
     i += 1
 if args.file:
     print("Filename =", filename)
@@ -73,13 +73,13 @@ if args.file:
     
 #Print for Console 
 
-print("RunTimes =", QueryList)
-minimum = min(QueryList)
+print("RunTimes =", query_list)
+minimum = min(query_list)
 print("Min =", minimum)
-maximum = max(QueryList)
+maximum = max(query_list)
 print("Max =", maximum)
-sum = sum(QueryList)
-length = len(QueryList)
+sum = sum(query_list)
+length = len(query_list)
 average = round(sum/length, 2)
 print("Avg =", average)
 

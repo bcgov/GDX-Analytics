@@ -16,6 +16,11 @@ args = parser.parse_args()
 slug_input = args.slugInput
 times = args.times
 
+if times > 100 or times <= 0:
+    print("Runs per query(arg2) must be between 1 and 100")
+    exit()
+
+
 sdk = looker_sdk.init40("config/looker.ini")
 
 QueryList = []
@@ -42,7 +47,7 @@ if args.file:
 # run query as per user input
 
 i = 1
-while i <= times:
+while i <= times :
     response = sdk.run_query(
     query_id=query,
     result_format="json_detail",
@@ -63,20 +68,16 @@ if args.file:
     print("Filename =", filename)
     f.close()
     
-#Print for Console and some error handling
+#Print for Console 
 
-if times > 100 or times <= 0:
-    print("Runs per query(arg2) must be between 1 and 100")
-    
-else:
-    print("RunTimes =", QueryList)
-    minimum = min(QueryList)
-    print("Min =", minimum)
-    maximum = max(QueryList)
-    print("Max =", maximum)
-    sum = sum(QueryList)
-    length = len(QueryList)
-    average = round(sum/length, 2)
-    print("Avg =", average)
+print("RunTimes =", QueryList)
+minimum = min(QueryList)
+print("Min =", minimum)
+maximum = max(QueryList)
+print("Max =", maximum)
+sum = sum(QueryList)
+length = len(QueryList)
+average = round(sum/length, 2)
+print("Avg =", average)
 
     

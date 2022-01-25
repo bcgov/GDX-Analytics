@@ -56,6 +56,12 @@ You can run the following command from this to prevent any changes to looker.ini
 git update-index --skip-worktree config/looker.ini
 ```
 
+To revert this, if you are making a change to the template `config/looker.ini` file, you can run:
+
+```
+git update-index --no-skip-worktree config/looker.ini
+```
+
 ## Running `measure_tile_performance.py`
 
 The `measure_tile_performance.py` script requires positional arguments:

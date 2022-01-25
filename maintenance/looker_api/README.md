@@ -8,7 +8,7 @@ The script takes positional command line arguments to set the Explore slug and t
 
 The output on the command line will report the duration of each query as a list and the _min_, _max_, and _average_ query runtimes of those queries. It will optionally output a csv file with the headers:
 
-`explore_slug, invokation_timestamp, query_runtime`
+`SlugID, Timestamp, RunTime`
 
 ## Installation
 
@@ -39,18 +39,26 @@ client_id="<client_id>"  ## Replace <client_id> with your Client ID
 client_secret="<client_secret>"  ## Replace <client_secret> with your client secret
 ```
 
-> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required.
+> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required. Following command was used to prevent any changes to looker.ini being committed. 
 
+```
+git update-index --skip-worktree path/to/looker.ini
+```
 ## Running `looker_api_connect.py`
 
 The `looker_api_connect.py` script requires positional arguments:
- - <arg1> accepts a Looker Explore slug, which it will use to determine the Query ID to run.
- - <arg2> accepts an integer, which is the number of times you want to run the query (the script will take the minimum of this value and 100)
- - __TODO__: instructions for CSV file creation
+ - <arg1> accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then choose the 'Share' option to show the share url for the query. "Share" option can be found by clicking on the gear icon on top right section of an explore. Share urls generally look something like 'https://analytics.gov.bc.ca/x/UnBMGQaMNRhiTy2nhbcXdl'. The trailing 'UnBMGQaMNRhiTy2nhbcXdl' is the share slug.
+ - <arg2> accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
+ - -f or --file: flag to write output to a csv file
 
 When invoking `looker_api_connect.py`, use Pipenv run.
 
-### Example:
+### Example with a csv file:
+
+```
+pipenv run python looker_api_connect.py <arg1> <arg2> -f
+```
+### Example without a csv file:
 
 ```
 pipenv run python looker_api_connect.py <arg1> <arg2>

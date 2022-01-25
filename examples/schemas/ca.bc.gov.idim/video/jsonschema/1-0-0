@@ -1,0 +1,28 @@
+{
+  "description": "Event to capture video events in the IDIM app.",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What was the video action? eg. loadstart, progress, canplay, canplaythrough, etc."
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The ID for the video"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action",
+    "id"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.idim",
+    "name": "video",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

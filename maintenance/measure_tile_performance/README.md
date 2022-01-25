@@ -39,7 +39,9 @@ client_id="<client_id>"  ## Replace <client_id> with your Client ID
 client_secret="<client_secret>"  ## Replace <client_secret> with your client secret
 ```
 
-> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required. Following command was used to prevent any changes to looker.ini being committed. 
+> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required. 
+
+Use the following command was  to prevent any changes to looker.ini being committed. 
 
 ```
 git update-index --skip-worktree path/to/looker.ini

@@ -8,14 +8,23 @@ The script takes positional command line arguments to set the Explore slug and t
 
 The output on the command line will report the duration of each query as a list and the _min_, _max_, and _average_ query runtimes of those queries. It will optionally output a csv file with the headers:
 
-`SlugID, Timestamp, RunTime`
+```
+SlugID, Timestamp, RunTime
+```
+
+Format:
+ - `SlugID`: The slugID that was provided as the first argument when running the script (see "Running" section below).
+ - `Timestamp`: The ISO 8601 Looker system time timestamp when the query was performed, such as: `2022-01-25T20:20:18Z`. The GDX Analytics Looker system timezone is set to UTC.
+ - `RunTime`: The query run duration in seconds.
 
 ## Installation
 
 Use Pipenv to handle dependencies and run the script:
+
 ```
 pipenv install
 ```
+
 ## Configuration
 
 The user must provide API client and secret keys in the `config/looker.ini` file.
@@ -39,30 +48,31 @@ client_id="<client_id>"  ## Replace <client_id> with your Client ID
 client_secret="<client_secret>"  ## Replace <client_secret> with your client secret
 ```
 
-> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required. 
+> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required.
 
-Use the following command was  to prevent any changes to looker.ini being committed. 
+You can run the following command from this to prevent any changes to looker.ini being accidentally committed:
 
 ```
-git update-index --skip-worktree path/to/looker.ini
+git update-index --skip-worktree config/looker.ini
 ```
+
 ## Running `measure_tile_performance.py`
 
 The `measure_tile_performance.py` script requires positional arguments:
- - <arg1> accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then choose the 'Share' option to show the share url for the query. "Share" option can be found by clicking on the gear icon on top right section of an explore. Share urls generally look something like 'https://analytics.gov.bc.ca/x/UnBMGQaMNRhiTy2nhbcXdl'. The trailing 'UnBMGQaMNRhiTy2nhbcXdl' is the share slug.
- - <arg2> accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
+ - `<arg1>` accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then choose the 'Share' option to show the share url for the query. "Share" option can be found by clicking on the gear icon on top right section of an explore. Share urls generally look something like 'https://analytics.gov.bc.ca/x/UnBMGQaMNRhiTy2nhbcXdl'. The trailing 'UnBMGQaMNRhiTy2nhbcXdl' is the share slug.
+ - `<arg2>` accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
 
  Optional arguments:
- - -f or --file: flag to write output to a csv file. It will create a csv file with the name <slug><datetime>.csv when <slug> is slug id of query you are running and <datetime> is the timestamp of when script was run.
+ - `-f` or `--file`: flag to write output to a csv file. It will create a csv file with the name `<slug>_<datetime>.csv` when `<slug>` is slug id of query you are running and `<datetime>` is the local system timestamp of when script was run as `YYYYMMDDTHHMMSS` (ISO 8601 format).
 
 When invoking `measure_tile_performance.py`, use Pipenv run.
+
 ### Example with a csv file:
 ```
 pipenv run python measure_tile_performance.py <arg1> <arg2> -f
 
 pipenv run python measure_tile_performance.py rVaXot9rHeO8VZnAjD1PmY 2 -f
 ```
-
 
 ### Example without a csv file:
 

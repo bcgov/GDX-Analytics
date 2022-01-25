@@ -31,7 +31,7 @@ from datetime import datetime
 now = datetime.now()
  
 # dd/mm/YY H:M:S
-filename = slug_input + now.strftime("-%d-%m-%Y-%H-%M-%S") + '.csv'
+filename = slug_input + now.strftime("_%Y%m%dT%H%M%S") + '.csv'
 
 # get query_id from slug
 SlugResponse = sdk.query_for_slug(slug=slug_input)

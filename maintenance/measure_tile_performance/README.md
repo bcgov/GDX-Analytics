@@ -14,7 +14,7 @@ SlugID, Timestamp, RunTime
 
 Format:
  - `SlugID`: The slugID that was provided as the first argument when running the script (see "Running" section below).
- - `Timestamp`: The ISO 8601 Looker system time timestamp when the query was performed, such as: `2022-01-25T20:20:18Z`. The GDX Analytics Looker system timezone is set to UTC.
+ - `Timestamp`: The ISO 8601 Looker system time timestamp converted from UTC into the America/Vancouver timezome, such as: `2022-01-25T13:39:16-08:00`.
  - `RunTime`: The query run duration in seconds.
 
 ## Installation

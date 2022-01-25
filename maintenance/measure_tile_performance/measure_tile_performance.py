@@ -3,6 +3,8 @@ import json
 import datetime
 import csv
 import argparse
+from pytz import timezone
+import pytz
 
 parser = argparse.ArgumentParser()
 # Positional mandatory arguments
@@ -56,7 +58,8 @@ while i <= times :
     # Convert string to Python dict 
     query_dic = json.loads(response) 
     Runtime_duration = round(float(query_dic['runtime']), 2)
-    Ran_at = query_dic['ran_at']
+    Ran_at_utc = pytz.utc.localize(datetime.fromisoformat(query_dic['ran_at'][:-1]))
+    Ran_at = Ran_at_utc.astimezone(pytz.timezone('America/Vancouver')).isoformat()
     QueryList.append(Runtime_duration)
     if args.file:
         with open(filename, 'a', encoding='UTF8') as f:

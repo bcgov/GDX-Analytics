@@ -39,9 +39,11 @@ Update `looker.ini` replace the values for Client ID and Client Secret recorded 
 
 ```
 # API 3 client 
-client_id="<client_id>"  ## Replace <client_id> with your Client ID
+## Replace <client_id> with your Client ID
+client_id="<client_id>"
 # API 3 
-client_secret="<client_secret>"  ## Replace <client_secret> with your client secret
+## Replace <client_secret> with your client secret
+client_secret="<client_secret>"
 ```
 
 > These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required.

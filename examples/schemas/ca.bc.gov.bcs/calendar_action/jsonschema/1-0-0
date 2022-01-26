@@ -60,14 +60,6 @@
           "maxLength": 255,
           "description": "A single value from the category list if selected. NULL or omitted otherwise."
         },
-        "more": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "maxLength": 255,
-          "description": "A single value from the 'more' list if selected. NULL or omitted otherwise."
-        },
         "issue": {
           "type": [
             "string",

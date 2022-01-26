@@ -1,4 +1,5 @@
 [Looker]
+# Copy this file to your home directory, put your own unique credentials as explained in Readme.md and rename it to looker.ini 
 # Base URL for API. Do not include /api/* in the url 
 base_url="https://analytics.gov.bc.ca:19999"
 # API 3 client 

@@ -6,6 +6,8 @@ import argparse
 import time
 import pytz
 from pytz import timezone
+import os
+
 
 
 parser = argparse.ArgumentParser()
@@ -24,8 +26,8 @@ if times > 100 or times <= 0:
     print("Runs per query(arg2) must be between 1 and 100")
     exit()
 
-
-sdk = looker_sdk.init40("config/looker.ini")
+# looks for looker.ini file in your home directory
+sdk = looker_sdk.init40(os.path.expanduser('~')+"/looker.ini")
 
 query_list = []
 header = ['SlugId', 'Timestamp', 'RunTime']

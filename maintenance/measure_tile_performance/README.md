@@ -8,6 +8,8 @@ The script takes positional command line arguments to set the Explore slug and t
 
 The output on the command line will report the duration of each query as a list and the _min_, _max_, and _average_ query runtimes of those queries. It will optionally output a csv file with the headers:
 
+There will be a time delay of 5 mins between each query to save looker from clogging.
+
 ```
 SlugID, Timestamp, RunTime
 ```
@@ -77,7 +79,7 @@ When invoking `measure_tile_performance.py`, use Pipenv run.
 ```
 pipenv run python measure_tile_performance.py <arg1> <arg2> -f
 
-pipenv run python measure_tile_performance.py rVaXot9rHeO8VZnAjD1PmY 2 -f
+pipenv run python measure_tile_performance.py MWPGYXQO8rj4ha3PWQAM7d 2 -f
 ```
 
 ### Example without a csv file:
@@ -85,5 +87,5 @@ pipenv run python measure_tile_performance.py rVaXot9rHeO8VZnAjD1PmY 2 -f
 ```
 pipenv run python measure_tile_performance.py <arg1> <arg2>
 
-pipenv run python measure_tile_performance.py rVaXot9rHeO8VZnAjD1PmY 4
+pipenv run python measure_tile_performance.py MWPGYXQO8rj4ha3PWQAM7d 4
 ```

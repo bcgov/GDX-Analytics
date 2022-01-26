@@ -3,8 +3,10 @@ import json
 import datetime
 import csv
 import argparse
-from pytz import timezone
+import time
 import pytz
+from pytz import timezone
+
 
 parser = argparse.ArgumentParser()
 # Positional mandatory arguments
@@ -66,7 +68,13 @@ while i <= times :
             writer = csv.writer(f)
             # write the data
             writer.writerow([slug_input, ran_at, runtime_duration])
+    
+    # adding 5 min time delay between subsequent queries to keep looker open for other tasks
+    if i != times:
+        time.sleep(300)
+
     i += 1
+
 if args.file:
     print("Filename =", filename)
     f.close()

@@ -17,7 +17,7 @@ Format:
  - `Timestamp`: The ISO 8601 Looker system time timestamp converted from UTC into the America/Vancouver timezome, such as: `2022-01-25T13:39:16-08:00`.
  - `RunTime`: The query run duration in seconds.
 
-There will be a time delay of 5 mins between each query to save looker from clogging.
+There will be a time delay of 5 mins between each query to save looker from clogging. User can change this time dealy bu using `<arg3>` as explained below.
 
 
 ## Configuration of Looker.ini
@@ -64,6 +64,8 @@ The `measure_tile_performance.py` script requires positional arguments:
  - `<arg2>` accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
 
  Optional arguments:
+ - `<arg3>` accepts an integer, which is number of seconds you want to delay between each query run. If nothing is specified then default value is 300s
+
  - `-f` or `--file`: flag to write output to a csv file. It will create a csv file with the name `<slug>_<datetime>.csv` when `<slug>` is slug id of query you are running and `<datetime>` is the local system timestamp of when script was run as `YYYYMMDDTHHMMSS` (ISO 8601 format).
 
 When invoking `measure_tile_performance.py`, use Pipenv run.

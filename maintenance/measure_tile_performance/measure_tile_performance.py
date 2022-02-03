@@ -14,13 +14,20 @@ parser = argparse.ArgumentParser()
 # Positional mandatory arguments
 parser.add_argument("slugInput", help="Slug id from explore.")
 parser.add_argument("times", help="Number of times script is run - Value must be between 1 and 100", type=int)
-# optional argument
+# optional arguments
+parser.add_argument("sleepTimer", help="Number of seconds delay between each query, defaluted to 300s ", nargs='?', type=int)
 parser.add_argument("-f", "--file", help="Boolean to create a file", action='store_true')
+
 args = parser.parse_args()
 
 
 slug_input = args.slugInput
 times = args.times
+
+if args.sleepTimer:
+    sleep_timer = args.sleepTimer
+else:
+    sleep_timer = 300
 
 if times > 100 or times <= 0:
     print("Runs per query(arg2) must be between 1 and 100")
@@ -73,7 +80,7 @@ while i <= times :
     
     # adding 5 min time delay between subsequent queries to keep looker open for other tasks
     if i != times:
-        time.sleep(300)
+        time.sleep(sleep_timer)
 
     i += 1
 

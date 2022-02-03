@@ -53,7 +53,7 @@ client_secret="<client_secret>"
 Use Pipenv to handle dependencies and run the script:
 
 ```
-pipenv install
+pipenv install --ignore-pipfile
 ```
 
 
@@ -70,17 +70,23 @@ The `measure_tile_performance.py` script requires positional arguments:
 
 When invoking `measure_tile_performance.py`, use Pipenv run.
 
-### Example with a csv file:
+### Example with the SleepTimer and  csv file:
 ```
-pipenv run python measure_tile_performance.py <arg1> <arg2> -f
+pipenv run python measure_tile_performance.py <arg1> <arg2> <arg3> -f
+```
+The following example is using slug - TPvGJfrWSmqCAw7w8GnQ3w which will run the query 4 times with delay of 10s between each query and create a csv file.
 
-pipenv run python measure_tile_performance.py MWPGYXQO8rj4ha3PWQAM7d 2 -f
+```
+pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 10 -f
 ```
 
-### Example without a csv file:
+### Example without SleepTimer and csv file:
 
 ```
 pipenv run python measure_tile_performance.py <arg1> <arg2>
+```
+The following example is using slug - TPvGJfrWSmqCAw7w8GnQ3w, run the query 4 times with delay of default 300s between each query because <arg3> is not set and will not create a csv file because -f is not used.
 
-pipenv run python measure_tile_performance.py MWPGYXQO8rj4ha3PWQAM7d 4
+```
+pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 
 ```

@@ -10,6 +10,7 @@
   "dependencies": {
     "ansi-html": "^0.0.7",
     "ansi-regex": "^6.0.1",
+    "cache-loader": "^4.1.0",
     "copy-webpack-plugin": "^6.3.2",
     "follow-redirects": "^1.14.8",
     "glob-parent": "^6.0.2",
@@ -21,7 +22,8 @@
     "postcss": "^8.4.6",
     "set-value": "^4.1.0",
     "vue": "^2.6.12",
-    "vue-router": "^3.4.9"
+    "vue-router": "^3.4.9",
+    "webpack": "^4.46.0"
   },
   "resolutions": {
     "serialize-javascript": "3.1.0"

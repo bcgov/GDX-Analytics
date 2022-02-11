@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS test.atomic_sept_poc_parquet (
     page_url            VARCHAR(4096)   ENCODE ZSTD,
     domain_sessionid    CHAR(128)       ENCODE ZSTD,
     PRIMARY KEY(root_id)
-    SORTKEY(root_tstamp)
 )
+    SORTKEY(root_tstamp);

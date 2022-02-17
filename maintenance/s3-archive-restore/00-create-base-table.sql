@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS test.atomic_sept_poc_parquet (
-    root_tstamp         TIMESTAMPTZ     ENCODE ZSTD,
+CREATE TABLE IF NOT EXISTS test.atomic_sept_full_poc_parquet (
+    root_tstamp         TIMESTAMPTZ     ENCODE AZ64,
     page_view_id        VARCHAR(36)     ENCODE ZSTD,
     root_id             CHAR(36)        ENCODE LZO,
     page_urlhost        VARCHAR(255)    ENCODE ZSTD,
@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS test.atomic_sept_poc_parquet (
     domain_sessionid    CHAR(128)       ENCODE ZSTD,
     PRIMARY KEY(root_id)
 )
-DISTSTYLE KEY
 -- Optimize join to events table
 DISTKEY (root_id)
-SORTKEY(root_tstamp);
+SORTKEY (root_tstamp);

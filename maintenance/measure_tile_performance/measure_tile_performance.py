@@ -33,8 +33,8 @@ if times > 100 or times <= 0:
     print("Runs per query(arg2) must be between 1 and 100")
     exit()
 
-# looks for looker.ini file in your home directory
-sdk = looker_sdk.init40(os.path.expanduser('~')+"/looker.ini")
+# looks for environment variables for authentication
+sdk = looker_sdk.init40()
 
 query_list = []
 header = ['SlugId', 'Timestamp', 'RunTime']

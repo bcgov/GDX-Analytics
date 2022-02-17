@@ -46,8 +46,6 @@ export LOOKERSDK_TIMEOUT=300
 [...]
 ```
 
-> These are secret values unique to your user, and should not be shared. After changing `looker.ini`, do not add that change to a git commit record. The Client ID and Client Secret pairs can be deleted and new ones recreated from the Looker interface if required.
-
 ## Installation
 
 Install using Pipenv to get the dependencies specified in the `Pipfile.lock`:

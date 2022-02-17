@@ -2,7 +2,7 @@
 
 This Measure Tile Performance script, `measure_tile_performance.py` will output the runtime results of running a given input query (based on a Looker Explore slug) a given number of times.
 
-It runs by invoking the Looker API, which requires API Keys to access which must be set in the `looker.ini` file.
+It runs by invoking the Looker API, which requires Base URL, API Keys and other config settings which are set under environment variables.
 
 The script takes positional command line arguments to set the Explore slug and the number of times you want to run the query.
 
@@ -15,36 +15,34 @@ SlugID, Timestamp, RunTime
 Format:
  - `SlugID`: The slugID that was provided as the first argument when running the script (see "Running" section below).
  - `Timestamp`: The ISO 8601 Looker system time timestamp converted from UTC into the America/Vancouver timezome, such as: `2022-01-25T13:39:16-08:00`.
- - `RunTime`: The query run duration in seconds (optional: default 300).
+ - `RunTime`: The query runtime duration in seconds.
 
 There will be a time delay of 300 seconds (5 minutes) between each query to save looker from clogging. User can change this time dealy bu using `<arg3>` as explained below.
 
 
-## Configuration of Looker.ini
-The user must copy `looker.ini.dist` file to thier local home directory and rename it to `looker.ini`. This step is added to prevent looker.ini being committed to source control. 
+## Configuration of environment variables if running locally
 
-The user must provide API client and secret keys in the `looker.ini` file.
+These variables are already set in EC2 and following instructions are to setup these variables in case you want to run this script locally.
 
-Every authorized Looker user can create their own values for __"Client ID"__ and __"Client Secret__" for use with the Looker API. To find these values:
+Every authorized Looker user can create their own values for __"Client ID"__ and __"Client Secret"__ for use with the Looker API. To find these values:
 
- 1. navigate to the Looker [Users Admin panel](https://analytics.gov.bc.ca/admin/users),
+ 1. navigate to the Looker [Users Admin panel](https://analytics.gov.bc.ca/admin/users);
  2. search for your user;
  3. click the "_Edit_" button to open your user configuration screen;
  4. click on "_Edit Keys_" button under the "__Api3__" section;
  5. if "No API3 keys found", click the "_New API3 Key_" button to generate a new Client ID and Client Secret pair;
-    - you may optionally delete and recreate key Client ID and Client Secret pairs, or create multiple key pairs for different uses. Keep in mind deleting these pairs will require updating the `looker.ini` file, and deleted keys will no longer work if being used elsewhere.
+    - you may optionally delete and recreate key Client ID and Client Secret pairs, or create multiple key pairs for different uses. Keep in mind deleting these pairs will require updating the environment variables, and deleted keys will no longer work if being used elsewhere.
  6. record the values for your Client ID and Client Secret.
 
-Update `looker.ini` replace the values for Client ID and Client Secret recorded in the previous steps:
+Update environment variables locally to replace the values for Client ID and Client Secret recorded in the previous steps:
 
 ```
 [...]
-# API 3 client 
-## Replace <client_id> with your Client ID
-client_id="<client_id>"
-# API 3 
-## Replace <client_secret> with your client secret
-client_secret="<client_secret>"
+export LOOKERSDK_CLIENT_ID=__"Client ID"__
+export LOOKERSDK_CLIENT_SECRET=__"Client Secret"__
+export LOOKERSDK_BASE_URL="https://analytics.gov.bc.ca:19999"
+export LOOKERSDK_VERIFY_SSL=True
+export LOOKERSDK_TIMEOUT=300
 [...]
 ```
 
@@ -91,3 +89,4 @@ The following example is using slug `TPvGJfrWSmqCAw7w8GnQ3w`, run the query 2 ti
 ```
 pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 
 ```
+

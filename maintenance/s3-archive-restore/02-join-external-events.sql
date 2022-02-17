@@ -7,16 +7,17 @@ WITH he AS (
         ev.page_url,
         ev.domain_sessionid
     FROM atomic_spectrum_2020_07.events AS ev
-        INNER JOIN test.atomic_sept_poc_parquet AS ta
+        INNER JOIN test.atomic_sept_full_poc_parquet AS ta
             ON ta.root_id = ev.event_id AND
             ta.root_tstamp = ev.collector_tstamp
-        WHERE ev.month LIKE '2021-09-01 00:00:00'
+        WHERE
+            ev.month LIKE '2021-09-01 00:00:00' AND
+            ta.root_tstamp >= '2021-09-01'
 )
--- Update base history table
-UPDATE test.atomic_sept_poc_parquet
+UPDATE test.atomic_sept_full_poc_parquet
     SET page_urlhost = he.page_urlhost,
         page_url = he.page_url,
         domain_sessionid = he.domain_sessionid
 FROM he
-    WHERE atomic_sept_poc_parquet.root_id = he.event_id AND
-    atomic_sept_poc_parquet.root_tstamp = he.collector_tstamp;
+    WHERE atomic_sept_full_poc_parquet.root_id = he.event_id AND
+    atomic_sept_full_poc_parquet.root_tstamp = he.collector_tstamp;

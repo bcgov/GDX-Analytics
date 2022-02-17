@@ -17,7 +17,7 @@ Format:
  - `Timestamp`: The ISO 8601 Looker system time timestamp converted from UTC into the America/Vancouver timezome, such as: `2022-01-25T13:39:16-08:00`.
  - `RunTime`: The query runtime duration in seconds.
 
-There will be a time delay of 300 seconds (5 minutes) between each query to save looker from clogging. User can change this time dealy bu using `<arg3>` as explained below.
+There will be a time delay of 300 seconds (5 minutes) between each query to save looker from clogging. User can change this time delay by using `<arg3>` as explained below.
 
 
 ## Configuration of environment variables if running locally

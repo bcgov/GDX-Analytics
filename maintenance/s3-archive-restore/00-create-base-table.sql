@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS test.atomic_sept_full_poc_parquet (
     domain_sessionid    CHAR(128)       ENCODE ZSTD,
     PRIMARY KEY(root_id)
 )
+DISTSTYLE KEY
 -- Optimize join to events table
 DISTKEY (root_id)
 SORTKEY (root_tstamp);

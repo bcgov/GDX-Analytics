@@ -8,13 +8,19 @@ import pytz
 from pytz import timezone
 import os
 import psycopg2
+import statistics
 
 NAME = 'snowplow'
 HOST = 'redshift.analytics.gov.bc.ca'
 PORT = 5439
 
+# connects with redshift database using environment variables
+# set redshift cache to 'off' before running any looker API calls
+# run the API calls
+# set redshift cache back to 'on' after the queries are processed.
+# close the redshift connection
 def main():
-    """Run the default connection, test, and close"""
+    
     user = os.environ['lookeruser_rs']
     passwd = os.environ['lookerpass_rs']
     connection_string = (
@@ -118,7 +124,10 @@ def main():
     length = len(query_list)
     average = round(sum_of_list/length, 2)
     print("Avg =", average)
-
+    #if query runs are more than 1, then calculate standard deviation
+    if times > 1:
+        standard_dev = statistics.stdev(query_list)
+        print("Standard Deviation =", standard_dev)
     with conn:
         with conn.cursor() as curs:
             curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")

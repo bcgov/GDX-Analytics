@@ -15,8 +15,8 @@ PORT = 5439
 
 def main():
   """Run the default connection, test, and close"""
-  user = os.environ['lookeruser']
-  passwd = os.environ['lookerpass']
+  user = os.environ['lookeruser_rs']
+  passwd = os.environ['lookerpass_rs']
   connection_string = (
     f"dbname='{NAME}' "
     f"host='{HOST}' "
@@ -109,15 +109,14 @@ def main():
         f.close()
         
     #Print for Console 
-
     print("RunTimes =", query_list)
     minimum = min(query_list)
     print("Min =", minimum)
     maximum = max(query_list)
     print("Max =", maximum)
-    sum = sum(query_list)
+    sum_of_list = sum(query_list)
     length = len(query_list)
-    average = round(sum/length, 2)
+    average = round(sum_of_list/length, 2)
     print("Avg =", average)
 
     with conn:

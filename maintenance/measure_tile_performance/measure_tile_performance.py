@@ -126,7 +126,7 @@ def main():
     print("Avg =", average)
     #if query runs are more than 1, then calculate standard deviation
     if times > 1:
-        standard_dev = statistics.stdev(query_list)
+        standard_dev = round(statistics.stdev(query_list), 2)
         print("Standard Deviation =", standard_dev)
     with conn:
         with conn.cursor() as curs:

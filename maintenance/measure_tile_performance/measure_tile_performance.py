@@ -14,21 +14,21 @@ HOST = 'redshift.analytics.gov.bc.ca'
 PORT = 5439
 
 def main():
-  """Run the default connection, test, and close"""
-  user = os.environ['lookeruser_rs']
-  passwd = os.environ['lookerpass_rs']
-  connection_string = (
-    f"dbname='{NAME}' "
-    f"host='{HOST}' "
-    f"port='{PORT}' "
-    f"user='{user}' "
-    f"password={passwd}")
-  
-  conn = psycopg2.connect(dsn=connection_string)
+    """Run the default connection, test, and close"""
+    user = os.environ['lookeruser_rs']
+    passwd = os.environ['lookerpass_rs']
+    connection_string = (
+        f"dbname='{NAME}' "
+        f"host='{HOST}' "
+        f"port='{PORT}' "
+        f"user='{user}' "
+        f"password={passwd}")
+    
+    conn = psycopg2.connect(dsn=connection_string)
 
-  with conn:
-    with conn.cursor() as curs:
-        curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
+    with conn:
+        with conn.cursor() as curs:
+            curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
 
     parser = argparse.ArgumentParser()
     # Positional mandatory arguments

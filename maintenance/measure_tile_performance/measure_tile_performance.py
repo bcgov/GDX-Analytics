@@ -31,11 +31,6 @@ def main():
         f"password={passwd}")
     
     conn = psycopg2.connect(dsn=connection_string)
-
-    with conn:
-        with conn.cursor() as curs:
-            curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
-
     parser = argparse.ArgumentParser()
     # Positional mandatory arguments
     parser.add_argument("slugInput", help="Slug id from explore.")
@@ -43,10 +38,7 @@ def main():
     # optional arguments
     parser.add_argument("sleepTimer", help="Number of seconds delay between each query, defaluted to 300s ", nargs='?', type=int)
     parser.add_argument("-f", "--file", help="Boolean to create a file", action='store_true')
-
     args = parser.parse_args()
-
-
     slug_input = args.slugInput
     times = args.times
 
@@ -87,6 +79,10 @@ def main():
 
     i = 1
     while i <= times :
+        # set redshift cache to 'off' before running any looker API calls
+        with conn:
+            with conn.cursor() as curs:
+                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
         response = sdk.run_query(
         query_id=query,
         result_format="json_detail",
@@ -94,6 +90,10 @@ def main():
         cache_only=False)
         # Convert string to Python dict 
         query_dic = json.loads(response) 
+        # set redshift cache back to 'on' after the queries are processed.
+        with conn:
+            with conn.cursor() as curs:
+                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
         runtime_duration = round(float(query_dic['runtime']), 2)
         ran_at_utc = pytz.utc.localize(datetime.fromisoformat(query_dic['ran_at'][:-1]))
         ran_at = ran_at_utc.astimezone(pytz.timezone('America/Vancouver')).isoformat()
@@ -128,12 +128,7 @@ def main():
     if times > 1:
         standard_dev = round(statistics.stdev(query_list), 2)
         print("Standard Deviation =", standard_dev)
-    with conn:
-        with conn.cursor() as curs:
-            curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
-
-    ## Give the looker user back the ability to use Redshift cache
-
+    #close the connection
     conn.close()
 
 if __name__ == '__main__':

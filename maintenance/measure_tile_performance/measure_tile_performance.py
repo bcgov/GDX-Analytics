@@ -1,4 +1,9 @@
+from distutils.log import error
+import os
+import psycopg2
+import statistics
 import looker_sdk 
+from looker_sdk import error as SDKError
 import json
 import datetime
 import csv
@@ -6,9 +11,7 @@ import argparse
 import time
 import pytz
 from pytz import timezone
-import os
-import psycopg2
-import statistics
+
 
 NAME = 'snowplow'
 HOST = 'redshift.analytics.gov.bc.ca'
@@ -82,18 +85,33 @@ def main():
         # set redshift cache to 'off' before running any looker API calls
         with conn:
             with conn.cursor() as curs:
-                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
-        response = sdk.run_query(
-        query_id=query,
-        result_format="json_detail",
-        cache=False,
-        cache_only=False)
-        # Convert string to Python dict 
-        query_dic = json.loads(response) 
+                try:
+                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
+                except Exception as err:
+                    print(f'Exiting due to psycopg2 execution error: {err}')
+                    exit(1)
+        try:
+            response = sdk.run_query(
+            query_id=query,
+            result_format="json_detail",
+            cache=False,
+            cache_only=False)
+        except error.SDKError as err:
+            print(f'Exiting due to Looker SDK exception: {err}')
+
+            exit(1)
+
         # set redshift cache back to 'on' after the queries are processed.
         with conn:
             with conn.cursor() as curs:
-                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
+                try:
+                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
+                except Exception as err:
+                        print(f'URGENT! Exiting due to psycopg2 execution error: {err}')
+                        print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
+                        exit(1)
+        # Convert string to Python dict 
+        query_dic = json.loads(response) 
         runtime_duration = round(float(query_dic['runtime']), 2)
         ran_at_utc = pytz.utc.localize(datetime.fromisoformat(query_dic['ran_at'][:-1]))
         ran_at = ran_at_utc.astimezone(pytz.timezone('America/Vancouver')).isoformat()

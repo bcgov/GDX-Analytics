@@ -68,7 +68,12 @@ def main():
     filename = slug_input + now.strftime("_%Y%m%dT%H%M%S") + '.csv'
 
     # get query_id from slug
-    slug_response = sdk.query_for_slug(slug=slug_input)
+    try:
+        slug_response = sdk.query_for_slug(slug=slug_input)
+    except error.SDKError as err:
+        print(f'Exiting due to Looker SDK exception: {err}')
+        exit(1)
+    
 
     query = slug_response.id
 

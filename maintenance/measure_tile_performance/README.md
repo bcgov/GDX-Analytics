@@ -43,7 +43,7 @@ export LOOKERSDK_CLIENT_ID=__"Client ID"__
 export LOOKERSDK_CLIENT_SECRET=__"Client Secret"__
 export LOOKERSDK_BASE_URL="https://analytics.gov.bc.ca:19999"
 export LOOKERSDK_VERIFY_SSL=True
-export LOOKERSDK_TIMEOUT=300
+export LOOKERSDK_TIMEOUT=600
 [...]
 ```
 

@@ -2,8 +2,7 @@ from distutils.log import error
 import os
 import psycopg2
 import statistics
-import looker_sdk 
-from looker_sdk import error as SDKError
+import looker_sdk
 import json
 import datetime
 import csv
@@ -70,7 +69,7 @@ def main():
     # get query_id from slug
     try:
         slug_response = sdk.query_for_slug(slug=slug_input)
-    except error.SDKError as err:
+    except Exception as err:
         print(f'Exiting due to Looker SDK exception: {err}')
         exit(1)
     
@@ -101,7 +100,7 @@ def main():
             result_format="json_detail",
             cache=False,
             cache_only=False)
-        except error.SDKError as err:
+        except Exception as err:
             print(f'Exiting due to Looker SDK exception: {err}')
 
             exit(1)

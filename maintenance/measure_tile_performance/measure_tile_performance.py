@@ -1,4 +1,3 @@
-from distutils.log import error
 import os
 import psycopg2
 import statistics

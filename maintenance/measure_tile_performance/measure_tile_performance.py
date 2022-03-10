@@ -105,7 +105,7 @@ def main():
         with conn:
             with conn.cursor() as curs:
                 try:
-                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
+                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
                 except Exception as err:
                         print(f'URGENT! Exiting due to psycopg2 execution error: {err}')
                         print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')

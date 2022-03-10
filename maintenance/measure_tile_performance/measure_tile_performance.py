@@ -9,6 +9,7 @@ import argparse
 import time
 import pytz
 from pytz import timezone
+from datetime import datetime
 
 
 NAME = 'snowplow'
@@ -58,7 +59,6 @@ def main():
     query_list = []
     header = ['SlugId', 'Timestamp', 'RunTime']
 
-    from datetime import datetime
     # datetime object containing current date and time
     now = datetime.now()
     
@@ -70,8 +70,7 @@ def main():
         slug_response = sdk.query_for_slug(slug=slug_input)
     except Exception as err:
         print(f'Exiting due to Looker SDK exception: {err}')
-        exit(1)
-    
+        exit(1)    
 
     query = slug_response.id
 
@@ -82,7 +81,6 @@ def main():
             writer.writerow(header)
 
     # run query as per user input
-
     i = 1
     while i <= times :
         # set redshift cache to 'off' before running any looker API calls
@@ -101,7 +99,6 @@ def main():
             cache_only=False)
         except Exception as err:
             print(f'Exiting due to Looker SDK exception: {err}')
-
             exit(1)
 
         # set redshift cache back to 'on' after the queries are processed.
@@ -149,7 +146,7 @@ def main():
     if times > 1:
         standard_dev = round(statistics.stdev(query_list), 2)
         print("Standard Deviation =", standard_dev)
-    #close the connection
+    #close redshift connection
     conn.close()
 
 if __name__ == '__main__':

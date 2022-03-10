@@ -2,12 +2,11 @@
 
 This Measure Tile Performance script, `measure_tile_performance.py` will output the runtime results of running a given input query (based on a Looker Explore slug) a given number of times.
 
-It runs by invoking the Looker API, which requires Base URL, API Keys and other config settings which are set under environment variables. The script is setup to not pull any cached query results and run a fresh query with each run.
+It runs by invoking the Looker API, which requires Base URL, API Keys and other config settings which are set as environment variables. The script is setup to not pull any cached query results and run a fresh query with each run.
 
 The script takes positional command line arguments to set the Explore slug and the number of times you want to run the query.
 
-
-The output on the command line will report the duration of each query as a list and the _min_, _max_, _average_, _standard deviation_ query runtimes of those queries. It will optionally output a csv file with the headers:
+The standard output to the command line will report the duration of each query as a list. The _min_, _max_, _average_, and _standard deviation_ of the query runtimes is also reported. It will optionally output a csv file with the headers:
 
 ```
 SlugID, Timestamp, RunTime
@@ -19,7 +18,6 @@ Format:
  - `RunTime`: The query runtime duration in seconds.
 
 There will be a time delay of 300 seconds (5 minutes) between each query to save looker from clogging. User can change this time delay by using `<arg3>` as explained below.
-
 
 ## Configuration of environment variables if running locally
 

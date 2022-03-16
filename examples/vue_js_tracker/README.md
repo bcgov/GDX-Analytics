@@ -14,7 +14,7 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project requires Vue CLI and npm v6 or higher. Vue CLI requires Node.js version 8.9 or higher. 
+This project requires Vue CLI, vue-template-compiler,  and npm v6 or higher. Vue CLI requires Node.js version 8.9 or higher. 
 
 ### Installation instructions
 
@@ -28,6 +28,12 @@ To install Vue CLI-Service (globally)
 
 ```
 npm install -g @vue/cli-service
+```
+
+To install vue-template-compiler (globally)
+
+```
+npm i -g vue-template-compiler
 ```
 
 See the official Vue.js installation documentation here: https://cli.vuejs.org/guide/installation.html

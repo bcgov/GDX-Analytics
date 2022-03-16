@@ -1,13 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import { Route, Link, BrowserRouter as Router } from 'react-router-dom'
+import { Route, Routes, Link, BrowserRouter as Router, BrowserRouter } from 'react-router-dom'
 import App from './App'
 import SecondPage from './SecondPage'
 import Thirdpage from './ThirdPage'
 
 const routing = (
-  <Router>
+  <BrowserRouter>
     <div>
       <ul>
         <li>
@@ -20,11 +20,13 @@ const routing = (
           <Link to="/thirdPage">Third Page</Link>
         </li>
       </ul>
-      <Route exact path="/" component={App} />
-      <Route path="/secondPage" component={SecondPage} />
-      <Route path="/thirdPage" component={Thirdpage} />
+          <Routes>
+            <Route exact path="/" component={App} />
+            <Route path="/secondPage" component={SecondPage} />
+            <Route path="/thirdPage" component={Thirdpage} />
+          </Routes>
     </div>
-  </Router>
+  </BrowserRouter>
 )
 
 ReactDOM.render(routing, document.getElementById('root'))

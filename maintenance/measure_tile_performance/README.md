@@ -56,7 +56,13 @@ pipenv install --ignore-pipfile
 ## Running `measure_tile_performance.py`
 
 The `measure_tile_performance.py` script requires positional arguments:
- - `<arg1>` accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then choose the 'Share' option to show the share url for the query. "Share" option can be found by clicking on the gear icon on top right section of an explore. Share urls generally look something like 'https://analytics.gov.bc.ca/x/UnBMGQaMNRhiTy2nhbcXdl'. The trailing 'UnBMGQaMNRhiTy2nhbcXdl' is the share slug.
+ - `<arg1>` accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then to find the Slug, click on the URL in the browser window. The part between "qid=" and "&origin" is the slug that you need for next steps. Copy these slugs in your documentation table.
+
+For example the **bolded** part of this link is slug.
+
+https://analytics.gov.bc.ca/explore/snowplow_web_block/page_views?qid=**hmbjQaHfeDbrtAsoCCBofP**&origin_space=37&toggle=vis 
+
+Slug for above explore = hmbjQaHfeDbrtAsoCCBofP
  - `<arg2>` accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
 
  Optional arguments:

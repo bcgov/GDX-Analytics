@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 import boto3
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 
@@ -27,5 +28,5 @@ response = requests.get(endpoint,
                         auth=auth, 
                         headers=headers)
 
-print(response.content)
+print(json.loads(response.content.decode('utf-8'))['body'])
 

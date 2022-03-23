@@ -1,3 +1,21 @@
+###################################################################
+# Script Name   : invoke_looker_embed_generator_api.py
+#
+# Description   : Sample Python script to generate secure Looker
+#               : embed URLs for embed dashboards. This script 
+#               : will make an api call with the dashbaord_id,
+#               : embed_domain, and urlhost as hardcoded variables.
+#
+# Requirements  : You must set the following environment variable
+#               : to establish credentials for the embed user
+#
+#               : export API_SECRET_ACCESS_KEY=<<AWS Embed API Key>>
+#
+# Usage         : To run the example embed string api call:
+#
+#               : python3 invoke_embed_generator_api.py
+#
+
 import requests
 import os
 import json

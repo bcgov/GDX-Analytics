@@ -1,0 +1,22 @@
+{
+  "description": "Schema to track button clicks on the Corporate Calendar",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What was clicked? (eg. sync, manage, help, calendar_view_button, excel_export_button, look_ahead_report_button, exec_look_ahead_report_button,, main_report_button, planning_report_button)."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.bcs",
+    "name": "calendar_click",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

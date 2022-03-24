@@ -17,7 +17,7 @@ Format:
  - `Timestamp`: The ISO 8601 Looker system time timestamp converted from UTC into the America/Vancouver timezome, such as: `2022-01-25T13:39:16-08:00`.
  - `RunTime`: The query runtime duration in seconds.
 
-There will be a time delay of 300 seconds (5 minutes) between each query to save looker from clogging. User can change this time delay by using `<arg3>` as explained below.
+User can put a time delay(seconds) between each query to save looker from clogging. User can change set time delay by using `<arg3>` as explained below. If it is not set then there is no delay between queries.
 
 ## Configuration of environment variables if running locally
 
@@ -65,8 +65,8 @@ https://analytics.gov.bc.ca/explore/snowplow_web_block/page_views?qid=hmbjQaHfeD
 Slug for above explore = hmbjQaHfeDbrtAsoCCBofP
  - `<arg2>` accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
 
- Optional arguments:
- - `<arg3>` accepts an integer, which is number of seconds you want to delay between each query run. If nothing is specified then default value is 300s
+ Optional arguments: 
+ - `<arg3>` accepts an integer, which is number of seconds you want to delay between each query run. If nothing is specified then default value is 0s. Skip this argument if you are running this script in non-businesss hours using cron.
 
  - `-f` or `--file`: flag to write output to a csv file. It will create a csv file with the name `<slug>_<datetime>.csv` when `<slug>` is slug id of query you are running and `<datetime>` is the local system timestamp of when script was run as `YYYYMMDDTHHMMSS` (ISO 8601 format).
 
@@ -92,4 +92,6 @@ The following example is using slug `TPvGJfrWSmqCAw7w8GnQ3w`, run the query 2 ti
 ```
 pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 
 ```
+## Running using Cron
 
+Use this procedure https://apps.itsm.gov.bc.ca/confluence/display/ANALYTICS/Measure+Looker+Tile+Performance to run this script via cron.

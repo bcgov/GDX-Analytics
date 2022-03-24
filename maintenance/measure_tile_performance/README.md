@@ -2,11 +2,11 @@
 
 This Measure Tile Performance script, `measure_tile_performance.py` will output the runtime results of running a given input query (based on a Looker Explore slug) a given number of times.
 
-It runs by invoking the Looker API, which requires Base URL, API Keys and other config settings which are set under environment variables.
+It runs by invoking the Looker API, which requires Base URL, API Keys and other config settings which are set as environment variables. The script is setup to not pull any cached query results and run a fresh query with each run.
 
 The script takes positional command line arguments to set the Explore slug and the number of times you want to run the query.
 
-The output on the command line will report the duration of each query as a list and the _min_, _max_, and _average_ query runtimes of those queries. It will optionally output a csv file with the headers:
+The standard output to the command line will report the duration of each query as a list. The _min_, _max_, _average_, and _standard deviation_ of the query runtimes is also reported. It will optionally output a csv file with the headers:
 
 ```
 SlugID, Timestamp, RunTime
@@ -17,8 +17,7 @@ Format:
  - `Timestamp`: The ISO 8601 Looker system time timestamp converted from UTC into the America/Vancouver timezome, such as: `2022-01-25T13:39:16-08:00`.
  - `RunTime`: The query runtime duration in seconds.
 
-There will be a time delay of 300 seconds (5 minutes) between each query to save looker from clogging. User can change this time delay by using `<arg3>` as explained below.
-
+User can put a time delay(seconds) between each query to save looker from clogging. User can change set time delay by using `<arg3>` as explained below. If it is not set then there is no delay between queries.
 
 ## Configuration of environment variables if running locally
 
@@ -42,7 +41,7 @@ export LOOKERSDK_CLIENT_ID=__"Client ID"__
 export LOOKERSDK_CLIENT_SECRET=__"Client Secret"__
 export LOOKERSDK_BASE_URL="https://analytics.gov.bc.ca:19999"
 export LOOKERSDK_VERIFY_SSL=True
-export LOOKERSDK_TIMEOUT=300
+export LOOKERSDK_TIMEOUT=600
 [...]
 ```
 
@@ -57,11 +56,17 @@ pipenv install --ignore-pipfile
 ## Running `measure_tile_performance.py`
 
 The `measure_tile_performance.py` script requires positional arguments:
- - `<arg1>` accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then choose the 'Share' option to show the share url for the query. "Share" option can be found by clicking on the gear icon on top right section of an explore. Share urls generally look something like 'https://analytics.gov.bc.ca/x/UnBMGQaMNRhiTy2nhbcXdl'. The trailing 'UnBMGQaMNRhiTy2nhbcXdl' is the share slug.
+ - `<arg1>` accepts a Looker Explore slug, which it will use to determine the Query ID to run. You can use the Looker explore page to build a query and then to find the Slug, click on the URL in the browser window. The part between "qid=" and "&origin" is the slug that you need for next steps. Copy these slugs in your documentation table.
+
+For example the **hmbjQaHfeDbrtAsoCCBofP** part of this link is slug.
+
+https://analytics.gov.bc.ca/explore/snowplow_web_block/page_views?qid=hmbjQaHfeDbrtAsoCCBofP&origin_space=37&toggle=vis 
+
+Slug for above explore = hmbjQaHfeDbrtAsoCCBofP
  - `<arg2>` accepts an integer, which is the number of times you want to run the query (the script will take the value between 1 and 100)
 
- Optional arguments:
- - `<arg3>` accepts an integer, which is number of seconds you want to delay between each query run. If nothing is specified then default value is 300s
+ Optional arguments: 
+ - `<arg3>` accepts an integer, which is number of seconds you want to delay between each query run. If nothing is specified then default value is 0s. Skip this argument if you are running this script in non-businesss hours using cron.
 
  - `-f` or `--file`: flag to write output to a csv file. It will create a csv file with the name `<slug>_<datetime>.csv` when `<slug>` is slug id of query you are running and `<datetime>` is the local system timestamp of when script was run as `YYYYMMDDTHHMMSS` (ISO 8601 format).
 
@@ -87,4 +92,6 @@ The following example is using slug `TPvGJfrWSmqCAw7w8GnQ3w`, run the query 2 ti
 ```
 pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 
 ```
+## Running using Cron
 
+Use this procedure https://apps.itsm.gov.bc.ca/confluence/display/ANALYTICS/Measure+Looker+Tile+Performance to run this script via cron.

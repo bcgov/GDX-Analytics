@@ -47,7 +47,7 @@ def main():
     if args.sleepTimer:
         sleep_timer = args.sleepTimer
     else:
-        sleep_timer = 300
+        sleep_timer = 0
 
     if times > 100 or times <= 0:
         print("Runs per query(arg2) must be between 1 and 100")
@@ -122,8 +122,8 @@ def main():
                 # write the data
                 writer.writerow([slug_input, ran_at, runtime_duration])
         
-        # adding 5 min time delay between subsequent queries to keep looker open for other tasks
-        if i != times:
+        # adding time delay between subsequent queries to keep looker open for other tasks
+        if i != times and args.sleepTimer:
             time.sleep(sleep_timer)
 
         i += 1

@@ -22,7 +22,7 @@ UNION
     SELECT root_id, root_tstamp FROM atomic.ca_bc_gov_chatbot_chatbot_2 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
 )
 
-SELECT DISTINCT
+SELECT
     wp.root_tstamp,
     wp.id AS page_view_id,
     wp.root_id
@@ -34,6 +34,10 @@ WHERE
     -- wp.month limits spectrum s3 scan to specified partition 
     wp.month LIKE '2021-09-01 00:00:00' AND
     -- anecdotal performance gain from timestamp condition
-    wp.root_tstamp >= '2021-09-01';
+    wp.root_tstamp >= '2021-09-01'
+GROUP BY 
+    wp.root_tstamp,
+    wp.id,
+    wp.root_id;
 
 GRANT SELECT ON test.atomic_sept_full_poc_parquet TO looker;

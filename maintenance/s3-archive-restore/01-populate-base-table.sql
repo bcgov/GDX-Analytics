@@ -1,5 +1,5 @@
 -- Build CTE from atomic business area tables
-INSERT INTO test.atomic_sept_poc_parquet
+INSERT INTO gdx_analytics.restored_atomic_ca_bc_gov
 
 WITH custom_context_events AS
 (
@@ -54,4 +54,4 @@ GROUP BY
     wp.id,
     wp.root_id;
 
-GRANT SELECT ON test.atomic_sept_poc_parquet TO looker;
+GRANT SELECT ON gdx_analytics.restored_atomic_ca_bc_gov TO looker;

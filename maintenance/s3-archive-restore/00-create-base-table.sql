@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS test.atomic_sept_full_poc_parquet (
+CREATE TABLE IF NOT EXISTS gdx_analytics.restored_atomic_ca_bc_gov (
     root_tstamp         TIMESTAMPTZ     ENCODE AZ64,
     page_view_id        VARCHAR(36)     ENCODE ZSTD,
     root_id             CHAR(36)        ENCODE LZO,

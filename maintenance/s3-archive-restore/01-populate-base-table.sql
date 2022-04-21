@@ -5,11 +5,11 @@ WITH custom_context_events AS
 (
     SELECT root_id, root_tstamp FROM atomic.ca_bc_gov_workbc_find_career_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp FROM atomic.bc_gov_workbc_resource_click_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
+    SELECT root_id, root_tstamp FROM atomic.ca_bc_gov_workbc_resource_click_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp FROM atomic.bc_gov_workbc_find_resources_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
+    SELECT root_id, root_tstamp FROM atomic.ca_bc_gov_workbc_find_resources_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
 UNION
-    SELECT root_id, root_tstamp FROM atomic.bc_gov_wellbeing_wellbeing_click_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
+    SELECT root_id, root_tstamp FROM atomic.ca_bc_gov_wellbeing_wellbeing_click_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
 UNION
     SELECT root_id, root_tstamp FROM atomic.ca_bc_gov_wellbeing_wellbeing_resources_1 WHERE root_tstamp >= '2021-09-01' AND root_tstamp < '2021-10-01'
 UNION

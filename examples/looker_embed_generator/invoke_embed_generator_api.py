@@ -19,14 +19,13 @@
 import requests
 import os
 import json
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 api_secret_access_key=os.environ['API_SECRET_ACCESS_KEY']
 
 api_id='jdo0epycg8'
 region='ca-central-1'
 endpoint=f'https://api.analytics.gov.bc.ca/embed/'
-params="dashboard_id=120&embed_domain=localhost:8888&urlhost=www2.gov.bc.ca"
+params="dashboard_id=103&embed_domain=localhost:8888&urlhost=www2.gov.bc.ca&first_name=John&last_name=Doe&external_user_id=12334567890ABCDEFG"
 headers={"x-api-key": api_secret_access_key}
 
 response = requests.get(endpoint,

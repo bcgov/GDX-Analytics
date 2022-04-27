@@ -42,6 +42,8 @@ SELECT
     wp.root_id
 FROM custom_context_events AS ce
 -- join external_schema.glue_data_catalog_table
+-- prior to 2020-07, replace schema name with 'atomic_external_schema'
+-- this is currently necessary due to a difference in partition structure 
 JOIN atomic_spectrum_2020_07.snowplow_web_page_1 AS wp
     ON ce.root_id = wp.root_id AND ce.root_tstamp = wp.root_tstamp
 WHERE

@@ -1,7 +1,7 @@
-
+--DROP TABLE maintenance.table_sizes;
 CREATE TABLE IF NOT EXISTS maintenance.table_sizes
 (
-        date TIMESTAMP WITHOUT TIME ZONE   ENCODE zstd
+        date TIMESTAMP WITHOUT TIME ZONE   ENCODE RAW
         ,"schema" VARCHAR(255)   ENCODE zstd
         ,"table" VARCHAR(255)   ENCODE zstd
         ,tbl_rows BIGINT   ENCODE zstd
@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS maintenance.table_sizes
         ,tombstoned_rows BIGINT   ENCODE az64
 )
 DISTSTYLE AUTO
-SORTKEY (date)
+ SORTKEY (
+        date
+        )
 ;
 ALTER TABLE maintenance.table_sizes owner to microservice;
+GRANT SELECT ON maintenance.table_sizes TO looker;

@@ -21,9 +21,9 @@ const routing = (
         </li>
       </ul>
           <Routes>
-            <Route exact path="/" component={App} />
-            <Route path="/secondPage" component={SecondPage} />
-            <Route path="/thirdPage" component={Thirdpage} />
+            <Route exact path="/" element={<App />}></Route>
+            <Route path="/secondPage" element={<SecondPage />}></Route>
+            <Route path="/thirdPage" element={<Thirdpage />}></Route>
           </Routes>
     </div>
   </BrowserRouter>

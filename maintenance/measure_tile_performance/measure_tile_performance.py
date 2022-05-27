@@ -15,24 +15,55 @@ from datetime import datetime
 NAME = 'snowplow'
 HOST = 'redshift.analytics.gov.bc.ca'
 PORT = 5439
+user = os.environ['lookeruser_rs']
+passwd = os.environ['lookerpass_rs']
+connection_string = (
+    f"dbname='{NAME}' "
+    f"host='{HOST}' "
+    f"port='{PORT}' "
+    f"user='{user}' "
+    f"password={passwd}")
 
 # connects with redshift database using environment variables
 # set redshift cache to 'off' before running any looker API calls
 # run the API calls
 # set redshift cache back to 'on' after the queries are processed.
 # close the redshift connection
+
+def cache_off():
+ # set redshift cache to 'off'
+    conn = psycopg2.connect(dsn=connection_string)
+    with conn:
+         with conn.cursor() as curs:
+            try:
+                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
+                print('redshift cache is off and connection is closed')
+            except Exception as err:
+                print(f'Exiting due to psycopg2 execution error: {err}')
+                print('redshift cache is on and connection is closed')
+                exit(1)
+
+
+
+def cache_on():
+ # set redshift cache back to 'on'
+    conn = psycopg2.connect(dsn=connection_string)
+    with conn:
+        with conn.cursor() as curs:
+            try:
+                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
+                print('redshift cache is on and connection is closed')
+            except Exception as err:
+                print(f'URGENT! Exiting due to psycopg2 execution error: {err}')
+                print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
+                print('redshift cache is on and connection is closed')
+                exit(1)
+              
+
+
+
 def main():
     
-    user = os.environ['lookeruser_rs']
-    passwd = os.environ['lookerpass_rs']
-    connection_string = (
-        f"dbname='{NAME}' "
-        f"host='{HOST}' "
-        f"port='{PORT}' "
-        f"user='{user}' "
-        f"password={passwd}")
-    
-    conn = psycopg2.connect(dsn=connection_string)
     parser = argparse.ArgumentParser()
     # Positional mandatory arguments
     parser.add_argument("slugInput", help="Slug id from explore.")
@@ -80,17 +111,13 @@ def main():
             # write the header
             writer.writerow(header)
 
+    # set redshift cache to 'off' before running any looker API calls
+    cache_off()
+
     # run query as per user input
     i = 1
     while i <= times :
-        # set redshift cache to 'off' before running any looker API calls
-        with conn:
-            with conn.cursor() as curs:
-                try:
-                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
-                except Exception as err:
-                    print(f'Exiting due to psycopg2 execution error: {err}')
-                    exit(1)
+
         try:
             response = sdk.run_query(
             query_id=query,
@@ -99,17 +126,10 @@ def main():
             cache_only=False)
         except Exception as err:
             print(f'Exiting due to Looker SDK exception: {err}')
+            cache_on()
             exit(1)
 
-        # set redshift cache back to 'on' after the queries are processed.
-        with conn:
-            with conn.cursor() as curs:
-                try:
-                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
-                except Exception as err:
-                        print(f'URGENT! Exiting due to psycopg2 execution error: {err}')
-                        print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
-                        exit(1)
+
         # Convert string to Python dict 
         query_dic = json.loads(response) 
         runtime_duration = round(float(query_dic['runtime']), 2)
@@ -128,6 +148,7 @@ def main():
 
         i += 1
 
+    # print the filename on console
     if args.file:
         print("Filename =", filename)
         f.close()
@@ -146,8 +167,9 @@ def main():
     if times > 1:
         standard_dev = round(statistics.stdev(query_list), 2)
         print("Standard Deviation =", standard_dev)
-    #close redshift connection
-    conn.close()
+
+    # set redshift cache back to 'on' after the queries are processed.
+    cache_on()
 
 if __name__ == '__main__':
   main()

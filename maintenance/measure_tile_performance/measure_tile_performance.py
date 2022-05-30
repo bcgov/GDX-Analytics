@@ -1,3 +1,4 @@
+from ast import While
 import os
 import psycopg2
 import statistics
@@ -43,24 +44,28 @@ def cache_off():
                 print('redshift cache is on and connection is closed')
                 exit(1)
 
-
-
 def cache_on():
  # set redshift cache back to 'on'
-    conn = psycopg2.connect(dsn=connection_string)
-    with conn:
-        with conn.cursor() as curs:
-            try:
-                curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
-                print('redshift cache is on and connection is closed')
-            except Exception as err:
-                print(f'URGENT! Exiting due to psycopg2 execution error: {err}')
-                print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
-                print('redshift cache is on and connection is closed')
-                exit(1)
-              
-
-
+    sleep_timer = 0
+    while True and sleep_timer <= 50: 
+        conn = psycopg2.connect(dsn=connection_string)
+        with conn:
+            with conn.cursor() as curs:
+                try:
+                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
+                    print('redshift cache is on and connection is closed')
+                except Exception as err:
+                    # exponential backoff loop to reconnect with database 5 times
+                    sleep_timer += 10
+                    if sleep_timer > 50:
+                        print(f'URGENT! After retrying redshift connection 5 times, program is exiting due to psycopg2 execution error: {err}')
+                        print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
+                        exit(1)
+                    else:    
+                        print(f"Retrying connection after {sleep_timer} seconds")
+                        time.sleep(sleep_timer)
+                        continue
+        break
 
 def main():
     
@@ -155,14 +160,17 @@ def main():
         
     #Print for Console 
     print("RunTimes =", query_list)
-    minimum = min(query_list)
-    print("Min =", minimum)
-    maximum = max(query_list)
-    print("Max =", maximum)
+    #average run time
     sum_of_list = sum(query_list)
     length = len(query_list)
     average = round(sum_of_list/length, 2)
     print("Avg =", average)
+    #max run time
+    maximum = max(query_list)
+    print("Max =", maximum)
+    #min run time
+    minimum = min(query_list)
+    print("Min =", minimum)
     #if query runs are more than 1, then calculate standard deviation
     if times > 1:
         standard_dev = round(statistics.stdev(query_list), 2)

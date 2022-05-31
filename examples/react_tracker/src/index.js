@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import { Route, Routes, Link, BrowserRouter as Router, BrowserRouter } from 'react-router-dom'
+import { Route, Routes, Link, BrowserRouter } from 'react-router-dom'
 import App from './App'
 import SecondPage from './SecondPage'
 import Thirdpage from './ThirdPage'

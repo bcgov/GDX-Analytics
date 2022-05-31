@@ -33,7 +33,11 @@ CONNECTION_STRING = (
 def cache(status):
  # set redshift cache back to 'on' or 'off'
     sleep_timer = 0
+    conn = None
     while True and sleep_timer <= 50: 
+        # if there is an open connection, close it here
+        if conn:
+            conn.close()
         conn = psycopg2.connect(dsn=CONNECTION_STRING)
         with conn:
             with conn.cursor() as curs:

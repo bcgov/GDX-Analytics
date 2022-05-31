@@ -15,24 +15,56 @@ from datetime import datetime
 NAME = 'snowplow'
 HOST = 'redshift.analytics.gov.bc.ca'
 PORT = 5439
+USER = os.environ['lookeruser_rs']
+PASSWD = os.environ['lookerpass_rs']
+CONNECTION_STRING = (
+    f"dbname='{NAME}' "
+    f"host='{HOST}' "
+    f"port='{PORT}' "
+    f"user='{USER}' "
+    f"password={PASSWD}")
 
 # connects with redshift database using environment variables
 # set redshift cache to 'off' before running any looker API calls
 # run the API calls
 # set redshift cache back to 'on' after the queries are processed.
 # close the redshift connection
+
+def cache(status):
+ # set redshift cache back to 'on' or 'off'
+    sleep_timer = 0
+    conn = None
+    while True and sleep_timer <= 50: 
+        # if there is an open connection, close it here
+        if conn:
+            conn.close()
+        conn = psycopg2.connect(dsn=CONNECTION_STRING)
+        with conn:
+            with conn.cursor() as curs:
+                try:
+                    curs.execute(f'ALTER USER looker SET enable_result_cache_for_session TO {status} ;')
+                    print(f'redshift cache is {status} and connection is closed')
+                except Exception as err:
+                    if status == "on":
+                        #  linear backoff loop to reconnect with database 5 times
+                        sleep_timer += 10
+                        if sleep_timer > 50:
+                            print(f'URGENT! After retrying redshift connection 5 times, program is exiting due to psycopg2 execution error: {err}')
+                            print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
+                            exit(1)
+                        else:    
+                            print(f"Retrying connection after {sleep_timer} seconds")
+                            time.sleep(sleep_timer)
+                            continue
+                    elif status == "off":
+                            print(f'Could not turn the cache off and program is exiting due to psycopg2 execution error: {err}')
+                            exit(1)
+        #closing the connection
+        conn.close()
+        break
+
 def main():
     
-    user = os.environ['lookeruser_rs']
-    passwd = os.environ['lookerpass_rs']
-    connection_string = (
-        f"dbname='{NAME}' "
-        f"host='{HOST}' "
-        f"port='{PORT}' "
-        f"user='{user}' "
-        f"password={passwd}")
-    
-    conn = psycopg2.connect(dsn=connection_string)
     parser = argparse.ArgumentParser()
     # Positional mandatory arguments
     parser.add_argument("slugInput", help="Slug id from explore.")
@@ -80,17 +112,13 @@ def main():
             # write the header
             writer.writerow(header)
 
+    # set redshift cache to 'off' before running any looker API calls
+    cache("off")
+
     # run query as per user input
     i = 1
     while i <= times :
-        # set redshift cache to 'off' before running any looker API calls
-        with conn:
-            with conn.cursor() as curs:
-                try:
-                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO off;")
-                except Exception as err:
-                    print(f'Exiting due to psycopg2 execution error: {err}')
-                    exit(1)
+
         try:
             response = sdk.run_query(
             query_id=query,
@@ -99,17 +127,10 @@ def main():
             cache_only=False)
         except Exception as err:
             print(f'Exiting due to Looker SDK exception: {err}')
+            cache("on")
             exit(1)
 
-        # set redshift cache back to 'on' after the queries are processed.
-        with conn:
-            with conn.cursor() as curs:
-                try:
-                    curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
-                except Exception as err:
-                        print(f'URGENT! Exiting due to psycopg2 execution error: {err}')
-                        print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
-                        exit(1)
+
         # Convert string to Python dict 
         query_dic = json.loads(response) 
         runtime_duration = round(float(query_dic['runtime']), 2)
@@ -128,26 +149,31 @@ def main():
 
         i += 1
 
+    # print the filename on console
     if args.file:
         print("Filename =", filename)
         f.close()
         
     #Print for Console 
     print("RunTimes =", query_list)
-    minimum = min(query_list)
-    print("Min =", minimum)
-    maximum = max(query_list)
-    print("Max =", maximum)
+    #average run time
     sum_of_list = sum(query_list)
     length = len(query_list)
     average = round(sum_of_list/length, 2)
     print("Avg =", average)
+    #max run time
+    maximum = max(query_list)
+    print("Max =", maximum)
+    #min run time
+    minimum = min(query_list)
+    print("Min =", minimum)
     #if query runs are more than 1, then calculate standard deviation
     if times > 1:
         standard_dev = round(statistics.stdev(query_list), 2)
         print("Standard Deviation =", standard_dev)
-    #close redshift connection
-    conn.close()
+
+    # set redshift cache back to 'on' after the queries are processed.
+    cache("on")
 
 if __name__ == '__main__':
   main()

@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import { Route, Routes, Link, BrowserRouter as Router, BrowserRouter } from 'react-router-dom'
+import { Route, Routes, Link, BrowserRouter } from 'react-router-dom'
 import App from './App'
 import SecondPage from './SecondPage'
 import Thirdpage from './ThirdPage'
@@ -21,9 +21,9 @@ const routing = (
         </li>
       </ul>
           <Routes>
-            <Route exact path="/" component={App} />
-            <Route path="/secondPage" component={SecondPage} />
-            <Route path="/thirdPage" component={Thirdpage} />
+            <Route exact path="/" element={<App />}></Route>
+            <Route path="/secondPage" element={<SecondPage />}></Route>
+            <Route path="/thirdPage" element={<Thirdpage />}></Route>
           </Routes>
     </div>
   </BrowserRouter>

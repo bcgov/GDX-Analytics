@@ -1,4 +1,3 @@
-from ast import While
 import os
 import psycopg2
 import statistics
@@ -16,14 +15,14 @@ from datetime import datetime
 NAME = 'snowplow'
 HOST = 'redshift.analytics.gov.bc.ca'
 PORT = 5439
-user = os.environ['lookeruser_rs']
-passwd = os.environ['lookerpass_rs']
-connection_string = (
+USER = os.environ['lookeruser_rs']
+PASSWD = os.environ['lookerpass_rs']
+CONNECTION_STRING = (
     f"dbname='{NAME}' "
     f"host='{HOST}' "
     f"port='{PORT}' "
-    f"user='{user}' "
-    f"password={passwd}")
+    f"user='{USER}' "
+    f"password={PASSWD}")
 
 # connects with redshift database using environment variables
 # set redshift cache to 'off' before running any looker API calls
@@ -33,7 +32,7 @@ connection_string = (
 
 def cache_off():
  # set redshift cache to 'off'
-    conn = psycopg2.connect(dsn=connection_string)
+    conn = psycopg2.connect(dsn=CONNECTION_STRING)
     with conn:
          with conn.cursor() as curs:
             try:
@@ -48,14 +47,14 @@ def cache_on():
  # set redshift cache back to 'on'
     sleep_timer = 0
     while True and sleep_timer <= 50: 
-        conn = psycopg2.connect(dsn=connection_string)
+        conn = psycopg2.connect(dsn=CONNECTION_STRING)
         with conn:
             with conn.cursor() as curs:
                 try:
                     curs.execute("ALTER USER looker SET enable_result_cache_for_session TO on;")
                     print('redshift cache is on and connection is closed')
                 except Exception as err:
-                    # exponential backoff loop to reconnect with database 5 times
+                    # linear backoff loop to reconnect with database 5 times
                     sleep_timer += 10
                     if sleep_timer > 50:
                         print(f'URGENT! After retrying redshift connection 5 times, program is exiting due to psycopg2 execution error: {err}')

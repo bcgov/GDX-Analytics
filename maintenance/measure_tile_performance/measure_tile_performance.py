@@ -35,30 +35,31 @@ def cache(status):
     sleep_timer = 0
     conn = None
     while True and sleep_timer <= 50: 
-        # if there is an open connection, close it here
-        if conn:
-            conn.close()
-        conn = psycopg2.connect(dsn=CONNECTION_STRING)
-        with conn:
-            with conn.cursor() as curs:
-                try:
+        try:
+            # if there is an open connection, close it here
+            if conn:
+                conn.close()
+            conn = psycopg2.connect(dsn=CONNECTION_STRING)
+            with conn:
+                with conn.cursor() as curs:
+                
                     curs.execute(f'ALTER USER looker SET enable_result_cache_for_session TO {status} ;')
                     print(f'redshift cache is {status} and connection is closed')
-                except Exception as err:
-                    if status == "on":
-                        #  linear backoff loop to reconnect with database 5 times
-                        sleep_timer += 10
-                        if sleep_timer > 50:
-                            print(f'URGENT! After retrying redshift connection 5 times, program is exiting due to psycopg2 execution error: {err}')
-                            print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
-                            exit(1)
-                        else:    
-                            print(f"Retrying connection after {sleep_timer} seconds")
-                            time.sleep(sleep_timer)
-                            continue
-                    elif status == "off":
-                            print(f'Could not turn the cache off and program is exiting due to psycopg2 execution error: {err}')
-                            exit(1)
+        except Exception as err:
+            if status == "on":
+                #  linear backoff loop to reconnect with database 5 times
+                sleep_timer += 10
+                if sleep_timer > 50:
+                    print(f'URGENT! After retrying redshift connection 5 times, program is exiting due to psycopg2 execution error: {err}')
+                    print('Requires manual run of: ALTER USER looker SET enable_result_cache_for_session TO on;')
+                    exit(1)
+                else:    
+                    print(f"Retrying connection after {sleep_timer} seconds")
+                    time.sleep(sleep_timer)
+                    continue
+            elif status == "off":
+                    print(f'Could not turn the cache off and program is exiting due to psycopg2 execution error: {err}')
+                    exit(1)
         #closing the connection
         conn.close()
         break

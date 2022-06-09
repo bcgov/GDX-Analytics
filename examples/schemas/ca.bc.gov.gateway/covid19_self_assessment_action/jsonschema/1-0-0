@@ -3,18 +3,18 @@
   "properties": {
     "action": {
       "type": "string",
-      "description": "The action the user is taking to navigate the form.",
+      "description": "The action the user is taking to navigate the form. Ex. 'Continue' or 'Go Back'.",
       "maxLength": 255
     },
     "stage_id": {
       "type": "integer",
-      "description": "The integer ID value of the form stage where the action is taken.",
+      "description": "The integer ID value of the form stage where the action is taken. Ex. 1,2,3...N",
       "minimum": 0,
       "maximum": 100
     },
     "stage_name": {
       "type": "string",
-      "description": "The stage of the form where the action is taken.",
+      "description": "The stage of the form where the action is taken. Ex: 'Are you experiencing any of the following? - Emergent' ",
       "maxLength": 255
     },
     "symptom_list": {
@@ -25,7 +25,7 @@
       "description": "The list of self-reported symptoms.",
       "items": {
         "type": "string",
-        "description": "The string value of the symptom.",
+        "description": "The string value of the symptom or symptoms. Ex: 'Headache' or 'Difficult Breathing'.",
         "maxLength": 255
       }
     }

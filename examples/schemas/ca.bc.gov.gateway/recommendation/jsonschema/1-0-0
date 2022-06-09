@@ -3,7 +3,7 @@
   "properties": {
     "recommendation_message": {
       "type": "string",
-      "description": "The recommendation outcome message of the COVID19 Self-Assessment tool.",
+      "description": "The recommendation outcome message of the COVID19 Self-Assessment tool. Ex. 'symptomatic_test' or 'call911'.",
       "maxLength": 255
     }
   },

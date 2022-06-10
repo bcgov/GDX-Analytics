@@ -1,0 +1,47 @@
+{
+  "description": "Schema for COVID19 Self-Assessment tool action.",
+  "properties": {
+    "action": {
+      "type": "string",
+      "description": "The action the user is taking to navigate the form. Ex. 'Continue' or 'Go Back'.",
+      "maxLength": 255
+    },
+    "stage_id": {
+      "type": "integer",
+      "description": "The integer ID value of the form stage where the action is taken. Ex. 1,2,3...N",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "stage_name": {
+      "type": "string",
+      "description": "The stage of the form where the action is taken. Ex: 'Are you experiencing any of the following? - Emergent' ",
+      "maxLength": 255
+    },
+    "symptom_list": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "description": "The list of self-reported symptoms.",
+      "items": {
+        "type": "string",
+        "description": "The string value of the symptom or symptoms. Ex: 'Headache' or 'Difficult Breathing'.",
+        "maxLength": 255
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "stage_id",
+    "stage_name",
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.gateway",
+    "name": "covid19_self_assessment_action",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

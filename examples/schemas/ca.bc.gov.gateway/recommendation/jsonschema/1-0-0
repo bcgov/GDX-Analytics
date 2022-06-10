@@ -1,0 +1,22 @@
+{
+  "description": "Schema for COVID19 Self-Assessment tool recommendation.",
+  "properties": {
+    "recommendation_message": {
+      "type": "string",
+      "description": "The recommendation outcome message of the COVID19 Self-Assessment tool. Ex. 'symptomatic_test' or 'call911'.",
+      "maxLength": 255
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "recommendation_message"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.gateway",
+    "name": "recommendation",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

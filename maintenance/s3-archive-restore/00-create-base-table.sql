@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS gdx_analytics.restored_atomic_ca_bc_gov (
-    root_tstamp         TIMESTAMPTZ     ENCODE RAW,
+    root_tstamp         TIMESTAMP       ENCODE RAW,
     page_view_id        VARCHAR(36)     ENCODE ZSTD,
     root_id             CHAR(36)        ENCODE LZO,
     page_urlhost        VARCHAR(255)    ENCODE ZSTD,

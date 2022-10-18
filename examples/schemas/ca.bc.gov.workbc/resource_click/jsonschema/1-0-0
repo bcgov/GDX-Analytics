@@ -1,0 +1,44 @@
+{
+  "description": "Schema to track clicks on resources in the WorkBC Teacher Resources Tool",
+  "properties": {
+    "category": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What category of page is it? (lesson_plan, resource)."
+    },
+    "resource_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The identifier for the resource (if available, omit otherwise) "
+    },
+    "click_type": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What type of click is it? (nav_lesson_plan, nav_activities, nav_activity_1,  nav_activity_2, etc., nav_assessment_ideas, nav_curriculum_details"
+    },
+    "text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Optional field with additional click info."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "category",
+    "click_type"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "resource_click",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

@@ -1,0 +1,69 @@
+{
+  "description": "Schema to track searches in the WorkBC Teacher Resources Tool",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What action was taken? (load, update, clear)."
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000,
+      "description": "How many results are on the page?"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Which filters are applied?",
+      "properties": {
+        "focus_area": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "A comma delimited list of the focus areas selected."
+        },
+        "lifecycle_stage": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "A comma delimited list of the lifecycle stages selected."
+        },
+        "competencies": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "A comma delimited list of the competencies selected."
+        },
+        "audiences": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "A comma delimited list of the audiences selected."
+        },
+        "show_category": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Which category are we showing? All, Lesson Plans, Resources"
+        },
+        "keyword": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 255,
+          "description": "What keywords were enterred in the search, if any."
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action",
+    "count",
+    "filters"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "find_resources",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

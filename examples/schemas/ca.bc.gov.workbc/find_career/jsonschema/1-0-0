@@ -1,0 +1,79 @@
+{
+  "description": "Schema to track searches in the WorkBC Career Search Tool",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What action was taken? (Load, apply_filter, clear)."
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000,
+      "description": "How many results are on the page?"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Which filters are applied?",
+      "properties": {
+        "region": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Region value selected."
+        },
+        "education": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Education value selected."
+        },
+        "occupational_interest": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Interest value selected."
+        },
+        "industry": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Industry value selected."
+        },
+        "occupational_category": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Category value selected."
+        },
+        "job_type": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Job type value selected."
+        },
+        "annual_salary": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Annual salary value selected."
+        },
+        "keyword": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 255,
+          "description": "What keywords were enterred, if any."
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action",
+    "count",
+    "filters"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "find_career",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

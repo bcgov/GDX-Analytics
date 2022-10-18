@@ -1,0 +1,134 @@
+{
+  "description": "Schema to track clicks in the WorkBC Career Quiz Tool",
+  "properties": {
+    "category": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Either “Career” or “Personality” to match the category of quizzes."
+    },
+    "quiz": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The name of the quiz (eg. “Abilities”, “Interests”, etc.)"
+    },
+    "appt": {
+      "type": "object",
+      "description": "What are the aptitude scores",
+      "properties": {
+        "Apptitude_1_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the first aptitude."
+        },
+        "Apptitude_1_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the first aptitude."
+        },
+        "Apptitude_2_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the second aptitude."
+        },
+        "Apptitude_2_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the second aptitude."
+        },
+        "Apptitude_3_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the third aptitude."
+        },
+        "Apptitude_3_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the third aptitude."
+        },
+        "Apptitude_4_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the fourth aptitude."
+        },
+        "Apptitude_4_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the fourth aptitude."
+        },
+        "Apptitude_5_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the fifth aptitude."
+        },
+        "Apptitude_5_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the fifth aptitude."
+        },
+        "Apptitude_6_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the sixth aptitude."
+        },
+        "Apptitude_6_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the sixth aptitude."
+        },
+        "Apptitude_7_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the seventh aptitude."
+        },
+        "Apptitude_7_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the seventh aptitude."
+        },
+        "Apptitude_8_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the eighth aptitude."
+        },
+        "Apptitude_8_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the eighth aptitude."
+        },
+        "Apptitude_9_name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "The name of the ninth aptitude."
+        },
+        "Apptitude_9_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "The score for the ninth aptitude."
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "category",
+    "quiz",
+    "appt"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "career_quiz_result",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

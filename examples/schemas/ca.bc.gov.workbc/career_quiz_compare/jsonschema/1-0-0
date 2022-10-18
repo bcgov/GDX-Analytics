@@ -1,0 +1,46 @@
+{
+  "description": "Schema to career comparisons in the WorkBC Career Quiz Tool",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "What action was taken? (compare or clear)."
+    },
+    "noc_1": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The NOC of the first career selected (or null)."
+    },
+    "noc_2": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The NOC of the second career selected (or null)."
+    },
+    "noc_3": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The NOC of the third career selected (or null)."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "career_quiz_compare",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

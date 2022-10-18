@@ -1,0 +1,43 @@
+{
+  "description": "Schema to track clicks in the WorkBC Career Quiz Tool",
+  "properties": {
+    "category": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Either “Career” or “Personality” to match the category of quizzes."
+    },
+    "quiz": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The name of the quiz (eg. “Abilities”, “Interests”, etc.)"
+    },
+    "step": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "What step of the quiz did they complete? Null if they are finishing.",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "status": {
+      "type": "string",
+      "maxLength": 15,
+      "description": "Is it a first attempt or repeat? eg. new, modify, or continue"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "category",
+    "quiz",
+    "status"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "career_quiz_step",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

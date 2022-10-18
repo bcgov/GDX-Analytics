@@ -1,0 +1,41 @@
+{
+  "description": "Schema to track errors in the WorkBC Career Quiz Tool",
+  "properties": {
+    "error_message": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The error message."
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Either “Career” or “Personality” to match the category of quizzes."
+    },
+    "quiz": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The name of the quiz (eg. “Abilities”, “Interests”, etc.)"
+    },
+    "step": {
+      "type": "number",
+      "description": "What step of the quiz did they complete?",
+      "minimum": 0,
+      "maximum": 1000
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "error_message",
+    "category",
+    "quiz",
+    "step"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.workbc",
+    "name": "career_quiz_error",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

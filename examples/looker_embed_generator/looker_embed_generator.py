@@ -6,8 +6,10 @@
 #
 # Requirements  : You must set the following environment variable
 #               : to establish credentials for the embed user
-#
 #               : export LOOKERKEY=<<Looker embed key>>
+#
+#               : python version 3 or higher is required
+#               : tested up to version 3.11 at time of commit into GIT
 #
 # Usage         : To create an embed string without a filter:
 #               : python looker_embed_generator.py <<embed url>>
@@ -102,6 +104,7 @@
 #               :
 
 import urllib
+import urllib.parse
 import base64
 import json
 import time
@@ -117,7 +120,7 @@ import sys  # to read command line parameters
 # filter parameters in the embed_url string.
 def parse_filter_value(filter_value):
     """A function to parse the filter value"""
-    parsed_filter_value = urllib.quote(
+    parsed_filter_value = urllib.parse.quote(
         filter_value.replace(', ', r'\\, ').replace('\"', ''))
     return parsed_filter_value
 
@@ -223,7 +226,7 @@ class URL:
         """A init function"""
         self.looker = looker
         self.user = user
-        self.path = '/login/embed/' + urllib.quote_plus(embed_url)
+        self.path = '/login/embed/' + urllib.parse.quote_plus(embed_url)
         self.session_length = json.dumps(session_length)
         self.force_logout_login = json.dumps(force_logout_login)
 
@@ -237,7 +240,7 @@ class URL:
     # information they shouldn't have.
     def set_nonce(self):
         """A function that sets a nonce"""
-        self.nonce = json.dumps(binascii.hexlify(os.urandom(16)))
+        self.nonce = json.dumps(os.urandom(16).hex())
 
     def sign(self):
         """A sign function"""
@@ -256,7 +259,7 @@ class URL:
         string_to_sign = string_to_sign + self.user.user_attributes + "\n"
         string_to_sign = string_to_sign + self.user.access_filters
 
-        signer = hmac.new(self.looker.secret,
+        signer = hmac.new(bytes(self.looker.secret, 'UTF-8'),
                           string_to_sign.encode('utf8'), sha1)
         self.signature = base64.b64encode(signer.digest())
 
@@ -282,8 +285,8 @@ class URL:
                   'force_logout_login':  self.force_logout_login}
 
         query_string = '&'.join(["%s=%s" % (key,
-                                            urllib.quote_plus(val)) for key,
-                                val in params.iteritems()])
+                                            urllib.parse.quote_plus(val)) for key,
+                                val in iter(params.items())])
 
         return "%s%s?%s" % (self.looker.host, self.path, query_string)
 

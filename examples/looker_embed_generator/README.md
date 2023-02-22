@@ -38,6 +38,8 @@ java -cp <<filepath>> looker_embed_generator.java <<environment>> -e  '{"filter-
 ```
 
 ### Running the Python version
+Requirements:
+Python version 3 or higher is required, this script has been tested up to version 3.11 at time of commit into GIT
 
 Parameters:
 - `embed_url`: the target look or dashboard, e.g.: `looks/98`

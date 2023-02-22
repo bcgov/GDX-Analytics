@@ -6,8 +6,10 @@
 #
 # Requirements  : You must set the following environment variable
 #               : to establish credentials for the embed user
-#
 #               : export LOOKERKEY=<<Looker embed key>>
+#
+#               : python version 3 or higher is required
+#               : tested up to version 3.11 at time of commit into GIT
 #
 # Usage         : To create an embed string without a filter:
 #               : python looker_embed_generator.py <<embed url>>

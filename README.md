@@ -68,7 +68,7 @@ A gateway service to handle event analytics for BC Government projects on the Op
 
 #### [GDX-Analytics-Drupal_snowplow/](https://github.com/bcgov/GDX-Analytics-Drupal-Snowplow)
 
-A Drupal 8 module that runs the GDX-Analytics Snowplow web trackers.
+Drupal 8 and 9 modules that enable GDX-Analytics Snowplow tracking on Drupal sites.
 
 #### [GDX-Analytics-Looker-Google-Block/](https://github.com/bcgov/GDX-Analytics-Looker-Google-Block)
 

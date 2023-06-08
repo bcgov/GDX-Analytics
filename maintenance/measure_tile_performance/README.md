@@ -76,10 +76,10 @@ When executing `measure_tile_performance.py`, use `pipenv run` to invoke the pip
 ```
 pipenv run python measure_tile_performance.py <arg1> <arg2> <arg3> -f
 ```
-The following example is using slug `TPvGJfrWSmqCAw7w8GnQ3w` which will run the query 2 times with delay of 10s between each query and create a csv file.
+The following example is using slug `hmbjQaHfeDbrtAsoCCBofP` which will run the query 2 times with delay of 10s between each query and create a csv file.
 
 ```
-pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 10 -f
+pipenv run python measure_tile_performance.py hmbjQaHfeDbrtAsoCCBofP 2 10 -f
 ```
 
 ### Example without SleepTimer and without csv file:
@@ -87,10 +87,10 @@ pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 10 -f
 ```
 pipenv run python measure_tile_performance.py <arg1> <arg2>
 ```
-The following example is using slug `TPvGJfrWSmqCAw7w8GnQ3w`, run the query 2 times with delay of default 300s between each query because `<arg3>` is not set and will not create a csv file because `-f` is not used.
+The following example is using slug `hmbjQaHfeDbrtAsoCCBofP`, run the query 2 times with delay of default 300s between each query because `<arg3>` is not set and will not create a csv file because `-f` is not used.
 
 ```
-pipenv run python measure_tile_performance.py TPvGJfrWSmqCAw7w8GnQ3w 2 
+pipenv run python measure_tile_performance.py hmbjQaHfeDbrtAsoCCBofP 2 
 ```
 ## Running using Cron
 

@@ -1,0 +1,97 @@
+{
+  "description": "Schema to searches on FeedBC",
+  "properties": {
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1000000,
+      "description": "How many results are on the page?"
+    },
+    "query": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023,
+      "description": "The search query."
+    },
+    "filters": {
+      "type": "object",
+      "description": "Which filters are applied?",
+      "properties": {
+        "food_safety_certifications": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. Federally Inspected (CFIA),Provincially Inspected"
+        },
+        "certifications": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. Buy BC"
+        },
+        "dietary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. Halal"
+        },
+        "producer_operations": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. Indigenous owned or operated"
+        },
+        "delivery_options": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. Regional"
+        },
+        "availability": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. January"
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "null"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "query",
+    "filters"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.feedbc",
+    "name": "product_search",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

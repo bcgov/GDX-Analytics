@@ -1,0 +1,49 @@
+{
+  "description": "Schema to searches on FeedBC",
+  "properties": {
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1000000,
+      "description": "How many results are on the page?"
+    },
+    "query": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023,
+      "description": "The search query."
+    },
+    "filters": {
+      "type": "object",
+      "description": "Which filters are applied?",
+      "properties": {
+        "producer_market_channels": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1023,
+          "description": "eg. Food Service Provider,Major stores,Universities or Colleges,Processors (direct or via broker)"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "query",
+    "filters"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.feedbc",
+    "name": "find_buyers",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

@@ -7,7 +7,7 @@ These scripts are designed to perform a backup of Looker dashboards from specifi
 Before using this script, make sure you have the following:
 
 1. Access to looker_dev and looker_prod instances via terminal
-2. Environment Varible GZR_PATH set in your bashrc file like this 
+2. Environment Variable GZR_PATH set in your bashrc file like this 
     `export GZR_PATH="/home/looker/bin/gzr"`
 3. The `gzr` command-line tool installed, which is used to interact with Looker via the Looker API.
 4. Properly configured `.netrc` file containing your Looker credentials.

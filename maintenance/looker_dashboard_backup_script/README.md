@@ -1,6 +1,6 @@
 # Looker Dashboard Backup Script
 
-These scripts are designed to perform a nightly backup of Looker dashboards from specific spaces in our Looker instance and push the data to a Git repository. They can be scheduled to run as a cron job.
+These scripts are designed to perform a backup of Looker dashboards from specific spaces in our Looker instance and push the data to a Git repository. They are currently scheduled to run as a nightly cron job in both dev and prod instances.
 
 ## Prerequisites
 
@@ -23,3 +23,7 @@ All of the above prerequisites are already satisfied in looker_dev instance
 
 ## Modification to git_looker_dev_backup_script.sh
 If there is a new folder in looker dev that we want to backup then script should be edited to add that space_id. Space id of folder can be taken from the URL such as Space_id for this folder https://dev.analytics.gov.bc.ca/folders/32 is `32`
+
+## Further reading
+1. Further reading can be done about backup and resore process at our confluence page - https://apps.itsm.gov.bc.ca/confluence/display/ANALYTICS/Looker+Dashboards+Backup+and+Restore+Process
+2. More details about gazer tool can be found here https://github.com/looker-open-source/gzr  

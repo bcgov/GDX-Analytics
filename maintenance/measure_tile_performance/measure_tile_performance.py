@@ -44,7 +44,7 @@ def cache(status):
                 with conn.cursor() as curs:
                 
                     curs.execute(f'ALTER USER looker SET enable_result_cache_for_session TO {status} ;')
-                    print(f'redshift cache is {status} and connection is closed')
+                    print(f'redshift cache is {status} and connection is open')
         except Exception as err:
             if status == "on":
                 #  linear backoff loop to reconnect with database 5 times

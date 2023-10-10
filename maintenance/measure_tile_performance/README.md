@@ -37,6 +37,10 @@ Update environment variables locally to replace the values for Client ID and Cli
 
 ```
 [...]
+# Credentials for the looker user in Redshift
+export lookeruser_rs=REDACTED_ASK_TEAM_MEMBER
+export lookerpass_rs=REDACTED_ASK_TEAM_MEMBER
+# looker sdk for measurement
 export LOOKERSDK_CLIENT_ID=__"Client ID"__
 export LOOKERSDK_CLIENT_SECRET=__"Client Secret"__
 export LOOKERSDK_BASE_URL="https://analytics.gov.bc.ca:19999"
@@ -46,10 +50,11 @@ export LOOKERSDK_TIMEOUT=600
 ```
 
 ## Installation
-
+This script uses python version 3.11.5 and you can install it using pyenv.
 Install using Pipenv to get the dependencies specified in the `Pipfile.lock`:
 
 ```
+pipenv --python 3.11.5
 pipenv install --ignore-pipfile
 ```
 

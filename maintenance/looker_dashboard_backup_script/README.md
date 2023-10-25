@@ -1,6 +1,6 @@
 # Looker Dashboard Backup Script
 
-These scripts are designed to perform a backup of Looker dashboards from specific spaces in our Looker instance and push the data to a Git repository. They are currently scheduled to run as a nightly cron job in both dev and prod instances.
+These scripts are designed to perform a backup of Looker dashboards from all spaces under shared frolder in our Looker instances and push the data to a Git repository. They are currently scheduled to run as a nightly cron job in both dev and prod instances.
 
 ## Prerequisites
 
@@ -21,8 +21,12 @@ All of the above prerequisites are already satisfied in looker_dev instance
 3. Run `./git_looker_dev_backup_script.sh`
 4. Check `dev-backup branch` of this Github Directory https://github.com/bcgov/GDX-Analytics-Gazer-Looker-Dev-Integration to verify the backup
 
-## Modification to git_looker_dev_backup_script.sh
-If there is a new folder in looker dev that we want to backup then script should be edited to add that space_id. Space id of folder can be taken from the URL such as Space_id for this folder https://dev.analytics.gov.bc.ca/folders/32 is `32`
+## Usage for git_looker_dev_backup_script.sh
+
+1. Login to looker_prod
+2. Go to home/looker/scripts directory
+3. Run `./git_looker_prod_backup_script.sh`
+4. Check `prod-backup branch` of this Github Directory https://github.com/bcgov/GDX-Analytics-Gazer-Looker-Prod-Integration to verify the backup
 
 ## Further reading
 1. Further reading can be done about backup and resore process at our confluence page - https://apps.itsm.gov.bc.ca/confluence/display/ANALYTICS/Looker+Dashboards+Backup+and+Restore+Process

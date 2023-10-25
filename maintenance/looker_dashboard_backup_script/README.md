@@ -21,7 +21,7 @@ All of the above prerequisites are already satisfied in looker_dev instance
 3. Run `./git_looker_dev_backup_script.sh`
 4. Check `dev-backup branch` of this Github Directory https://github.com/bcgov/GDX-Analytics-Gazer-Looker-Dev-Integration to verify the backup
 
-## Usage for git_looker_dev_backup_script.sh
+## Usage for git_looker_prod_backup_script.sh
 
 1. Login to looker_prod
 2. Go to home/looker/scripts directory

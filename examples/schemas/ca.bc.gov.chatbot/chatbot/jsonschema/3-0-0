@@ -1,0 +1,97 @@
+{
+  "description": "Schema for tracking use of the chatbot",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "get_answer, ask_question, etc."
+    },
+    "text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1023,
+      "description": "The text field, either a URL, Intent, etc. depending on the action"
+    },
+    "agent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "As provided by DialogFlow - this will be the ID of the mega agent except if in the test environment we are pointing at a different agent"
+    },
+    "frontend_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The FrontendID of the agent on a website 'eg. GOV, HLBC'"
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "The session_id as reported to Dialogflow for audit purposes"
+    },
+    "intent_confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "The confidence interval of an intent. A number from 0 to 1."
+    },
+    "sentiment": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "score": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -1,
+          "maximum": 1,
+          "description": "The sentiment score. A number from 0 to 1."
+        },
+        "magnitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "The sentiment magnitute. A number from 0 to +inf."
+        }
+      },
+      "description": "The sentiment score. Two numbers from 0 to 1."
+    },
+    "source_intent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Used for certain actions such as chip_click to show the intent where the chip came from."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action"
+  ],
+  "self": {
+    "vendor": "ca.bc.gov.chatbot",
+    "name": "chatbot",
+    "format": "jsonschema",
+    "version": "3-0-0"
+  },
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#"
+}

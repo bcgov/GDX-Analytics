@@ -13,7 +13,7 @@
     "ansi-html": "^0.0.8",
     "ansi-regex": "^6.0.1",
     "copy-webpack-plugin": "^6.3.2",
-    "follow-redirects": "^1.14.8",
+    "follow-redirects": "^1.15.4",
     "glob-parent": "^6.0.2",
     "is-svg": "^4.3.1",
     "json-schema": "^0.4.0",

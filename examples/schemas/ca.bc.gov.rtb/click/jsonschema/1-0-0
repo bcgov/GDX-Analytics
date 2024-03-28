@@ -1,0 +1,28 @@
+{
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+  "type": "object",
+  "self": {
+    "vendor": "ca.bc.gov.rtb",
+    "name": "click",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "description": "Schema to measure outbound clicks for RTB",
+  "properties": {
+    "source_url": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The URL of the source page, up to 255 characters."
+    },
+    "target_url": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "The URL of the target page, up to 255 characters."
+    }
+  },
+  "required": [
+    "source_url",
+    "target_url"
+  ],
+  "additionalProperties": false
+}

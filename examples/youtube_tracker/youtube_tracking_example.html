@@ -1,3 +1,11 @@
+<!--
+This is an example webpage that includes our YouTube tracking script. It will track the linked YouTube video and send events related to it to our snowplow mini collector.
+1 - The script includes the YouTube iFrame API, which is necessary for controlling and interacting with embedded YouTube players.
+2 - The onPlayerStateChange function is called whenever the player's state changes (playing, paused, ended). It gathers information about the video being played and triggers a Snowplow event with relevant data.
+3 - The onYouTubeIframeAPIReady function is executed when the YouTube iFrame API is loaded. It retrieves all YouTube player iFrames by class name and creates a new player object for each one.
+4 - The onPlayerReady function is called when a YouTube player is ready. It gathers information about the video and triggers a Snowplow event.
+5 - The track_youtube_player function sends a Snowplow event with data about the player's state, including status, video source URL, ID, title, and author.
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -112,6 +120,6 @@ function track_youtube_player(player_info) {
     <header>
       <h3>Snowplow Youtube Example</h3>
     </header>
-    <iframe id="youtube_player" class="youtube_player" width="560" height="315" src="https://www.youtube.com/embed/G9NL-ED0xdQ?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe id="youtube_player" class="youtube_player" width="560" height="315" src="https://www.youtube.com/embed/UvhY8Q-01Rg?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </body>
 </html>

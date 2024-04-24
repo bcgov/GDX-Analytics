@@ -1,5 +1,5 @@
 <!--
-This is a example webpage that includes our youtube tracking script. It will track the linked youtube video and send events realted to it to our snowplow mini collector
+This is an example webpage that includes our YouTube tracking script. It will track the linked YouTube video and send events related to it to our snowplow mini collector.
 1 - The script includes the YouTube iFrame API, necessary for controlling and interacting with embedded YouTube players.
 2 - The onPlayerStateChange function is called whenever the player's state changes (playing, paused, ended). It gathers information about the video being played and triggers a Snowplow event with relevant data.
 3 - The onYouTubeIframeAPIReady function is executed when the YouTube iFrame API is loaded. It retrieves all YouTube player iFrames by class name and creates a new player object for each one.

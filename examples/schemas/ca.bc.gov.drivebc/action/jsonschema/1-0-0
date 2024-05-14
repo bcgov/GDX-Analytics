@@ -1,0 +1,50 @@
+{
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+  "type": "object",
+  "self": {
+    "vendor": "ca.bc.gov.drivebc",
+    "name": "action",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "description": "Event to capture action in Open School",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "What action was taken? Eg. click"
+    },
+    "section": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "What section of the site are they on? Eg. map, map-mobile, tab-webcams, etc."
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "What is the category of the click? eg. (Road Condition, Incident, Inland Ferry, Traffic Flow, Vancouver Island,Lower Mainland"
+    },
+    "label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "Title or titles of feature or name of cam clicked (optional field)"
+    },
+    "sub_label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "Secondary label, used for things like Severity, where one label isn't enough. (optional field)"
+    }
+  },
+  "required": [
+    "action",
+    "section",
+    "category"
+  ],
+  "additionalProperties": false
+}

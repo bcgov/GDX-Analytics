@@ -8,8 +8,9 @@ looker-sdk = "*"
 pytz = "*"
 typing-extensions = "*"
 psycopg2-binary = "*"
+urllib3 = "1.*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.11.5"
+python_version = "3.8.16"

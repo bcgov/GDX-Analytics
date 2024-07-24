@@ -50,11 +50,11 @@ export LOOKERSDK_TIMEOUT=600
 ```
 
 ## Installation
-This script uses python version 3.11.5 and you can install it using pyenv.
+This script uses python version 3.8.16 and you can install it using pyenv.
 Install using Pipenv to get the dependencies specified in the `Pipfile.lock`:
 
 ```
-pipenv --python 3.11.5
+pipenv --python 3.8.16
 pipenv install --ignore-pipfile
 ```
 

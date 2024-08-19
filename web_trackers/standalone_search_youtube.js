@@ -1,9 +1,9 @@
-<!-- Snowplow starts plowing - Standalone vD.2.14.0 -->
+// iFrame API should be called before the tracker
 <script src="https://www.youtube.com/iframe_api"></script>
-<script>
+
 // Each iFrame must have the JS Api enabled by appending 
-// 'enablejsapi=1' to the src URL parameters. Ex:
-// "https://www.youtube.com/embed/UvhY8Q-01Rg?enablejsapi=1"
+// 'enablejsapi=1' to the src URL parameters. Ex: "https://www.youtube.com/embed/UvhY8Q-01Rg?enablejsapi=1"
+// "class-name" should also be replaced with the iFrame classname.
 
 // Gets called when the youtube player changes state, and sends
 // and triggers a snowplow event with player status info.
@@ -77,5 +77,3 @@ function track_youtube_player(player_info) {
     }
   });
 }
-</script>
-<!-- Snowplow stops plowing -->

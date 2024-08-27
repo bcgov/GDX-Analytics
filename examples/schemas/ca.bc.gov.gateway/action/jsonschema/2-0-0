@@ -1,0 +1,92 @@
+{
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+  "type": "object",
+  "self": {
+    "vendor": "ca.bc.gov.gateway",
+    "name": "action",
+    "format": "jsonschema",
+    "version": "2-0-0"
+  },
+  "description": "Event to capture action in the Health Gateway App",
+  "properties": {
+    "action": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "What action was taken? Expected values are expand, contract, view_card, click_button, download_report, click_link"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "The label for the action. ie. which button or which card was viewed, url visited, etc."
+    },
+    "dataset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "Eg. BC Cancer, Lab Result, etc."
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "Eg. screening, etc."
+    },
+    "format": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "pdf,csv,xlsx"
+    },
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "User, Guardian, etc. "
+    },
+    "rating": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "1,2,…,5,Skip"
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "/covid19, etc."
+    },
+    "destination": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "Timeline, Immunization Recommendations Dialog, BC Vaccine Card"
+    },
+    "origin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 50,
+      "description": "Home, Dependents, Exports"
+    }
+  },
+  "required": [
+    "action",
+    "text"
+  ],
+  "additionalProperties": false
+}

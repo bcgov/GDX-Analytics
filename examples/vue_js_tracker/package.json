@@ -26,7 +26,7 @@
     "strip-ansi": "^7.0.1",
     "vue": "^2.6.14",
     "vue-router": "^3.4.9",
-    "webpack": "^5.76.0"
+    "webpack": "^5.94.0"
   },
   "resolutions": {
     "serialize-javascript": "3.1.0"

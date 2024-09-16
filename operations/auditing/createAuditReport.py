@@ -46,17 +46,13 @@ lookerClientSecret = args.lookerClientSecret
 
 # prompt user to supply missing mandatory information
 if pgHost is None:
-    sys.stderr.write('Enter Redshift host name: ')
-    pgHost = sys.stdin.readline().strip()
+    pgHost = input('Enter Redshift host name: ')
 if pgUser is None:
-    sys.stderr.write('Enter Redshift user name: ')
-    pgUser = sys.stdin.readline().strip()
+    pgUser = input('Enter Redshift user name: ')
 if pgPassword is None:
-    sys.stderr.write('Enter Redshift user password: ')
-    pgPassword = sys.stdin.readline().strip()
+    pgPassword = getpass.getpass('Enter Redshift user password: ')
 if lookerUrlPrefix is None:
-    sys.stderr.write('Enter Looker Url prefix: ')
-    lookerUrlPrefix = sys.stdin.readline().strip()
+    lookerUrlPrefix = input('Enter Looker Url prefix: ')
 if lookerClientSecret is None:
     lookerClientSecret = getpass.getpass('Enter your looker client secret: ')
 

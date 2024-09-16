@@ -9,6 +9,7 @@ verify_ssl = true
 psycopg2-binary = "*"
 httplib2 = "*"
 argparse = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.8"

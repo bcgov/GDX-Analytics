@@ -39,6 +39,7 @@ parser.add_argument('-l',
 
 args = parser.parse_args()
 
+# set var from cmd args or envvars
 lookerClientId = args.lookerClientId
 pgHost = args.pgHost or os.getenv('PGHOST')
 pgUser = args.pgUser or os.getenv('PGUSER')
@@ -66,11 +67,11 @@ connection_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
     '5439',
     'snowplow'
 )
-
 engine = create_engine(connection_string)
 
-# query database
+# create empty dict for api user data
 lookerUserIdNameMap = {}
+
 qryString = """
 select
     convert_timezone('America/Vancouver', starttime),
@@ -101,7 +102,7 @@ queryUserIdList = dfQuery['looker_user_id'].unique()
 for id in queryUserIdList:
     lookerUserIdNameMap[id] = {}
 
-# api loging to looker
+# api login to looker
 h = httplib2.Http(
     ca_certs=os.path.dirname(os.path.realpath(__file__)) + '/ca.crt')
 resp, content = h.request(
@@ -116,13 +117,14 @@ accessToken = jsonRes['access_token']
 userSrchStr = lookerUrlPrefix+'/users/search?id=' + \
     ','.join(lookerUserIdNameMap.keys())
 
-# query looker users
+# api call for looker users
 resp, content = h.request(
     userSrchStr,
     "GET",
     headers={'authorization': 'token ' + accessToken})
 users = json.loads(content)
 
+# add looker user data to dict if user id in query
 for usr in users:
     lookerUserIdNameMap[str(
         usr['id'])]["displayName"] = usr['display_name']
@@ -141,15 +143,24 @@ dfLookerUserIdNameMap = dfLookerUserIdNameMap.rename(columns={"index": "looker_u
 dfMerged = pd.merge(dfQuery, dfLookerUserIdNameMap, on='looker_user_id')
 
 # cleaning up the results
-dfMerged['displayName'] = dfMerged['displayName'].apply(lambda x: x.replace('"', '""'))
-dfMerged['embedUserId'] = dfMerged['embedUserId'].apply(lambda x: x.replace('"', '""'))
-dfMerged['sqlquery'] = dfMerged['sqlquery'].apply(lambda x: x.strip())
+dfMerged['displayName'] = dfMerged['displayName'].apply(lambda x: str(x).replace('"', '""'))
+dfMerged['embedUserId'] = dfMerged['embedUserId'].apply(lambda x: str(x).replace('"', '""'))
+dfMerged['sqlquery'] = dfMerged['sqlquery'].apply(lambda x: str(x).strip())
 dfMerged = dfMerged.rename(columns={"convert_timezone": "Date & Time",
                                     "looker_user_id": "Looker User Id",
                                     "displayName": "User Display Name",
                                     "embedUserId": "User Embed Id",
                                     "sqlquery": "Query Text"})
 
+# setting column datatypes
+dfMerged['Date & Time'] = dfMerged['Date & Time'].astype('datetime64[ns]')
+dfMerged['Looker User Id'] = dfMerged['Looker User Id'].astype('int')
+dfMerged['User Display Name'] = dfMerged['User Display Name'].astype('str')
+dfMerged['User Embed Id'] = dfMerged['User Embed Id'].astype('str')
+dfMerged['Query Text'] = dfMerged['Query Text'].astype('str')
+
 # reorder columns
 dfMerged = dfMerged.iloc[:,[0,1,3,4,2]]
-print(dfMerged.to_string())
+
+# print results to console
+print(dfMerged.to_csv(index=False, quoting=2))

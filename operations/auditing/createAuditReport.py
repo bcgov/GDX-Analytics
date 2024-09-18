@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 # parse cmd arguments
 parser = argparse.ArgumentParser(
     description='Generate auditing report for a given site host.')
-parser.add_argument('siteHost', help='site host such as my-site.gov.bc.ca')
+parser.add_argument('siteHost', help='site host such as www.my-site.gov.bc.ca')
 parser.add_argument('lookerClientId', help='your looker client id')
 parser.add_argument('-s',
                     '--lookerClientSecret',
@@ -35,7 +35,7 @@ parser.add_argument('-p',
 parser.add_argument('-l',
                     '--lookerUrlPrefix',
                     help='Looker url prefix such as https://looker.local:19999'
-                    '/api/3.1 overriding env var lookerUrlPrefix')
+                    '/api/4.0 overriding env var lookerUrlPrefix')
 parser.add_argument('-f',
                     '--file',
                     help='Write results to a csv file at the specified path')

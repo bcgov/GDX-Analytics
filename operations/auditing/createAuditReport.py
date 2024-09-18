@@ -36,6 +36,9 @@ parser.add_argument('-l',
                     '--lookerUrlPrefix',
                     help='Looker url prefix such as https://looker.local:19999'
                     '/api/3.1 overriding env var lookerUrlPrefix')
+parser.add_argument('-f',
+                    '--file',
+                    help='Write results to a csv file at the specified path')
 
 args = parser.parse_args()
 
@@ -46,6 +49,7 @@ pgUser = args.pgUser or os.getenv('PGUSER')
 pgPassword = args.pgPassword or os.getenv('PGPASSWORD')
 lookerUrlPrefix = args.lookerUrlPrefix or os.getenv('lookerUrlPrefix')
 lookerClientSecret = args.lookerClientSecret
+file = args.file
 
 # prompt user to supply missing mandatory information
 if pgHost is None:
@@ -162,5 +166,8 @@ dfMerged['Query Text'] = dfMerged['Query Text'].astype('str')
 # reorder columns
 dfMerged = dfMerged.iloc[:,[0,1,3,4,2]]
 
-# print results to console
-print(dfMerged.to_csv(index=False, quoting=2))
+# print results to console# if output is not set print results to console
+if file is None:
+    print(dfMerged.to_csv(index=False, quoting=2))
+else:
+    dfMerged.to_csv(path_or_buf=file, index=False, quoting=2)

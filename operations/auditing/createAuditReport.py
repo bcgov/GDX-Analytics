@@ -59,14 +59,19 @@ if lookerClientSecret is None:
     lookerClientSecret = getpass.getpass('Enter your looker client secret: ')
 
 # database connection string
-conn_string = "dbname='snowplow' host='" + pgHost + \
-    "' port='5439' user='" + pgUser + "' password=" + pgPassword
+connection_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+    pgUser,
+    pgPassword,
+    pgHost,
+    '5439',
+    'snowplow'
+)
+
+engine = create_engine(connection_string)
 
 # query database
 lookerUserIdNameMap = {}
-with psycopg2.connect(conn_string) as conn:
-    with conn.cursor() as curs:
-        qryString = """
+qryString = """
 select
     convert_timezone('America/Vancouver', starttime),
     looker_user_id,
@@ -74,60 +79,77 @@ select
 from
     admin.V_STL_QUERY_HISTORY
 where
-    sqlquery ilike '-- Looker Query Context%page_urlhost%'
+    sqlquery ilike '-- Looker Query Context%%page_urlhost%%'
     -- exclude known admin users
     and looker_user_id not in ('13','128','8','513','35','746','742','6','16')
     and (
-        sqlquery ilike '%page_urlhost)) = ''{0}''%'
+        sqlquery ilike '%%page_urlhost)) = ''{0}''%%'
         or
-        sqlquery ilike '%page_urlhost = ''{0}''%'
+        sqlquery ilike '%%page_urlhost = ''{0}''%%'
         or
-        position('page_urlhost LIKE ''%''' in sqlquery) > 0
+        position('page_urlhost LIKE ''%%''' in sqlquery) > 0
         )
 order by
     starttime desc;
     """.format(args.siteHost)  # nosec
-        curs.execute(qryString)
-        for rec in curs:
-            lookerUserIdNameMap[rec[1]] = {}
-        # query looker users
-        h = httplib2.Http(
-            ca_certs=os.path.dirname(os.path.realpath(__file__)) + '/ca.crt')
-        resp, content = h.request(
-            lookerUrlPrefix + '/login',
-            "POST",
-            body='client_id=' + lookerClientId + '&client_secret=' +
-            lookerClientSecret,
-            headers={'content-type': 'application/'
-                     'x-www-form-urlencoded'})
-        jsonRes = json.loads(content)
-        accessToken = jsonRes['access_token']
-        userSrchStr = lookerUrlPrefix+'/users/search?id=' + \
-            ','.join(lookerUserIdNameMap.keys())
-        resp, content = h.request(
-            userSrchStr,
-            "GET",
-            headers={'authorization': 'token ' + accessToken})
-        users = json.loads(content)
-        for usr in users:
-            lookerUserIdNameMap[str(
-                usr['id'])]["displayName"] = usr['display_name']
-            if usr['credentials_embed'] is not None and len(
-                    usr['credentials_embed']) > 0:
-                lookerUserIdNameMap[str(
-                    usr['id'])]["embedUserId"] = \
-                    usr['credentials_embed'][0]['external_user_id']
-        print('"Date & Time","Looker User Id",'
-              '"User Display Name","User Embed Id","Query Text"')
-        curs.scroll(0, mode='absolute')
-        for rec in curs:
-            displayNm = lookerUserIdNameMap[rec[1]].get("displayName",
-                                                        '').replace('"', '""')
-            userEmbedId = lookerUserIdNameMap[rec[1]].get("embedUserId",
-                                                          '').replace(
-                                                              '"', '""')
-            queryTxt = rec[2]
-            if queryTxt is not None:
-                queryTxt = queryTxt.replace('"', '""')
-            print('{0},{1},"{2}","{3}","{4}"'.format(rec[0], rec[1], displayNm,
-                                                     userEmbedId, queryTxt))
+
+# execute the query and store in a dataframe
+dfQuery = pd.read_sql(qryString, engine)
+
+# grab the unique user ids from the query
+queryUserIdList = dfQuery['looker_user_id'].unique()
+for id in queryUserIdList:
+    lookerUserIdNameMap[id] = {}
+
+# api loging to looker
+h = httplib2.Http(
+    ca_certs=os.path.dirname(os.path.realpath(__file__)) + '/ca.crt')
+resp, content = h.request(
+    lookerUrlPrefix + '/login',
+    "POST",
+    body='client_id=' + lookerClientId + '&client_secret=' +
+    lookerClientSecret,
+    headers={'content-type': 'application/'
+        'x-www-form-urlencoded'})
+jsonRes = json.loads(content)
+accessToken = jsonRes['access_token']
+userSrchStr = lookerUrlPrefix+'/users/search?id=' + \
+    ','.join(lookerUserIdNameMap.keys())
+
+# query looker users
+resp, content = h.request(
+    userSrchStr,
+    "GET",
+    headers={'authorization': 'token ' + accessToken})
+users = json.loads(content)
+
+for usr in users:
+    lookerUserIdNameMap[str(
+        usr['id'])]["displayName"] = usr['display_name']
+    if usr['credentials_embed'] is not None and len(
+            usr['credentials_embed']) > 0:
+        lookerUserIdNameMap[str(
+            usr['id'])]["embedUserId"] = \
+            usr['credentials_embed'][0]['external_user_id']
+        
+# convert name map dict to dataframe
+dfLookerUserIdNameMap = pd.DataFrame.from_dict(lookerUserIdNameMap, orient='index')
+dfLookerUserIdNameMap = dfLookerUserIdNameMap.reset_index()
+dfLookerUserIdNameMap = dfLookerUserIdNameMap.rename(columns={"index": "looker_user_id"})
+
+# merge query results with name map
+dfMerged = pd.merge(dfQuery, dfLookerUserIdNameMap, on='looker_user_id')
+
+# cleaning up the results
+dfMerged['displayName'] = dfMerged['displayName'].apply(lambda x: x.replace('"', '""'))
+dfMerged['embedUserId'] = dfMerged['embedUserId'].apply(lambda x: x.replace('"', '""'))
+dfMerged['sqlquery'] = dfMerged['sqlquery'].apply(lambda x: x.strip())
+dfMerged = dfMerged.rename(columns={"convert_timezone": "Date & Time",
+                                    "looker_user_id": "Looker User Id",
+                                    "displayName": "User Display Name",
+                                    "embedUserId": "User Embed Id",
+                                    "sqlquery": "Query Text"})
+
+# reorder columns
+dfMerged = dfMerged.iloc[:,[0,1,3,4,2]]
+print(dfMerged.to_string())

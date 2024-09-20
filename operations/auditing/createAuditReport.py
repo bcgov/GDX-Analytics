@@ -146,10 +146,7 @@ dfLookerUserIdNameMap = dfLookerUserIdNameMap.rename(columns={"index": "looker_u
 # merge query results with name map
 dfMerged = pd.merge(dfQuery, dfLookerUserIdNameMap, on='looker_user_id')
 
-# cleaning up the results
-dfMerged['displayName'] = dfMerged['displayName'].apply(lambda x: str(x).replace('"', '""'))
-dfMerged['embedUserId'] = dfMerged['embedUserId'].apply(lambda x: str(x).replace('"', '""'))
-dfMerged['sqlquery'] = dfMerged['sqlquery'].apply(lambda x: str(x).strip())
+# Cleaning up the header names 
 dfMerged = dfMerged.rename(columns={"convert_timezone": "Date & Time",
                                     "looker_user_id": "Looker User Id",
                                     "displayName": "User Display Name",

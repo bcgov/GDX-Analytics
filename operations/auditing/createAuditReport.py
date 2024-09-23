@@ -99,7 +99,7 @@ order by
     """.format(args.siteHost)  # nosec
 
 # execute the query and store in a dataframe
-dfQuery = pd.read_sql(qryString, engine)
+dfQuery = pd.read_sql(qryString, engine).fillna('')
 
 # grab the unique user ids from the query
 queryUserIdList = dfQuery['looker_user_id'].unique()
@@ -139,7 +139,7 @@ for usr in users:
             usr['credentials_embed'][0]['external_user_id']
         
 # convert name map dict to dataframe
-dfLookerUserIdNameMap = pd.DataFrame.from_dict(lookerUserIdNameMap, orient='index')
+dfLookerUserIdNameMap = pd.DataFrame.from_dict(lookerUserIdNameMap, orient='index').fillna('')
 dfLookerUserIdNameMap = dfLookerUserIdNameMap.reset_index()
 dfLookerUserIdNameMap = dfLookerUserIdNameMap.rename(columns={"index": "looker_user_id"})
 
@@ -162,6 +162,9 @@ dfMerged['Query Text'] = dfMerged['Query Text'].astype('str')
 
 # reorder columns
 dfMerged = dfMerged.iloc[:,[0,1,3,4,2]]
+
+# replace NaN with blanks
+dfMerged = dfMerged.fillna('')
 
 # print results to console# if output is not set print results to console
 if file is None:

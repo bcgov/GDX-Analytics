@@ -137,7 +137,11 @@ for usr in users:
         lookerUserIdNameMap[str(
             usr['id'])]["embedUserId"] = \
             usr['credentials_embed'][0]['external_user_id']
-        
+    else: 
+    # guarentees that embed id is added to the dict even if 
+    # missing from all users in query results
+        lookerUserIdNameMap[str(
+            usr['id'])]["embedUserId"] = None 
 # convert name map dict to dataframe
 dfLookerUserIdNameMap = pd.DataFrame.from_dict(lookerUserIdNameMap, orient='index').fillna('')
 dfLookerUserIdNameMap = dfLookerUserIdNameMap.reset_index()

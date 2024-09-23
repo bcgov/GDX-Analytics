@@ -16,7 +16,7 @@ The script *createAuditReport.py* in this folder generates an auditing report ab
   * access to Looker API endpoint
 * You need to have
   * Redshift login credentials
-  * Looker API4 keys
+  * Looker API3 keys
 
 ## Setup
 Download the git repo to host machine, change *`pwd`* to repo root folder, and run

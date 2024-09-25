@@ -11,11 +11,13 @@ import httplib2
 import json
 import argparse
 import getpass
+import pandas as pd
+from sqlalchemy import create_engine
 
 # parse cmd arguments
 parser = argparse.ArgumentParser(
     description='Generate auditing report for a given site host.')
-parser.add_argument('siteHost', help='site host such as my-site.gov.bc.ca')
+parser.add_argument('siteHost', help='site host such as www.my-site.gov.bc.ca')
 parser.add_argument('lookerClientId', help='your looker client id')
 parser.add_argument('-s',
                     '--lookerClientSecret',
@@ -33,42 +35,48 @@ parser.add_argument('-p',
 parser.add_argument('-l',
                     '--lookerUrlPrefix',
                     help='Looker url prefix such as https://looker.local:19999'
-                    '/api/3.1 overriding env var lookerUrlPrefix')
+                    '/api/4.0 overriding env var lookerUrlPrefix')
+parser.add_argument('-f',
+                    '--file',
+                    help='Write results to a csv file at the specified path')
 
 args = parser.parse_args()
 
+# set var from cmd args or envvars
 lookerClientId = args.lookerClientId
 pgHost = args.pgHost or os.getenv('PGHOST')
 pgUser = args.pgUser or os.getenv('PGUSER')
 pgPassword = args.pgPassword or os.getenv('PGPASSWORD')
 lookerUrlPrefix = args.lookerUrlPrefix or os.getenv('lookerUrlPrefix')
 lookerClientSecret = args.lookerClientSecret
+file = args.file
 
 # prompt user to supply missing mandatory information
 if pgHost is None:
-    sys.stderr.write('Enter Redshift host name: ')
-    pgHost = sys.stdin.readline().strip()
+    pgHost = input('Enter Redshift host name: ')
 if pgUser is None:
-    sys.stderr.write('Enter Redshift user name: ')
-    pgUser = sys.stdin.readline().strip()
+    pgUser = input('Enter Redshift user name: ')
 if pgPassword is None:
-    sys.stderr.write('Enter Redshift user password: ')
-    pgPassword = sys.stdin.readline().strip()
+    pgPassword = getpass.getpass('Enter Redshift user password: ')
 if lookerUrlPrefix is None:
-    sys.stderr.write('Enter Looker Url prefix: ')
-    lookerUrlPrefix = sys.stdin.readline().strip()
+    lookerUrlPrefix = input('Enter Looker Url prefix: ')
 if lookerClientSecret is None:
     lookerClientSecret = getpass.getpass('Enter your looker client secret: ')
 
 # database connection string
-conn_string = "dbname='snowplow' host='" + pgHost + \
-    "' port='5439' user='" + pgUser + "' password=" + pgPassword
+connection_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+    pgUser,
+    pgPassword,
+    pgHost,
+    '5439',
+    'snowplow'
+)
+engine = create_engine(connection_string)
 
-# query database
+# create empty dict for api user data
 lookerUserIdNameMap = {}
-with psycopg2.connect(conn_string) as conn:
-    with conn.cursor() as curs:
-        qryString = """
+
+qryString = """
 select
     convert_timezone('America/Vancouver', starttime),
     looker_user_id,
@@ -76,60 +84,94 @@ select
 from
     admin.V_STL_QUERY_HISTORY
 where
-    sqlquery ilike '-- Looker Query Context%page_urlhost%'
+    sqlquery ilike '-- Looker Query Context%%page_urlhost%%'
     -- exclude known admin users
     and looker_user_id not in ('13','128','8','513','35','746','742','6','16')
     and (
-        sqlquery ilike '%page_urlhost)) = ''{0}''%'
+        sqlquery ilike '%%page_urlhost)) = ''{0}''%%'
         or
-        sqlquery ilike '%page_urlhost = ''{0}''%'
+        sqlquery ilike '%%page_urlhost = ''{0}''%%'
         or
-        position('page_urlhost LIKE ''%''' in sqlquery) > 0
+        position('page_urlhost LIKE ''%%''' in sqlquery) > 0
         )
 order by
     starttime desc;
     """.format(args.siteHost)  # nosec
-        curs.execute(qryString)
-        for rec in curs:
-            lookerUserIdNameMap[rec[1]] = {}
-        # query looker users
-        h = httplib2.Http(
-            ca_certs=os.path.dirname(os.path.realpath(__file__)) + '/ca.crt')
-        resp, content = h.request(
-            lookerUrlPrefix + '/login',
-            "POST",
-            body='client_id=' + lookerClientId + '&client_secret=' +
-            lookerClientSecret,
-            headers={'content-type': 'application/'
-                     'x-www-form-urlencoded'})
-        jsonRes = json.loads(content)
-        accessToken = jsonRes['access_token']
-        userSrchStr = lookerUrlPrefix+'/users/search?id=' + \
-            ','.join(lookerUserIdNameMap.keys())
-        resp, content = h.request(
-            userSrchStr,
-            "GET",
-            headers={'authorization': 'token ' + accessToken})
-        users = json.loads(content)
-        for usr in users:
-            lookerUserIdNameMap[str(
-                usr['id'])]["displayName"] = usr['display_name']
-            if usr['credentials_embed'] is not None and len(
-                    usr['credentials_embed']) > 0:
-                lookerUserIdNameMap[str(
-                    usr['id'])]["embedUserId"] = \
-                    usr['credentials_embed'][0]['external_user_id']
-        print('"Date & Time","Looker User Id",'
-              '"User Display Name","User Embed Id","Query Text"')
-        curs.scroll(0, mode='absolute')
-        for rec in curs:
-            displayNm = lookerUserIdNameMap[rec[1]].get("displayName",
-                                                        '').replace('"', '""')
-            userEmbedId = lookerUserIdNameMap[rec[1]].get("embedUserId",
-                                                          '').replace(
-                                                              '"', '""')
-            queryTxt = rec[2]
-            if queryTxt is not None:
-                queryTxt = queryTxt.replace('"', '""')
-            print('{0},{1},"{2}","{3}","{4}"'.format(rec[0], rec[1], displayNm,
-                                                     userEmbedId, queryTxt))
+
+# execute the query and store in a dataframe
+dfQuery = pd.read_sql(qryString, engine).fillna('')
+
+# grab the unique user ids from the query
+queryUserIdList = dfQuery['looker_user_id'].unique()
+for id in queryUserIdList:
+    lookerUserIdNameMap[id] = {}
+
+# api login to looker
+h = httplib2.Http(
+    ca_certs=os.path.dirname(os.path.realpath(__file__)) + '/ca.crt')
+resp, content = h.request(
+    lookerUrlPrefix + '/login',
+    "POST",
+    body='client_id=' + lookerClientId + '&client_secret=' +
+    lookerClientSecret,
+    headers={'content-type': 'application/'
+        'x-www-form-urlencoded'})
+jsonRes = json.loads(content)
+accessToken = jsonRes['access_token']
+userSrchStr = lookerUrlPrefix+'/users/search?id=' + \
+    ','.join(lookerUserIdNameMap.keys())
+
+# api call for looker users
+resp, content = h.request(
+    userSrchStr,
+    "GET",
+    headers={'authorization': 'token ' + accessToken})
+users = json.loads(content)
+
+# add looker user data to dict if user id in query
+for usr in users:
+    lookerUserIdNameMap[str(
+        usr['id'])]["displayName"] = usr['display_name']
+    if usr['credentials_embed'] is not None and len(
+            usr['credentials_embed']) > 0:
+        lookerUserIdNameMap[str(
+            usr['id'])]["embedUserId"] = \
+            usr['credentials_embed'][0]['external_user_id']
+    else: 
+    # guarentees that embed id is added to the dict even if 
+    # missing from all users in query results
+        lookerUserIdNameMap[str(
+            usr['id'])]["embedUserId"] = None 
+# convert name map dict to dataframe
+dfLookerUserIdNameMap = pd.DataFrame.from_dict(lookerUserIdNameMap, orient='index').fillna('')
+dfLookerUserIdNameMap = dfLookerUserIdNameMap.reset_index()
+dfLookerUserIdNameMap = dfLookerUserIdNameMap.rename(columns={"index": "looker_user_id"})
+
+# merge query results with name map
+dfMerged = pd.merge(dfQuery, dfLookerUserIdNameMap, on='looker_user_id')
+
+# Cleaning up the header names 
+dfMerged = dfMerged.rename(columns={"convert_timezone": "Date & Time",
+                                    "looker_user_id": "Looker User Id",
+                                    "displayName": "User Display Name",
+                                    "embedUserId": "User Embed Id",
+                                    "sqlquery": "Query Text"})
+
+# setting column datatypes
+dfMerged['Date & Time'] = dfMerged['Date & Time'].astype('datetime64[ns]')
+dfMerged['Looker User Id'] = dfMerged['Looker User Id'].astype('int')
+dfMerged['User Display Name'] = dfMerged['User Display Name'].astype('str')
+dfMerged['User Embed Id'] = dfMerged['User Embed Id'].astype('str')
+dfMerged['Query Text'] = dfMerged['Query Text'].astype('str')
+
+# reorder columns
+dfMerged = dfMerged.iloc[:,[0,1,3,4,2]]
+
+# replace NaN with blanks
+dfMerged = dfMerged.fillna('')
+
+# print results to console# if output is not set print results to console
+if file is None:
+    print(dfMerged.to_csv(index=False, quoting=2))
+else:
+    dfMerged.to_csv(path_or_buf=file, index=False, quoting=2)

@@ -29,7 +29,7 @@ run_table_size_task() {
     else
         echo "TEST ECHO TASK: INFO:  CRON ERROR ..."
     fi
-    return random_exit_status 
+    return $random_exit_status 
 }
 
 # Run the main task and log the output

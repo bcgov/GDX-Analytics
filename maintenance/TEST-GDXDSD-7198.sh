@@ -21,8 +21,15 @@ run_table_size_task() {
     # echo "TEST: Import from S3 to Redshift ..."
     # echo "TEST: Move files to S3 Good ..."
     # echo "TEST: Delete >7 days old logs from EC2 ..."
-    echo "TEST ECHO TASK: INFO:  Load into table 'table_sizes' completed, ### record(s) loaded successfully ..."
-    return $((RANDOM % 2))  # Simulate random return 0 (success) or 1 (failure)
+    
+    # Simulate random return 0 (success) or 1 (failure)
+    local random_exit_status=$((RANDOM % 2))
+    if [ $random_exit_status -eq 0 ]; then
+        echo "TEST ECHO TASK: INFO:  Load into table 'table_sizes' completed, ### record(s) loaded successfully ..."
+    else
+        echo "TEST ECHO TASK: INFO:  CRON ERROR ..."
+    fi
+    return random_exit_status 
 }
 
 # Run the main task and log the output

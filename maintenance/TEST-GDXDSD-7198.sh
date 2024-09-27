@@ -9,12 +9,22 @@ echo "*start of TEST script*"
 # so that we can edit through crontab
 REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
 
+# Add a new variable to store the force run flag
+FORCE_RUN_LOG_REPORT=0
+
+# Parse command-line arguments (for forced reporting)
+while getopts "report" opt; do
+  case $opt in
+    report) FORCE_RUN_LOG_REPORT=1;;
+  esac
+done
+
 REPORT_LOG_PATH="ReportLogs/"
 mkdir -p "$REPORT_LOG_PATH"
 REPORT_LOG_PREFIX="Report_"
-DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
+DATE=$(date -u +"%Y-%m-%d")
 REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
-REPORT_SUBJECT_HOURLY="Hourly Job Summary"
+REPORT_SUBJECT_HOURLY="TEST- Hourly Job Summary"
 REPORT_MESSAGE=""
 
 run_table_size_task() {
@@ -52,8 +62,8 @@ minute=$(date +"%M")
 # Check if the current minute is less than or equal to 5, 
 # and send the hourly log report, and delete logs for >7 days
 # Set to 59 to run all the time for testing
-if [ "$minute" -le 59 ]; then
-    if [ -s $REPORT_LOG_FILE ]; then
+if [ "$minute" -le 5 ]; then
+    if [ -s $REPORT_LOG_FILE ] || [ $FORCE_RUN_LOG_REPORT -eq 1 ]; then
         # Send an email with the log content
         cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL
         

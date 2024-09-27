@@ -27,6 +27,12 @@ REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
 REPORT_SUBJECT_HOURLY="TEST- Hourly Job Summary"
 REPORT_MESSAGE=""
 
+# Current timestamp
+current_time=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Get the current minute
+minute=$(date +"%M")
+
 run_table_size_task() {
     # echo "TEST: JUST PRINTING getRsTableSize FUNCTIONS:"
     # echo "TEST: Construction SQL query ..."
@@ -39,9 +45,9 @@ run_table_size_task() {
     # Simulate random return 0 (success) or 1 (failure)
     local random_exit_status=$((RANDOM % 2))
     if [ $random_exit_status -eq 0 ]; then
-        echo "TEST ECHO TASK: INFO:  Load into table 'table_sizes' completed, ### record(s) loaded successfully ..."
+        echo "$current_time: INFO:  Load into table 'table_sizes' completed, ### record(s) loaded successfully ..."
     else
-        echo "TEST ECHO TASK: INFO:  CRON ERROR ..."
+        echo "$current_time: INFO:  CRON ERROR ..."
     fi
     return $random_exit_status 
 }
@@ -53,17 +59,11 @@ run_table_size_task >> $REPORT_LOG_FILE 2>&1
 status=$?
 echo "Exit status of the task: $status"
 
-# Current timestamp
-current_time=$(date +"%Y-%m-%d %H:%M:%S")
-
-# Get the current minute
-minute=$(date +"%M")
-
 # Check if the current minute is less than or equal to 5, 
 # and send the hourly log report, and delete logs for >7 days
 # Set to 59 to run all the time for testing
-if [ "$minute" -le 5 ]; then
-    if [ -s $REPORT_LOG_FILE ] || [ $FORCE_RUN_LOG_REPORT -eq 1 ]; then
+if [ "$minute" -le 5 ] || [ $FORCE_RUN_LOG_REPORT -eq 1 ]; then
+    if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
         cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL
         

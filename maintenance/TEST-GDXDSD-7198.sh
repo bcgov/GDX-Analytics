@@ -29,6 +29,7 @@ run_table_size_task >> $REPORT_LOG_FILE 2>&1
 
 # Capture the exit status of the task
 status=$?
+echo "Exit status of the task: $status"
 
 # Current timestamp
 current_time=$(date +"%Y-%m-%d %H:%M:%S")
@@ -36,14 +37,14 @@ current_time=$(date +"%Y-%m-%d %H:%M:%S")
 # Get the current minute
 minute=$(date +"%M")
 
-# If it's the top of the hour (minute == 00), send the hourly log report
+# If it's the top of the hour (minute == 00), send the hourly log report, and delete logs for >7 days
 if [ "$minute" == "00" ]; then
-    if [ -s $REPORT_OUT_FILE ]; then
+    if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
-        cat $REPORT_OUT_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL
+        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL
         
-        # Clear the log file after sending the email
-        > $REPORT_LOG_FILE
+        # Delete log files older than 1 week
+        find $REPORT_LOG_PATH -mindepth 1 -mtime +7 -delete;
     else
         echo "Log file is empty at $current_time, nothing to report." >> $REPORT_LOG_FILE
     fi

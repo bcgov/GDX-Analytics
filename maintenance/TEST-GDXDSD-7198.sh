@@ -5,11 +5,15 @@
 
 echo "*start of TEST script*"
 
+# In the final code, will take this as an argument to the script
+# so that we can edit through crontab
+REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
+
 REPORT_LOG_PATH="ReportLogs/"
 mkdir -p "$REPORT_LOG_PATH"
 REPORT_LOG_PREFIX="Report_"
+DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
 REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
-REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
 REPORT_SUBJECT_HOURLY="Hourly Job Summary"
 REPORT_MESSAGE=""
 
@@ -45,8 +49,10 @@ current_time=$(date +"%Y-%m-%d %H:%M:%S")
 # Get the current minute
 minute=$(date +"%M")
 
-# If it's the top of the hour (minute == 00), send the hourly log report, and delete logs for >7 days
-if [ "$minute" == "00" ]; then
+# Check if the current minute is less than or equal to 5, 
+# and send the hourly log report, and delete logs for >7 days
+# Set to 59 to run all the time for testing
+if [ "$minute" -le 59 ]; then
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
         cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL

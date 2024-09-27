@@ -6,6 +6,7 @@
 echo "*start of TEST script*"
 
 REPORT_LOG_PATH="ReportLogs/"
+mkdir -p "$REPORT_LOG_PATH"
 REPORT_LOG_PREFIX="Report_"
 REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
 REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"

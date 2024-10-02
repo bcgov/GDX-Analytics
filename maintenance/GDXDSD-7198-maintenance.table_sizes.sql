@@ -1,5 +1,5 @@
---DROP TABLE test.gdxdsd_7198_maintenance.table_sizes;
-CREATE TABLE IF NOT EXISTS test.gdxdsd_7198_maintenance.table_sizes
+--DROP TABLE test.gdxdsd_7198_table_sizes;
+CREATE TABLE IF NOT EXISTS test.gdxdsd_7198_table_sizes
 (
         date TIMESTAMP WITHOUT TIME ZONE   ENCODE RAW
         ,"schema" VARCHAR(255)   ENCODE zstd
@@ -14,5 +14,5 @@ DISTSTYLE AUTO
         date
         )
 ;
-ALTER TABLE test.gdxdsd_7198_maintenance.table_sizes owner to microservice;
-GRANT SELECT ON test.gdxdsd_7198_maintenance.table_sizes TO looker;
+ALTER TABLE test.gdxdsd_7198_table_sizes owner to microservice;
+GRANT SELECT ON test.gdxdsd_7198_table_sizes TO looker;

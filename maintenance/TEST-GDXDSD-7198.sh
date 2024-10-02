@@ -6,19 +6,17 @@
 echo "*Start of the TEST script*"
 
 # Script Arguments
-# In the final code, we can take below as an argument to the script
-# so that we can edit through crontab
-#REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
 
 # Check if REPORT_EMAIL environment variable is set
-if [ -z "$REPORT_EMAIL" ]; then
+if [ -z "$REPORT_EMAIL_TO" ]; then
     echo "Error: REPORT_EMAIL environment variable is not set."
     exit 1
 fi
 
-# Use the REPORT_EMAIL environment variable
-REPORT_EMAIL="$REPORT_EMAIL"
+# Use the REPORT_EMAIL_TO environment variable
+REPORT_EMAIL_TO="$REPORT_EMAIL_TO"
 
+# In the final code, we can take below as an argument to the script
 REPORT_INTERVAL_HOURS=1
 
 FORCE_REPORT=false
@@ -80,7 +78,7 @@ if [ "$FORCE_REPORT" = true ] || ([ $((hour % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
         echo "Sending report email at $current_time"
-        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL
+        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL_TO
         echo "Email sent!"
         
         # Delete log files older than 1 week

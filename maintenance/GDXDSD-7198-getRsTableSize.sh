@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+##################################################
+#
+# Queries Redshift for the list of tables ordered by their size
+#
+# The results are written to a Redshift table.
+#
+# The column order is:
+# date, schema, table, tbl_rows, size
+#
+# The date column is a timestamp in the America/Vancouver timezone
+# The schema column is what schema the table is in
+# The table columnn is the table name
+# The tbl_rows column is the table row count
+# The size column is the size of the table, in 1 MB data blocks.
+#
+# An optional positive number positional argument limits the rows returned.
+#
+##################################################
+
+# uncomment the following shell options to expand aliases and source the current ~/.bashrc file if not running as cron
+shopt -s expand_aliases
+source ~/.bashrc
+
+DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
+# LOG_PATH="RsTableLogs/"
+# LOG_PREFIX="RedShift_Table_Size_"
+LOG_PATH="TEST_RsTableLogs/"
+LOG_PREFIX="TEST_RedShift_Table_Size_"
+#OUT_FILE=${LOG_PATH}${LOG_PREFIX}$DATE
+OUT_FILE="RedShift_Table_Size_2024-10-01T00:30:01+00:00"
+S3_PATH="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7198/client_redshift_table_size/"
+S3_DEST="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7198/processed_good_client_redshift_table_size/"
+
+# For no positional arguments return the full list of tables
+# if [ $# -eq 0 ]
+#   then
+#     read -r -d '' sql <<EOF
+# 	SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size, estimated_visible_rows, tbl_rows-estimated_visible_rows AS tombstoned_rows
+# 	FROM SVV_TABLE_INFO
+# 	ORDER BY size DESC
+# EOF
+# else
+#     limit=$1
+#     # validate that the positional argument is a positive number
+#     re='^[0-9]+$'
+#     if ! [[ $limit =~ $re ]] ; then
+#         echo "error: Argument must be a number" >&2; exit 1
+#     else
+#     # limit the rows returned to the number provided as an argument
+#     read -r -d '' sql <<EOF
+#         SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size, estimated_visible_rows, tbl_rows-estimated_visible_rows AS tombstoned_rows
+#         FROM SVV_TABLE_INFO
+#         ORDER BY size DESC
+# 	LIMIT $limit
+# EOF
+#     fi
+# fi
+
+# Execute the query using the adminuser_rs alias and redirect output to file
+# adminuser_rs -tqc "$sql" >> $OUT_FILE
+
+# Clean the file before s3 upload
+sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
+
+# Copy output to  s3
+aws s3 --quiet cp "$OUT_FILE" $S3_PATH
+
+# Build table_size table
+read -r -d '' rs_copy <<EOF
+        COPY GDXDSD-7198-maintenance.table_sizes
+        FROM '$S3_PATH'
+        CREDENTIALS
+        'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
+        escape
+	ignoreblanklines
+        trimblanks
+        delimiter '|';
+EOF
+
+
+# Initiate copy to RedShift
+# adminuser_rs -tqc "$rs_copy"
+
+# Move log file to processed
+aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
+
+# Remove log files +7 days old
+find $LOG_PATH -mindepth 1 -mtime +7 -delete

@@ -21,6 +21,16 @@ REPORT_EMAIL="$REPORT_EMAIL"
 
 REPORT_INTERVAL_HOURS=1
 
+REPORT_EMAIL=false
+
+# Check for --report-email argument
+for arg in "$@"
+do
+    if [ "$arg" == "--report-email" ]; then
+        REPORT_EMAIL=true
+    fi
+done
+
 
 # Define script variables
 REPORT_LOG_PATH="ReportLogs/"
@@ -66,7 +76,7 @@ status=$?
 echo "Exit status of the task: $status"
 
 # Check the report interval and send the log report, and delete logs for >7 days
-if [ $((hour % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$minute" -eq 00 ]; then
+if [ "$REPORT_EMAIL" = true ] || ([ $((hour % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$minute" -eq 00 ]); then
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
         echo "Sending report email at $current_time"

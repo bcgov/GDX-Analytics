@@ -3,35 +3,30 @@
 # THIS IS A TEST SCRIPT TO USE FOR GDXDSD-7198
 ##################################################
 
-echo "*start of TEST script*"
+echo "*Start of the TEST script*"
 
-# In the final code, will take this as an argument to the script
+# Script Arguments
+# In the final code, we can take below as an argument to the script
 # so that we can edit through crontab
 REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
+REPORT_INTERVAL_HOURS=1
 
-# Add a new variable to store the force run flag
-FORCE_RUN_LOG_REPORT=0
-
-# Parse command-line arguments (for forced reporting)
-while getopts "report" opt; do
-  case $opt in
-    report) FORCE_RUN_LOG_REPORT=1;;
-  esac
-done
-
+# Define script variables
 REPORT_LOG_PATH="ReportLogs/"
 mkdir -p "$REPORT_LOG_PATH"
 REPORT_LOG_PREFIX="Report_"
 DATE=$(date -u +"%Y-%m-%d")
 REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
 REPORT_SUBJECT_HOURLY="TEST- Hourly Job Summary"
-REPORT_MESSAGE=""
 
 # Current timestamp
 current_time=$(date +"%Y-%m-%d %H:%M:%S")
 
 # Get the current minute
 minute=$(date +"%M")
+
+# Get the current hour
+hour=$(date +"%H")
 
 run_table_size_task() {
     # echo "TEST: JUST PRINTING getRsTableSize FUNCTIONS:"
@@ -62,10 +57,12 @@ echo "Exit status of the task: $status"
 # Check if the current minute is less than or equal to 5, 
 # and send the hourly log report, and delete logs for >7 days
 # Set to 59 to run all the time for testing
-if [ "$minute" -le 5 ] || [ $FORCE_RUN_LOG_REPORT -eq 1 ]; then
+if [ $((hour % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$minute" -eq 00 ]; then
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
+        echo "Sending report email at $current_time"
         cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL
+        echo "Email sent!"
         
         # Delete log files older than 1 week
         find $REPORT_LOG_PATH -mindepth 1 -mtime +7 -delete;
@@ -74,4 +71,4 @@ if [ "$minute" -le 5 ] || [ $FORCE_RUN_LOG_REPORT -eq 1 ]; then
     fi
 fi
 
-echo "*end of TEST script*"
+echo "*End of TEST script*"

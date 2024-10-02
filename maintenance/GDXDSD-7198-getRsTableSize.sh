@@ -22,13 +22,13 @@
 shopt -s expand_aliases
 source ~/.bashrc
 
-DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
+#DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
 # LOG_PATH="RsTableLogs/"
 # LOG_PREFIX="RedShift_Table_Size_"
+DATE="2024-10-01T00:30:01+00:00"
 LOG_PATH="TEST_RsTableLogs/"
-LOG_PREFIX="TEST_RedShift_Table_Size_"
-#OUT_FILE=${LOG_PATH}${LOG_PREFIX}$DATE
-OUT_FILE="RedShift_Table_Size_2024-10-01T00:30:01+00:00"
+LOG_PREFIX="RedShift_Table_Size_"
+OUT_FILE=${LOG_PATH}${LOG_PREFIX}$DATE
 S3_PATH="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7198/client_redshift_table_size/"
 S3_DEST="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7198/processed_good_client_redshift_table_size/"
 
@@ -68,7 +68,7 @@ aws s3 --quiet cp "$OUT_FILE" $S3_PATH
 
 # Build table_size table
 read -r -d '' rs_copy <<EOF
-        COPY GDXDSD-7198-maintenance.table_sizes
+        COPY test.gdxdsd_7198_table_sizes
         FROM '$S3_PATH'
         CREDENTIALS
         'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'

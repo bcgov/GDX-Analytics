@@ -8,8 +8,19 @@ echo "*Start of the TEST script*"
 # Script Arguments
 # In the final code, we can take below as an argument to the script
 # so that we can edit through crontab
-REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
+#REPORT_EMAIL="ozdemir.ozcelik@gov.bc.ca"
+
+# Check if REPORT_EMAIL environment variable is set
+if [ -z "$REPORT_EMAIL" ]; then
+    echo "Error: REPORT_EMAIL environment variable is not set."
+    exit 1
+fi
+
+# Use the REPORT_EMAIL environment variable
+REPORT_EMAIL="$REPORT_EMAIL"
+
 REPORT_INTERVAL_HOURS=1
+
 
 # Define script variables
 REPORT_LOG_PATH="ReportLogs/"
@@ -54,9 +65,7 @@ run_table_size_task >> $REPORT_LOG_FILE 2>&1
 status=$?
 echo "Exit status of the task: $status"
 
-# Check if the current minute is less than or equal to 5, 
-# and send the hourly log report, and delete logs for >7 days
-# Set to 59 to run all the time for testing
+# Check the report interval and send the log report, and delete logs for >7 days
 if [ $((hour % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$minute" -eq 00 ]; then
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content

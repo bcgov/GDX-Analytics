@@ -80,7 +80,7 @@ EOF
 
 
 # Initiate copy to RedShift
-# adminuser_rs -tqc "$rs_copy"
+adminuser_rs -tqc "$rs_copy"
 
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive

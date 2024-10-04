@@ -168,14 +168,16 @@ return 0
 
 # Run the main task in a subshell to capture the exit status of the task
 # and redirect subshell's stderr to parent's stderr
-(
+error_message=$( (
     set -e
-    run_table_size_task | process_task_output
-)  2>&1
+    run_table_size_task
+) 2>&1 )
+status=${PIPESTATUS[0]}
 
-# Capture the exit status of the task
-status=$?
+
 echo "Exit status of the task: $status"
+echo "$error_message"
+
 if [ $status -ne 0 ]; then
     log_message "ERROR: Task failed with exit status $status" "red"
 else

@@ -138,25 +138,39 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 
 }
 
-# log messages with timestamps and colors
+# Color-code the output of the task
+process_task_output() {
+    while IFS= read -r line; do
+        if echo "$line" | grep -q -i "error"; then
+            log_message "$line" "red"
+        elif echo "$line" | grep -q -i "success"; then
+            log_message "$line" "green"
+        else
+            log_message "$line" "black"
+        fi
+    done
+}
+
+
+# Log messages with timestamps and colors (sending as HTML)
 log_message() {
     local message="$1"
     local color="$2"
-    local reset="</span>"  # Reset color in HTML
+    local reset="</span>"  # reset color in HTML
     local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
-    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span>" >> "$REPORT_LOG_FILE"
+    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span><br>" >> "$REPORT_LOG_FILE"
 }
 
 # Run the main task and log the output
-run_table_size_task >> "$REPORT_LOG_FILE" 2>&1
+run_table_size_task 2>&1 | process_task_output
 
 # Capture the exit status of the task
 status=$?
 echo "Exit status of the task: $status"
 if [ $status -ne 0 ]; then
-    log_message "ERROR: Task failed with exit status $status" "red"  # Red color for errors
+    log_message "ERROR: Task failed with exit status $status" "red"
 else
-    log_message "SUCCESS: Task completed successfully with exit status $status" "green"  # Green color for success
+    log_message "SUCCESS: Task completed successfully with exit status $status" "green"
 fi
 
 # Check the report interval and send the log report, and delete logs for >7 days
@@ -164,7 +178,9 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
         echo "Sending report email at $CURRENT_TIME"
+        # use below to send as text
         # cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT" $REPORT_EMAIL_TO
+        # use below to send as html
         (echo "Subject: $REPORT_SUBJECT"; echo "To: $REPORT_EMAIL_TO"; echo "MIME-Version: 1.0"; echo "Content-Type: text/html; charset=UTF-8"; echo ""; cat $REPORT_LOG_FILE) | sendmail -t
         echo "Email sent!"     
     else

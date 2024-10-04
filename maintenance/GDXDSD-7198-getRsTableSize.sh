@@ -168,8 +168,8 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 }
 
 # Run the main task and log the output
-# run_table_size_task 2>&1 | process_task_output
-run_table_size_task 2>&1 | { process_task_output; status=$?; }
+#run_table_size_task 2>&1 | process_task_output
+run_table_size_task 2>&1
 
 # Capture the exit status of the task
 status=$?

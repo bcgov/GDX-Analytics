@@ -104,6 +104,7 @@ set -e
 
 # DELETE
 ls /non_existent_directory  # this command will fail
+echo "Exit status inside function: $?"
 
 echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
 

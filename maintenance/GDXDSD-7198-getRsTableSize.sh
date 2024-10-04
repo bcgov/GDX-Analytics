@@ -76,7 +76,7 @@ HOUR=$(date +"%H")
 
 run_table_size_task() {
 
-echo "$CURRENT_TIME: Executing the task for ${REPORT_LOG_PREFIX}$DATE"
+echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -113,16 +113,16 @@ sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
 aws s3 --quiet cp "$OUT_FILE" $S3_PATH
 
 # Build table_size table
-read -r -d '' rs_copy <<EOF
-        COPY test.gdxdsd_7198_table_sizes
-        FROM '$S3_PATH'
-        CREDENTIALS
-        'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
-        escape
-	ignoreblanklines
-        trimblanks
-        delimiter '|';
-EOF
+# read -r -d '' rs_copy <<EOF
+#         COPY test.gdxdsd_7198_table_sizes
+#         FROM '$S3_PATH'
+#         CREDENTIALS
+#         'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
+#         escape
+# 	ignoreblanklines
+#         trimblanks
+#         delimiter '|';
+# EOF
 
 # Initiate copy to RedShift
 adminuser_rs -tqc "$rs_copy"

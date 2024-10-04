@@ -100,7 +100,7 @@ log_message() {
 run_table_size_task() {
 
 # DELETE - fail test
-# ls /non_existent_directory  # this command will fail
+ls /non_existent_directory  # this command will fail
 
 echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE <br>"
 

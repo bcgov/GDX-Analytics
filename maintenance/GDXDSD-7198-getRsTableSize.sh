@@ -76,6 +76,9 @@ HOUR=$(date +"%H")
 
 run_table_size_task() {
 
+# Exit immediately if a command exits with a non-zero status
+set -e  
+
 # DELETE
 ls /non_existent_directory  # this command will fail
 

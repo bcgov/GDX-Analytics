@@ -171,7 +171,7 @@ return 0
 error_message=$( (
     set -e
     run_table_size_task
-) 2>&1 )
+) 2>&1 ) | process_task_output
 status=${PIPESTATUS[0]}
 
 

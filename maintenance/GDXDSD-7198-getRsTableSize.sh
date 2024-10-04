@@ -167,7 +167,7 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
         # Send an email with the log content
         echo "Sending report email at $CURRENT_TIME"
         # cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT" $REPORT_EMAIL_TO
-        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT" -a 'Content-Type: text/plain; charset="UTF-8"' $REPORT_EMAIL_TO
+        (echo "Subject: $REPORT_SUBJECT"; echo "To: $REPORT_EMAIL_TO"; echo "MIME-Version: 1.0"; echo "Content-Type: text/plain; charset=UTF-8"; echo; cat $REPORT_LOG_FILE) | sendmail -t
         echo "Email sent!"     
     else
         echo "Log file is empty at $CURRENT_TIME, nothing to report." >> $REPORT_LOG_FILE

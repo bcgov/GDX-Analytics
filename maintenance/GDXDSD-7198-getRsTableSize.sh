@@ -104,7 +104,6 @@ set -e
 
 # DELETE
 ls /non_existent_directory  # this command will fail
-echo "Exit status inside function: $?"
 
 echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
 
@@ -169,7 +168,8 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 }
 
 # Run the main task and log the output
-run_table_size_task 2>&1 | process_task_output
+# run_table_size_task 2>&1 | process_task_output
+run_table_size_task 2>&1 | { process_task_output; status=$?; }
 
 # Capture the exit status of the task
 status=$?

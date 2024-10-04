@@ -102,7 +102,7 @@ run_table_size_task() {
 # DELETE - fail test
 # ls /non_existent_directory  # this command will fail
 
-echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
+echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE <br>"
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -154,7 +154,7 @@ EOF
 # adminuser_rs -tqc "$rs_copy"
 
 # DELETE
-echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully."
+echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully.<br>"
 
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive

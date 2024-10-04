@@ -152,14 +152,14 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
         # Send an email with the log content
         echo "Sending report email at $CURRENT_TIME"
         cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT" $REPORT_EMAIL_TO
-        echo "Email sent!"
-        
-        # Delete log files older than 1 week
-        find $REPORT_LOG_PATH -mindepth 1 -mtime +3 -delete;
+        echo "Email sent!"     
     else
         echo "Log file is empty at $CURRENT_TIME, nothing to report." >> $REPORT_LOG_FILE
     fi
 fi
+
+# Delete log files older than 1 week
+find $REPORT_LOG_PATH -mindepth 1 -mtime +3 -delete;
 
 echo "*End of TEST script*"
 

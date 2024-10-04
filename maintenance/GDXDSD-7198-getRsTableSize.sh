@@ -74,6 +74,29 @@ CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 MINUTE=$(date +"%M")
 HOUR=$(date +"%H")
 
+# Color-code the output of the task
+process_task_output() {
+    while IFS= read -r line; do
+        if echo "$line" | grep -q -i "error"; then
+            log_message "$line" "red"
+        elif echo "$line" | grep -q -i "success"; then
+            log_message "$line" "green"
+        else
+            log_message "$line" "black"
+        fi
+    done
+}
+
+
+# Log messages with timestamps and colors (sending as HTML)
+log_message() {
+    local message="$1"
+    local color="$2"
+    local reset="</span>"  # reset color in HTML
+    local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
+    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span><br>" >> "$REPORT_LOG_FILE"
+}
+
 run_table_size_task() {
 
 # Exit immediately if a command exits with a non-zero status
@@ -144,29 +167,6 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 
 return 0
 
-}
-
-# Color-code the output of the task
-process_task_output() {
-    while IFS= read -r line; do
-        if echo "$line" | grep -q -i "error"; then
-            log_message "$line" "red"
-        elif echo "$line" | grep -q -i "success"; then
-            log_message "$line" "green"
-        else
-            log_message "$line" "black"
-        fi
-    done
-}
-
-
-# Log messages with timestamps and colors (sending as HTML)
-log_message() {
-    local message="$1"
-    local color="$2"
-    local reset="</span>"  # reset color in HTML
-    local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
-    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span><br>" >> "$REPORT_LOG_FILE"
 }
 
 # Run the main task and log the output

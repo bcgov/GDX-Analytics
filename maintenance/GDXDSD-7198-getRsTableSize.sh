@@ -76,7 +76,8 @@ HOUR=$(date +"%H")
 
 run_table_size_task() {
 
-$ERROR_VAR
+# DELETE
+ls /non_existent_directory  # this command will fail
 
 echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
 

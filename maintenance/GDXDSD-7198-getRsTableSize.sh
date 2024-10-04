@@ -176,10 +176,9 @@ status=${PIPESTATUS[0]}
 
 echo "Exit status of the task: $status"
 echo "$error_message"
-process_task_output "$error_message"
 
 if [ $status -ne 0 ]; then
-    log_message "ERROR: Task failed with exit status $status" "red"
+    log_message "ERROR: Task failed: $error_message" "red"
 else
     log_message "SUCCESS: Task completed successfully with exit status $status" "green"
 fi

@@ -168,11 +168,23 @@ return 0
 
 # Run the main task in a subshell to capture the exit status of the task
 # and redirect subshell's stderr to parent's stderr
-error_message=$( (
-    set -e
+# error_message=$( (
+#     set -e
+#     run_table_size_task
+# ) 2>&1 )
+# status=${PIPESTATUS[0]}
+
+# Run the main task in a subshell to capture the exit status and error messages
+{
     run_table_size_task
-) 2>&1 )
-status=${PIPESTATUS[0]}
+} 2> >(tee error_message.log >&2)
+
+# Capture the status of the task
+status=$?
+
+# Capture the error message (if any) from the log file
+error_message=$(<error_message.log)
+
 
 echo "Exit status of the task: $status"
 echo "$error_message"
@@ -182,6 +194,9 @@ if [ $status -ne 0 ]; then
 else
     log_message "SUCCESS: Task completed successfully with exit status $status" "green"
 fi
+
+# Clean up error log file
+rm -f error_message.log
 
 # Check the report interval and send the log report, and delete logs for >7 days
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then

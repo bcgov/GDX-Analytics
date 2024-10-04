@@ -165,11 +165,13 @@ aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
 # Remove log files +7 days old
 find $LOG_PATH -mindepth 1 -mtime +7 -delete
 
+return 0
+
 }
 
 # Run the main task and log the output
 #run_table_size_task 2>&1 | process_task_output
-run_table_size_task 2>&1
+run_table_size_task
 
 # Capture the exit status of the task
 status=$?

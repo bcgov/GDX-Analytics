@@ -99,10 +99,7 @@ log_message() {
 
 run_table_size_task() {
 
-# Exit immediately if a command exits with a non-zero status
-#set -e  
-
-# DELETE
+# DELETE - fail test
 ls /non_existent_directory  # this command will fail
 
 echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
@@ -169,12 +166,12 @@ return 0
 
 }
 
-# Run the main task and log the output
-#run_table_size_task 2>&1 | process_task_output
+# Run the main task in a subshell to capture the exit status of the task
+# and redirect subshell's stderr to parent's stderr
 (
     set -e
-    run_table_size_task
-) 
+    run_table_size_task | process_task_output
+)  2>&1
 
 # Capture the exit status of the task
 status=$?

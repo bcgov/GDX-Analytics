@@ -175,22 +175,27 @@ return 0
 # status=${PIPESTATUS[0]}
 
 # Run the main task in a subshell to capture the exit status and error messages
+# {
+#     run_table_size_task
+# } 2> >(tee error_message.log >&2)
+
+# Capture both stdout and stderr from the task into $REPORT_LOG_FILE
 {
-    run_table_size_task
-} 2> >(tee error_message.log >&2)
+run_table_size_task
+} &>> "$REPORT_LOG_FILE"
+    
 
 # Capture the status of the task
 status=$?
 
 # Capture the error message (if any) from the log file
-error_message=$(<error_message.log)
-
+# error_message=$(<error_message.log)
 
 echo "Exit status of the task: $status"
-echo "$error_message"
+# echo "$error_message"
 
 if [ $status -ne 0 ]; then
-    log_message "ERROR: Task failed: $error_message" "red"
+    log_message "ERROR: Task failed with exit status $status" "red"
 else
     log_message "SUCCESS: Task completed successfully with exit status $status" "green"
 fi

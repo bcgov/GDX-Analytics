@@ -76,7 +76,7 @@ HOUR=$(date +"%H")
 
 run_table_size_task() {
 
-echo "$CURRENT_TIME: Starting table size task..."
+echo "$CURRENT_TIME: Executing the query to create $OUT_FILE"
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -113,9 +113,8 @@ sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
 aws s3 --quiet cp "$OUT_FILE" $S3_PATH
 
 # Build table_size table
-# Build table_size table
 read -r -d '' rs_copy <<EOF
-        COPY maintenance.table_sizes
+        COPY test.gdxdsd_7198_table_sizes
         FROM '$S3_PATH'
         CREDENTIALS
         'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
@@ -140,6 +139,7 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 run_table_size_task >> $REPORT_LOG_FILE 2>&1
 
 # Capture the exit status of the task
+# EDIT HERE TO CAPTURE ERROS
 status=$?
 echo "Exit status of the task: $status"
 

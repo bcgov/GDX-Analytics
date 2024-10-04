@@ -67,8 +67,8 @@ REPORT_INTERVAL_HOURS="$REPORT_INTERVAL_HOURS"
 REPORT_LOG_PATH="ReportLogs/"
 mkdir -p "$REPORT_LOG_PATH"
 REPORT_LOG_PREFIX="Report_"
-DATE=$(date -u +"%Y-%m-%d")
-REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
+REPORT_DATE=$(date -u +"%Y-%m-%d")
+REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$REPORT_DATE
 REPORT_SUBJECT="TEST- Hourly Job Summary"
 CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 MINUTE=$(date +"%M")
@@ -113,19 +113,22 @@ sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
 aws s3 --quiet cp "$OUT_FILE" $S3_PATH
 
 # Build table_size table
-# read -r -d '' rs_copy <<EOF
-#         COPY test.gdxdsd_7198_table_sizes
-#         FROM '$S3_PATH'
-#         CREDENTIALS
-#         'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
-#         escape
-# 	ignoreblanklines
-#         trimblanks
-#         delimiter '|';
-# EOF
+read -r -d '' rs_copy <<EOF
+        COPY test.gdxdsd_7198_table_sizes
+        FROM '$S3_PATH'
+        CREDENTIALS
+        'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
+        escape
+	ignoreblanklines
+        trimblanks
+        delimiter '|';
+EOF
 
 # Initiate copy to RedShift
-adminuser_rs -tqc "$rs_copy"
+# adminuser_rs -tqc "$rs_copy"
+
+# DELETE
+echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully."
 
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
@@ -152,7 +155,7 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
         echo "Email sent!"
         
         # Delete log files older than 1 week
-        find $REPORT_LOG_PATH -mindepth 1 -mtime +7 -delete;
+        find $REPORT_LOG_PATH -mindepth 1 -mtime +3 -delete;
     else
         echo "Log file is empty at $CURRENT_TIME, nothing to report." >> $REPORT_LOG_FILE
     fi

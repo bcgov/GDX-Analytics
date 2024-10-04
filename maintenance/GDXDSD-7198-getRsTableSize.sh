@@ -53,7 +53,7 @@ done
 #DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
 # LOG_PATH="RsTableLogs/"
 # LOG_PREFIX="RedShift_Table_Size_"
-DATE="2024-10-01T00:30:01+00:00"
+DATE="2024-10-01T23:00:01+00:00"
 LOG_PATH="TEST_RsTableLogs/"
 LOG_PREFIX="RedShift_Table_Size_"
 OUT_FILE=${LOG_PATH}${LOG_PREFIX}$DATE
@@ -69,7 +69,7 @@ mkdir -p "$REPORT_LOG_PATH"
 REPORT_LOG_PREFIX="Report_"
 DATE=$(date -u +"%Y-%m-%d")
 REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
-REPORT_SUBJECT_HOURLY="TEST- Hourly Job Summary"
+REPORT_SUBJECT="TEST- Hourly Job Summary"
 CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 MINUTE=$(date +"%M")
 HOUR=$(date +"%H")
@@ -148,7 +148,7 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
     if [ -s $REPORT_LOG_FILE ]; then
         # Send an email with the log content
         echo "Sending report email at $CURRENT_TIME"
-        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL_TO
+        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT" $REPORT_EMAIL_TO
         echo "Email sent!"
         
         # Delete log files older than 1 week

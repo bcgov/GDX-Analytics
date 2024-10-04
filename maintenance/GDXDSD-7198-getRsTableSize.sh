@@ -76,6 +76,8 @@ HOUR=$(date +"%H")
 
 run_table_size_task() {
 
+$ERROR_VAR
+
 echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
 
 # For no positional arguments return the full list of tables

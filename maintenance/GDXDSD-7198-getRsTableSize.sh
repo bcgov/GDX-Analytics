@@ -74,35 +74,12 @@ CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 MINUTE=$(date +"%M")
 HOUR=$(date +"%H")
 
-# Color-code the output of the task
-process_task_output() {
-    while IFS= read -r line; do
-        if echo "$line" | grep -q -i "error"; then
-            log_message "$line" "red"
-        elif echo "$line" | grep -q -i "success"; then
-            log_message "$line" "green"
-        else
-            log_message "$line" "black"
-        fi
-    done
-}
-
-
-# Log messages with timestamps and colors (sending as HTML)
-log_message() {
-    local message="$1"
-    local color="$2"
-    local reset="</span>"  # reset color in HTML
-    local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
-    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span><br>" >> "$REPORT_LOG_FILE"
-}
-
 run_table_size_task() {
 
 # DELETE - fail test
 ls /non_existent_directory  # this command will fail
 
-echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE <br>"
+echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -164,17 +141,32 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 
 }
 
+# Color-code the output of the task
+process_task_output() {
+    while IFS= read -r line; do
+        if echo "$line" | grep -q -i "loaded successfully"; then
+            log_message "$line" "green"
+        else
+            log_message "$line" "red"
+        fi
+    done
+}
+
+# Log messages with timestamps and colors (sending as HTML)
+log_message() {
+    local message="$1"
+    local color="$2"
+    local reset="</span>"  # reset color in HTML
+    local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
+    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span><br>" >> "$REPORT_LOG_FILE"
+}
+
+
 # pipe both stdout and stderr from the task into $REPORT_LOG_FILE
 {
     run_table_size_task
 } 2>&1 | process_task_output
     
-# Capture the status of the task
-status=$?
-
-echo "Exit status of the task: $status"
-# echo "$error_message"
-
 # Check the report interval and send the log report, and delete logs for >7 days
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
     if [ -s $REPORT_LOG_FILE ]; then

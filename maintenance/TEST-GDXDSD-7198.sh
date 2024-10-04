@@ -5,23 +5,24 @@
 
 echo "*Start of the TEST script*"
 
-# Script Arguments
-
 # Check if REPORT_EMAIL environment variable is set
-if [ -z "$REPORT_EMAIL_TO" ]; then
-    echo "Error: REPORT_EMAIL environment variable is not set."
+if [ -z "$REPORT_INTERVAL_HOURS" ]; then
+    echo "Error: REPORT_INTERVAL_HOURS environment variable is not set."
     exit 1
 fi
 
-# Use the REPORT_EMAIL_TO environment variable
+# Check if REPORT_EMAIL_TO environment variable is set
+if [ -z "$REPORT_EMAIL_TO" ]; then
+    echo "Error: REPORT_EMAIL_TO environment variable is not set."
+    exit 1
+fi
+
+# Use the environment variables
 REPORT_EMAIL_TO="$REPORT_EMAIL_TO"
-
-# In the final code, we can take below as an argument to the script
-REPORT_INTERVAL_HOURS=1
-
-FORCE_REPORT=false
+REPORT_INTERVAL_HOURS="$REPORT_INTERVAL_HOURS"
 
 # Check for --force-report argument
+FORCE_REPORT=false
 for arg in "$@"
 do
     if [ "$arg" == "--force-report" ]; then
@@ -55,7 +56,7 @@ run_table_size_task() {
     # echo "TEST: Import from S3 to Redshift ..."
     # echo "TEST: Move files to S3 Good ..."
     # echo "TEST: Delete >7 days old logs from EC2 ..."
-    
+
     # Simulate random return 0 (success) or 1 (failure)
     local random_exit_status=$((RANDOM % 2))
     if [ $random_exit_status -eq 0 ]; then

@@ -16,12 +16,40 @@
 #
 # An optional positive number positional argument limits the rows returned.
 #
+# An optional --force-report positional argument sends a log report.
+#
 ##################################################
+
+# DELETE
+echo "*Start of the TEST script*"
 
 # uncomment the following shell options to expand aliases and source the current ~/.bashrc file if not running as cron
 shopt -s expand_aliases
 source ~/.bashrc
 
+# Check if REPORT_EMAIL environment variable is set
+if [ -z "$REPORT_INTERVAL_HOURS" ]; then
+    echo "Error: REPORT_INTERVAL_HOURS environment variable is not set."
+    exit 1
+fi
+
+# Check if REPORT_EMAIL_TO environment variable is set
+if [ -z "$REPORT_EMAIL_TO" ]; then
+    echo "Error: REPORT_EMAIL_TO environment variable is not set."
+    exit 1
+fi
+
+# Check for --force-report argument
+FORCE_REPORT=false
+for arg in "$@"
+do
+    if [ "$arg" == "--force-report" ]; then
+        FORCE_REPORT=true
+    fi
+done
+
+
+# Variables
 #DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
 # LOG_PATH="RsTableLogs/"
 # LOG_PREFIX="RedShift_Table_Size_"
@@ -31,6 +59,24 @@ LOG_PREFIX="RedShift_Table_Size_"
 OUT_FILE=${LOG_PATH}${LOG_PREFIX}$DATE
 S3_PATH="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7198/client_redshift_table_size/"
 S3_DEST="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7198/processed_good_client_redshift_table_size/"
+
+
+# Variables used for reporting
+REPORT_EMAIL_TO="$REPORT_EMAIL_TO"
+REPORT_INTERVAL_HOURS="$REPORT_INTERVAL_HOURS"
+REPORT_LOG_PATH="ReportLogs/"
+mkdir -p "$REPORT_LOG_PATH"
+REPORT_LOG_PREFIX="Report_"
+DATE=$(date -u +"%Y-%m-%d")
+REPORT_LOG_FILE=${REPORT_LOG_PATH}${REPORT_LOG_PREFIX}$DATE
+REPORT_SUBJECT_HOURLY="TEST- Hourly Job Summary"
+CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
+MINUTE=$(date +"%M")
+HOUR=$(date +"%H")
+
+run_table_size_task() {
+
+echo "$CURRENT_TIME: Starting table size task..."
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -67,8 +113,9 @@ sed -r -i 's/[\t ]//g;/^$/d' $OUT_FILE
 aws s3 --quiet cp "$OUT_FILE" $S3_PATH
 
 # Build table_size table
+# Build table_size table
 read -r -d '' rs_copy <<EOF
-        COPY test.gdxdsd_7198_table_sizes
+        COPY maintenance.table_sizes
         FROM '$S3_PATH'
         CREDENTIALS
         'aws_access_key_id=$AWS_ACCESS_KEY_ID;aws_secret_access_key=$AWS_SECRET_ACCESS_KEY'
@@ -78,7 +125,6 @@ read -r -d '' rs_copy <<EOF
         delimiter '|';
 EOF
 
-
 # Initiate copy to RedShift
 adminuser_rs -tqc "$rs_copy"
 
@@ -87,3 +133,31 @@ aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
 
 # Remove log files +7 days old
 find $LOG_PATH -mindepth 1 -mtime +7 -delete
+
+}
+
+# Run the main task and log the output
+run_table_size_task >> $REPORT_LOG_FILE 2>&1
+
+# Capture the exit status of the task
+status=$?
+echo "Exit status of the task: $status"
+
+# Check the report interval and send the log report, and delete logs for >7 days
+if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
+    if [ -s $REPORT_LOG_FILE ]; then
+        # Send an email with the log content
+        echo "Sending report email at $CURRENT_TIME"
+        cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT_HOURLY" $REPORT_EMAIL_TO
+        echo "Email sent!"
+        
+        # Delete log files older than 1 week
+        find $REPORT_LOG_PATH -mindepth 1 -mtime +7 -delete;
+    else
+        echo "Log file is empty at $CURRENT_TIME, nothing to report." >> $REPORT_LOG_FILE
+    fi
+fi
+
+echo "*End of TEST script*"
+
+

@@ -142,24 +142,22 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 log_message() {
     local message="$1"
     local color="$2"
-    local reset="\033[0m"  # Reset color
+    local reset="</span>"  # Reset color in HTML
     local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
-    echo -e "${color}[${timestamp}] ${message}${reset}" >> "$REPORT_LOG_FILE"
+    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span>" >> "$REPORT_LOG_FILE"
 }
 
 # Run the main task and log the output
-run_table_size_task >> $REPORT_LOG_FILE 2>&1
+run_table_size_task >> "$REPORT_LOG_FILE" 2>&1
 
 # Capture the exit status of the task
-# EDIT HERE TO CAPTURE ERRORS
 status=$?
 echo "Exit status of the task: $status"
 if [ $status -ne 0 ]; then
-    log_message "ERROR: Task failed with exit status $status" "\033[31m"  # Red color for errors
+    log_message "ERROR: Task failed with exit status $status" "red"  # Red color for errors
 else
-    log_message "SUCCESS: Task completed successfully with exit status $status" "\033[32m"  # Green color for success
+    log_message "SUCCESS: Task completed successfully with exit status $status" "green"  # Green color for success
 fi
-
 
 # Check the report interval and send the log report, and delete logs for >7 days
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
@@ -167,7 +165,7 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
         # Send an email with the log content
         echo "Sending report email at $CURRENT_TIME"
         # cat $REPORT_LOG_FILE | mail -s "$REPORT_SUBJECT" $REPORT_EMAIL_TO
-        (echo "Subject: $REPORT_SUBJECT"; echo "To: $REPORT_EMAIL_TO"; echo "MIME-Version: 1.0"; echo "Content-Type: text/html; charset=UTF-8"; echo ""; echo "<html><body><pre>$(cat $REPORT_LOG_FILE)</pre></body></html>") | sendmail -t
+        (echo "Subject: $REPORT_SUBJECT"; echo "To: $REPORT_EMAIL_TO"; echo "MIME-Version: 1.0"; echo "Content-Type: text/html; charset=UTF-8"; echo ""; cat $REPORT_LOG_FILE) | sendmail -t
         echo "Email sent!"     
     else
         echo "Log file is empty at $CURRENT_TIME, nothing to report." >> $REPORT_LOG_FILE

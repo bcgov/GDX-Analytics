@@ -138,6 +138,15 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 
 }
 
+# log messages with timestamps and colors
+log_message() {
+    local message="$1"
+    local color="$2"
+    local reset="\033[0m"  # Reset color
+    local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
+    echo -e "${color}[${timestamp}] ${message}${reset}" >> "$REPORT_LOG_FILE"
+}
+
 # Run the main task and log the output
 run_table_size_task >> $REPORT_LOG_FILE 2>&1
 
@@ -145,6 +154,12 @@ run_table_size_task >> $REPORT_LOG_FILE 2>&1
 # EDIT HERE TO CAPTURE ERRORS
 status=$?
 echo "Exit status of the task: $status"
+if [ $status -ne 0 ]; then
+    log_message "ERROR: Task failed with exit status $status" "\033[31m"  # Red color for errors
+else
+    log_message "SUCCESS: Task completed successfully with exit status $status" "\033[32m"  # Green color for success
+fi
+
 
 # Check the report interval and send the log report, and delete logs for >7 days
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
@@ -159,7 +174,7 @@ if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] &&
 fi
 
 # Delete log files older than 1 week
-find $REPORT_LOG_PATH -mindepth 1 -mtime +3 -delete;
+find $REPORT_LOG_PATH -mindepth 1 -mtime +7 -delete;
 
 echo "*End of TEST script*"
 

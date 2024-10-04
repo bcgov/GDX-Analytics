@@ -76,7 +76,7 @@ HOUR=$(date +"%H")
 
 run_table_size_task() {
 
-echo "$CURRENT_TIME: Executing the query to create $OUT_FILE"
+echo "$CURRENT_TIME: Executing the task for ${REPORT_LOG_PREFIX}$DATE"
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -139,7 +139,7 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 run_table_size_task >> $REPORT_LOG_FILE 2>&1
 
 # Capture the exit status of the task
-# EDIT HERE TO CAPTURE ERROS
+# EDIT HERE TO CAPTURE ERRORS
 status=$?
 echo "Exit status of the task: $status"
 

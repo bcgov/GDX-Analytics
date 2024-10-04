@@ -100,7 +100,7 @@ log_message() {
 run_table_size_task() {
 
 # Exit immediately if a command exits with a non-zero status
-set -e  
+#set -e  
 
 # DELETE
 ls /non_existent_directory  # this command will fail
@@ -171,7 +171,10 @@ return 0
 
 # Run the main task and log the output
 #run_table_size_task 2>&1 | process_task_output
-run_table_size_task
+(
+    set -e
+    run_table_size_task
+) 
 
 # Capture the exit status of the task
 status=$?

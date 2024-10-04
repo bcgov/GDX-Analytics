@@ -170,12 +170,13 @@ return 0
 # and redirect subshell's stderr to parent's stderr
 error_message=$( (
     set -e
-    run_table_size_task | process_task_output
+    run_table_size_task
 ) 2>&1 )
 status=${PIPESTATUS[0]}
 
 echo "Exit status of the task: $status"
 echo "$error_message"
+process_task_output "$error_message"
 
 if [ $status -ne 0 ]; then
     log_message "ERROR: Task failed with exit status $status" "red"

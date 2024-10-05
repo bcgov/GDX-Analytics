@@ -79,8 +79,6 @@ run_table_size_task() {
 # DELETE - fail test
 ls /non_existent_directory  # this command will fail
 
-echo "$CURRENT_TIME: Executing the task for ${LOG_PREFIX}$DATE"
-
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
 #   then

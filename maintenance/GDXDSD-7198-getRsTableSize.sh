@@ -126,7 +126,7 @@ read -r -d '' rs_copy <<EOF
 EOF
 
 # Initiate copy to RedShift
-# adminuser_rs -tqc "$rs_copy"
+adminuser_rs -tqc "$rs_copy"
 
 # DELETE
 echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully.<br>"

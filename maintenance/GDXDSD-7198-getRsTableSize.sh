@@ -131,18 +131,10 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 # Check the report interval and send the log report, and delete logs for >7 days
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
     if [ -s $REPORT_LOG_FILE ]; then
-        # Echo log content
-        # echo "Sending report email at $CURRENT_TIME"
-        # use below to send as text
-        # echo $REPORT_LOG_FILE
-        # echo "Email sent!"     
-        SUBJECT="Report Email"
-        BODY=$(echo "Sending report email at $CURRENT_TIME"; echo "$REPORT_LOG_FILE"; echo "Email sent!")
-
-        echo "Subject: $SUBJECT\n\n$BODY"
-
+        # echo the log content to send the report to MAILTO recipients
+        echo "$(cat $REPORT_LOG_FILE)"
     else
-        echo "Log file is empty at $CURRENT_TIME, nothing to report." >> $REPORT_LOG_FILE
+        echo "Log file is empty at $CURRENT_TIME, nothing to report."
     fi
 fi
 

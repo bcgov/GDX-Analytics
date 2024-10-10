@@ -18,10 +18,9 @@
 #
 # An optional --force-report positional argument sends a log report.
 #
+# [ADD NOTES FOR REPORTING]
+#
 ##################################################
-
-# DELETE
-echo "*Start of the TEST script*"
 
 # uncomment the following shell options to expand aliases and source the current ~/.bashrc file if not running as cron
 shopt -s expand_aliases
@@ -30,12 +29,6 @@ source ~/.bashrc
 # Check if REPORT_EMAIL environment variable is set
 if [ -z "$REPORT_INTERVAL_HOURS" ]; then
     echo "Error: REPORT_INTERVAL_HOURS environment variable is not set."
-    exit 1
-fi
-
-# Check if REPORT_EMAIL_TO environment variable is set
-if [ -z "$REPORT_EMAIL_TO" ]; then
-    echo "Error: REPORT_EMAIL_TO environment variable is not set."
     exit 1
 fi
 
@@ -51,8 +44,8 @@ done
 
 # Variables
 #DATE=$(date -u +"%Y-%m-%dT%H:%M:%S%:z")
-# LOG_PATH="RsTableLogs/"
-# LOG_PREFIX="RedShift_Table_Size_"
+#LOG_PATH="RsTableLogs/"
+#LOG_PREFIX="RedShift_Table_Size_"
 DATE="2024-10-01T23:00:01+00:00"
 LOG_PATH="TEST_RsTableLogs/"
 LOG_PREFIX="RedShift_Table_Size_"
@@ -62,7 +55,6 @@ S3_DEST="s3://sp-ca-bc-gov-131565110619-12-microservices/client/oz_test/GDXDSD-7
 
 
 # Variables used for reporting
-REPORT_EMAIL_TO="$REPORT_EMAIL_TO"
 REPORT_INTERVAL_HOURS="$REPORT_INTERVAL_HOURS"
 REPORT_LOG_PATH="ReportLogs/"
 mkdir -p "$REPORT_LOG_PATH"
@@ -74,10 +66,8 @@ CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 MINUTE=$(date +"%M")
 HOUR=$(date +"%H")
 
-run_table_size_task() {
-
-# DELETE - fail test
-ls /non_existent_directory  # this command will fail
+# DELETE AFTER TESTING - fail test
+#ls /non_existent_directory  # this command will fail
 
 # For no positional arguments return the full list of tables
 # if [ $# -eq 0 ]
@@ -128,8 +118,8 @@ EOF
 # Initiate copy to RedShift
 # adminuser_rs -tqc "$rs_copy"
 
-# DELETE
-echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully.<br>"
+# DELETE AFTER TESTING
+echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully.<br>" >> "$REPORT_LOG_FILE"
 
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
@@ -137,34 +127,7 @@ aws s3 mv $S3_PATH $S3_DEST --quiet --recursive
 # Remove log files +7 days old
 find $LOG_PATH -mindepth 1 -mtime +7 -delete
 
-}
 
-# Color-code the output of the task
-process_task_output() {
-    while IFS= read -r line; do
-        if echo "$line" | grep -q -i "loaded successfully"; then
-            log_message "$line" "green"
-        else
-            log_message "$line" "red"
-        fi
-    done
-}
-
-# Log messages with timestamps and colors (sending as HTML)
-log_message() {
-    local message="$1"
-    local color="$2"
-    local reset="</span>"  # reset color in HTML
-    local timestamp="$(date +"%Y-%m-%d %H:%M:%S")"
-    echo "<span style=\"color: ${color};\">[${timestamp}] ${message}${reset}</span><br>" >> "$REPORT_LOG_FILE"
-}
-
-
-# pipe both stdout and stderr from the task into $REPORT_LOG_FILE
-{
-    run_table_size_task
-} 2>&1 | process_task_output
-    
 # Check the report interval and send the log report, and delete logs for >7 days
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
     if [ -s $REPORT_LOG_FILE ]; then
@@ -182,7 +145,5 @@ fi
 
 # Delete log files older than 1 week
 find $REPORT_LOG_PATH -mindepth 1 -mtime +7 -delete;
-
-echo "*End of TEST script*"
 
 

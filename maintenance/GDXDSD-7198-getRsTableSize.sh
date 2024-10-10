@@ -119,7 +119,7 @@ EOF
 # adminuser_rs -tqc "$rs_copy"
 
 # DELETE AFTER TESTING
-echo "INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully." >> "$REPORT_LOG_FILE"
+echo "($CURRENT_TIME) INFO:  Load into table 'gdxdsd_7198_table_sizes' completed, XXX record(s) loaded successfully." >> "$REPORT_LOG_FILE"
 
 # Move log file to processed
 aws s3 mv $S3_PATH $S3_DEST --quiet --recursive

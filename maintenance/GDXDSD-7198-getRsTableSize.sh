@@ -132,6 +132,7 @@ find $LOG_PATH -mindepth 1 -mtime +7 -delete
 if [ "$FORCE_REPORT" = true ] || ([ $((HOUR % REPORT_INTERVAL_HOURS)) -eq 0 ] && [ "$MINUTE" -eq 00 ]); then
     if [ -s $REPORT_LOG_FILE ]; then
         # echo the log content to send the report to MAILTO recipients
+        echo -e "Log report for Redshift table sizes:\n"
         echo "$(cat $REPORT_LOG_FILE)"
     else
         echo "Log file is empty at $CURRENT_TIME, nothing to report."

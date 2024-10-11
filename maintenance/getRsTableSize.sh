@@ -116,7 +116,7 @@ if [[ -z "$LIMIT_ROWS" ]]; then
     # No limit set, return full list of tables
     read -r -d '' sql <<EOF
 	SELECT convert_timezone('America/Vancouver', getdate()) as date, schema, "table", tbl_rows, size, estimated_visible_rows, tbl_rows-estimated_visible_rows AS tombstoned_rows
-	FROM SVV_TABLE_INFOl
+	FROM SVV_TABLE_INFO
 	ORDER BY size DESC
 EOF
 else

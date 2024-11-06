@@ -1,44 +1,44 @@
 {
-  "name": "vue_js_tracker",
+  "name": "vue3_js_tracker",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
   "scripts": {
-    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
-    "lint": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@babel/core": "^7.21.3",
-    "ansi-html": "^0.0.8",
-    "ansi-regex": "^6.0.1",
-    "copy-webpack-plugin": "^6.3.2",
-    "follow-redirects": "^1.15.6",
-    "glob-parent": "^6.0.2",
-    "is-svg": "^4.3.1",
-    "json-schema": "^0.4.0",
-    "lodash": "^4.17.20",
-    "node-fetch": "^2.6.7",
-    "node-forge": "^1.3.0",
-    "nth-check": "^2.0.1",
-    "postcss": "^8.4.31",
-    "set-value": "^4.1.0",
-    "strip-ansi": "^7.0.1",
-    "vue": "^2.6.14",
-    "vue-router": "^3.4.9",
-    "webpack": "^5.76.0"
-  },
-  "resolutions": {
-    "serialize-javascript": "3.1.0"
+    "core-js": "^3.8.3",
+    "vue": "^3.2.13",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
-    "@vue/cli-plugin-router": "^5.0.1",
-    "@vue/cli-service": "^5.0.4",
-    "vue-template-compiler": "^2.6.14"
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
-    "not dead"
+    "not dead",
+    "not ie 11"
   ]
 }

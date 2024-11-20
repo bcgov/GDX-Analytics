@@ -5,8 +5,7 @@ This is an example Vue.js application to demonstrate how to install the the GDX_
 ## Features
 
 This app contains the Snowplow Tracker Standalone vE.2.14.0, which is installed in the header
-section of index.html. It also leverages the Vue Router Add-on by calling the Snowplow 'trackpageview' function, whenever the Vue Router changes the navigation.
-
+section of index.html. It also leverages the Vue Router Add-on by calling the Snowplow 'trackPageView' function, whenever the Vue Router changes the navigation.
 
 ## Project Status 
 
@@ -14,34 +13,11 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project requires Vue CLI, vue-template-compiler,  and npm v6 or higher. Vue CLI requires Node.js version 8.9 or higher. 
-
-### Installation instructions
-
-To install Vue CLI (globally)
-
-```
-npm install -g @vue/cli
-```
-
-To install Vue CLI-Service (globally)
-
-```
-npm install -g @vue/cli-service
-```
-
-To install vue-template-compiler (globally)
-
-```
-npm i -g vue-template-compiler
-```
-
-See the official Vue.js installation documentation here: https://cli.vuejs.org/guide/installation.html
+This project is built using Vue.js 3, utilizing Vue CLI Service, along with Vue Router for client-side routing. It is compatible with Node.js version 16 or higher.
 
 ## To run this application
 
 From the root of the application, run the following commands to install dependencies and serve the application using the vue-cli-service. This will serve the application from localhost.
-
 
 ### Install the project dependencies in the node_modules folder
 
@@ -56,7 +32,16 @@ npm ci
 ```
 npm run serve
 ```
+executes the serve script defined in package.json
 
+```JSON
+"scripts": {
+  "serve": "vue-cli-service serve"
+}
+```
+and starts the development server using Vue CLI Service, accessible at http://localhost:8080/ 
+
+See the official Vue CLI Service documentation here: https://cli.vuejs.org/guide/cli-service.html
 
 ## Getting Help or Reporting an Issue
  

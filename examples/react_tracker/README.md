@@ -4,7 +4,7 @@ This is an example React.js application to demonstrate how to install the the GD
 
 ## Requirements
 
-This project requires React, react-dom, react-router-dom. 
+This project requires React, react-dom, react-router-dom. It is compatible with Node.js version 16 or higher.
 
 To install the requisite global packages run:
 

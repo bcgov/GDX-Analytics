@@ -1,17 +1,22 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
 
-Vue.config.productionTip = false
+const app = createApp(App)
 
-new Vue({
-  router,
-  render: function (h) { return h(App) }
-}).$mount('#app')
+app.use(router)
 
-// This is a global After-Hook which calls the Snowplow page tracking event. See the
-// Vue.js documentation here:
-// https://router.vuejs.org/guide/advanced/navigation-guards.html#global-after-hooks
-router.afterEach((to, from) => {
-  window.snowplow('trackPageView');
-})
+// Disable production source maps
+if (process.env.NODE_ENV === 'production') {
+    app.config.productionSourceMap = false
+  }
+
+// This is a global After-Hook which calls the Snowplow page tracking event.
+// Vue.js documentation here: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-after-hooks
+router.afterEach(() => {
+    window.snowplow('trackPageView');
+  })
+
+app.mount('#app')
+
+

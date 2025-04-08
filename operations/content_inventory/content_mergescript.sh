@@ -7,19 +7,19 @@
 
 if [ $# -eq 0 ] # if there are no input variables
   then
-    printf "This script is expecting three input variables, not one\nAborting\n"
+    printf "Invalid options - this script is expecting three input variables, not zero\nAborting\n"
     exit 1 # abort the script
 fi
 
 if [ $# -eq 1 ] # if there is only one input variable
   then
-    printf "This script is expecting three input variables, not one\nAborting\n"
+    printf "Invalid options - this script is expecting three input variables, not one\nAborting\n"
     exit 1 # abort the script
 fi
 
 if [ $# -eq 2 ] # if there is only two input variables
   then
-    printf "This script is expecting three input variables, not two\nAborting\n"
+    printf "Invalid options - this script is expecting three input variables, not two\nAborting\n"
     exit 1 # abort the script
 fi
 

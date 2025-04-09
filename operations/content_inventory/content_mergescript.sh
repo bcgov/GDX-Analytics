@@ -43,7 +43,8 @@ if [ $# -eq 3 ]
             exit 1
     fi
     (sed 's/Page View Start Month/metadata.node_id/g' $explore_var |grep -v 'Node ID' > temp.csv ) && join -j1 -t,  $sql_var temp.csv   > $output_var   && join -j1 -t, -v 1 $sql_var temp.csv >> $output_var && rm temp.csv;
+    printf "SUCCESS: The file \"$output_var\" created\n"
+    exit 0
 fi
-
-printf "SUCCESS: The file \"$output_var\" created\n"
-exit 0
+printf "Invalid options - this script is expecting three input variables\nAborting\n"
+exit 1 # abort the script

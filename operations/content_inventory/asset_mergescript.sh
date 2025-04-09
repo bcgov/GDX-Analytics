@@ -31,5 +31,5 @@ if [ $# -eq 3 ] # if there are three input parameters when the script is execute
     exit 0
 fi
 #the following only executes if there is NOT 3 input parameters
-printf "Invalid options - this script is expecting three input variables\nAborting\n"
+printf "Invalid options - this script is expecting three input variables\nusage: asset_mergescript.sh EXPLORERCSV SQLCSV OUTPUTCSV\nAborting\n"
 exit 1 # abort the script

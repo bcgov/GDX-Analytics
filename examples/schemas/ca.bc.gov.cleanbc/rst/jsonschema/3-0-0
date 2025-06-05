@@ -1,0 +1,97 @@
+{
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+  "type": "object",
+  "self": {
+    "vendor": "ca.bc.gov.cleanbc",
+    "name": "rst",
+    "format": "jsonschema",
+    "version": "3-0-0"
+  },
+  "description": "Schema to track use of the Rebate Search Tool.",
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "hover",
+        "click",
+        "submit",
+        "change",
+        "select",
+        "deselect"
+      ],
+      "description": "User action on an element (e.g., hover, click, submit, change, select, deselect)."
+    },
+    "element_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Type of interacted element (e.g., incentive, project, location, heating, filter, submit)."
+    },
+    "project_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Type of project (e.g., building or renovating a home)."
+    },
+    "location": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Selected location for the rebate search."
+    },
+    "heating_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Type of heating system selected by the user."
+    },
+    "filter_values": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "maxLength": 255,
+        "description": "Individual filter value applied in the search."
+      },
+      "description": "Filters applied in search to refine results."
+    },
+    "label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Name or identifier of the interacted element (e.g., button text, form field name)."
+    },
+    "rebate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "Rebate amount or program details."
+    },
+    "destination": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255,
+      "description": "URL or page the user is directed to."
+    }
+  },
+  "required": [
+    "action"
+  ],
+  "additionalProperties": false
+}

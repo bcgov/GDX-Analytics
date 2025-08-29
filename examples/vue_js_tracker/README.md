@@ -5,7 +5,7 @@ This is an example Vue.js application to demonstrate how to install the the GDX_
 ## Features
 
 This app contains the Snowplow Tracker Standalone vE.2.14.0, which is installed in the header
-section of index.html. It also leverages the Vue Router Add-on by calling the Snowplow 'trackPageView' function, whenever the Vue Router changes the navigation.
+section of index.html. It also leverages Vue Router by using a global after-hook to call the Snowplow trackPageView function whenever the route changes, ensuring page tracking works on client-side navigation.
 
 ## Project Status 
 
@@ -13,11 +13,11 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project is built using Vue.js 3, utilizing Vue CLI Service, along with Vue Router for client-side routing. It is compatible with Node.js version 16 or higher.
+This project is built using Vue.js 3, utilizing Vite Service, along with Vue Router for client-side routing. It is compatible with Node.js version 20.19 or higher.
 
 ## To run this application
 
-From the root of the application, run the following commands to install dependencies and serve the application using the vue-cli-service. This will serve the application from localhost.
+From the root of the application, run the following commands to install dependencies and serve the application. This will serve the application from localhost.
 
 ### Install the project dependencies in the node_modules folder
 
@@ -30,18 +30,11 @@ npm ci
 ### Compiles and hot-reloads for development
 
 ```
-npm run serve
+npm run dev
 ```
-executes the serve script defined in package.json
+starts the development server, accessible at http://localhost:8080/ 
 
-```JSON
-"scripts": {
-  "serve": "vue-cli-service serve"
-}
-```
-and starts the development server using Vue CLI Service, accessible at http://localhost:8080/ 
-
-See the official Vue CLI Service documentation here: https://cli.vuejs.org/guide/cli-service.html
+See the official Vite documentation here: https://vite.dev/guide/
 
 ## Getting Help or Reporting an Issue
  

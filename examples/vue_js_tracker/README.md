@@ -13,7 +13,7 @@ This project is currently under development and actively supported by the GDX An
 
 ## Requirements
 
-This project is built using Vue.js 3, utilizing Vite Service, along with Vue Router for client-side routing. It is compatible with Node.js version 20.19 or higher.
+This project is built using Vue.js 3, utilizing Vite Service, along with Vue Router for client-side routing. It is compatible with Node.js version 20.19+, 22.12+ or higher.
 
 ## To run this application
 

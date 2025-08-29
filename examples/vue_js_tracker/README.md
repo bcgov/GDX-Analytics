@@ -15,9 +15,11 @@ This project is currently under development and actively supported by the GDX An
 
 This project is built using Vue.js 3, utilizing Vite Service, along with Vue Router for client-side routing. It is compatible with Node.js version 20.19+, 22.12+ or higher. However, some templates require a higher Node.js version to work, please upgrade if your package manager warns about it.
 
+See the official Vite documentation here: https://vite.dev/guide/
+
 ## To run this application
 
-From the root of the application, run the following commands to install dependencies and serve the application. This will serve the application from localhost.
+From the root of the application, run the following commands to install dependencies and start the application. This will serve the application from localhost.
 
 ### Install the project dependencies in the node_modules folder
 
@@ -34,7 +36,6 @@ npm run dev
 ```
 starts the development server, accessible at http://localhost:8080/ 
 
-See the official Vite documentation here: https://vite.dev/guide/
 
 ## Getting Help or Reporting an Issue
  

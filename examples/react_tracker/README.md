@@ -1,6 +1,6 @@
 ## React Tracker
 
-This is an example React.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vE2.10.2 in the React.js framework.
+This is an example React.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vE2.10.2 in the React.js framework. This project uses Vite as its development server and build tool.
 
 ## Requirements
 

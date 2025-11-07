@@ -1,16 +1,10 @@
 ## React Tracker
 
-This is an example React.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vE2.10.2 in the React.js framework.
+This is an example React.js application to demonstrate how to install the the GDX_Analytics Snowplow Standalone Tracker vE2.10.2 in the React.js framework. This project uses Vite as its development server and build tool.
 
 ## Requirements
 
-This project requires React, react-dom, react-router-dom. It is compatible with Node.js version 16 or higher.
-
-To install the requisite global packages run:
-
-```
-npm install -g react react-dom react-router-dom
-```
+This project requires React, react-dom, react-router-dom. It is compatible with Node.js version 20.19+ or 22.12+.
 
 To install the application using package-lock.json, navigate to the project directory and run:
 
@@ -29,10 +23,10 @@ npm install
 In the project directory, you can run:
 
 ```
-npm start
+npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
 
 
 ## Getting Help or Reporting an Issue

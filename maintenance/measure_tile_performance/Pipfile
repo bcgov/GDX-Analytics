@@ -9,6 +9,7 @@ pytz = "*"
 typing-extensions = "*"
 psycopg2-binary = "*"
 urllib3 = "1.*"
+requests = "==2.32.4"
 
 [dev-packages]
 

@@ -54,7 +54,7 @@ This script uses python version 3.8.16 and you can install it using pyenv.
 Install using Pipenv to get the dependencies specified in the `Pipfile.lock`:
 
 ```
-pipenv --python 3.8.16
+pipenv --python 3.9
 pipenv install --ignore-pipfile
 ```
 
@@ -99,4 +99,4 @@ pipenv run python measure_tile_performance.py hmbjQaHfeDbrtAsoCCBofP 2
 ```
 ## Running using Cron
 
-Use this procedure https://apps.itsm.gov.bc.ca/confluence/display/ANALYTICS/Measure+Looker+Tile+Performance to run this script via cron.
+Use this procedure https://citz-gdx.atlassian.net/wiki/spaces/ANALYTICS/pages/48449316/Measure+Looker+Tile+Performance to run this script via cron.

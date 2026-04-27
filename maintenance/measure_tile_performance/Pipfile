@@ -9,9 +9,9 @@ pytz = "*"
 typing-extensions = "*"
 psycopg2-binary = "*"
 urllib3 = "1.*"
-requests = "==2.32.4"
+requests = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8.16"
+python_version = "3.9"

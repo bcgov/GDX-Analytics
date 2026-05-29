@@ -10,7 +10,7 @@ psycopg2-binary = "*"
 httplib2 = "*"
 argparse = "*"
 pandas = "*"
-sqlalchemy = "1.4.*"
+sqlalchemy = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

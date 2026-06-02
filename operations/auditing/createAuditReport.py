@@ -82,15 +82,15 @@ select
 from
     admin.V_STL_QUERY_HISTORY
 where
-    sqlquery ilike '-- Looker Query Context%%page_urlhost%%'
+    sqlquery ilike '-- Looker Query Context%%%%page_urlhost%%%%'
     -- exclude known admin users
     and looker_user_id not in ('13','128','8','513','35','746','742','6','16')
     and (
-        sqlquery ilike '%%page_urlhost)) = ''{0}''%%'
+        sqlquery ilike '%%%%page_urlhost)) = ''{0}''%%%%'
         or
-        sqlquery ilike '%%page_urlhost = ''{0}''%%'
+        sqlquery ilike '%%%%page_urlhost = ''{0}''%%%%'
         or
-        position('page_urlhost LIKE ''%%''' in sqlquery) > 0
+        position('page_urlhost LIKE ''%%%%''' in sqlquery) > 0
         )
 order by
     starttime desc;

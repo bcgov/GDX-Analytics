@@ -62,7 +62,7 @@ if lookerUrlPrefix is None:
 if lookerClientSecret is None:
     lookerClientSecret = getpass.getpass('Enter your looker client secret: ')
 
-# database connection using psycopg2 pattern a la redshift.py in GDX-Analytics-microservice
+# database connection using psycopg2 pattern as used in redshift.py in GDX-Analytics-microservices
 conn = psycopg2.connect(
     dbname='snowplow',
     host=pgHost,

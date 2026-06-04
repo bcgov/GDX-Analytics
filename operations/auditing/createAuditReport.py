@@ -98,7 +98,6 @@ order by
 
 # execute the query and store in a dataframe
 with conn.cursor() as cur:
-    print(qryString)
     cur.execute(qryString)
     rows = cur.fetchall()
     col_names = [desc[0] for desc in cur.description]

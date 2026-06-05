@@ -10,7 +10,7 @@ The script *createAuditReport.py* in this folder generates an auditing report ab
 ## Prerequisites
 * The process [Copy Looker SQL query Logs](../../maintenance/copySqlQuery) is in place
 * The machine running the script must have
-  * Python 3.8
+  * Python 3.9
   * [pipenv](https://github.com/pypa/pipenv)
   * access to Redshift
   * access to Looker API endpoint

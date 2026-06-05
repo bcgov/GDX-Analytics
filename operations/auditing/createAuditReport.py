@@ -12,7 +12,6 @@ import json
 import argparse
 import getpass
 import pandas as pd
-from sqlalchemy import create_engine
 
 # parse cmd arguments
 parser = argparse.ArgumentParser(
@@ -63,15 +62,14 @@ if lookerUrlPrefix is None:
 if lookerClientSecret is None:
     lookerClientSecret = getpass.getpass('Enter your looker client secret: ')
 
-# database connection string
-connection_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
-    pgUser,
-    pgPassword,
-    pgHost,
-    '5439',
-    'snowplow'
+# database connection using psycopg2 pattern as used in redshift.py in GDX-Analytics-microservices
+conn = psycopg2.connect(
+    dbname='snowplow',
+    host=pgHost,
+    port=5439,
+    user=pgUser,
+    password=pgPassword
 )
-engine = create_engine(connection_string)
 
 # create empty dict for api user data
 lookerUserIdNameMap = {}
@@ -99,7 +97,12 @@ order by
     """.format(args.siteHost)  # nosec
 
 # execute the query and store in a dataframe
-dfQuery = pd.read_sql(qryString, engine).fillna('')
+with conn.cursor() as cur:
+    cur.execute(qryString)
+    rows = cur.fetchall()
+    col_names = [desc[0] for desc in cur.description]
+conn.close()
+dfQuery = pd.DataFrame(rows, columns=col_names).fillna('')
 
 # grab the unique user ids from the query
 queryUserIdList = dfQuery['looker_user_id'].unique()

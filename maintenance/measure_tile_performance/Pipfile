@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 looker-sdk = "*"
-pytz = "*"
+pytz = "==2026.5"
 typing-extensions = "*"
 psycopg2-binary = "*"
 urllib3 = "1.*"
